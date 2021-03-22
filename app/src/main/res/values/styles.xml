@@ -21,7 +21,17 @@ limitations under the License. -->
     <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
     <item name="colorAccent">@color/colorAccent</item>
     <item name="actionBarTheme">@style/ThemeOverlay.AppTheme.ActionBar</item>
+<!--
+    <item name="android:windowDisablePreview">true</item>
+-->
   </style>
+
+  <!-- Starting activity theme -->
+<!--
+  <style name="AppTheme.Launcher">
+    <item name="android:windowBackground">@drawable/startup</item>
+  </style>
+-->
 
   <style name="ThemeOverlay.AppTheme.ActionBar" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
     <!-- title text color -->

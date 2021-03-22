@@ -61,6 +61,10 @@ class CalcProgFragment(stockSymbol: String = "") : CalcBaseFragment(stockSymbol)
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View {
+
+//    // Crashlytics test
+//    throw RuntimeException("Test Crash") // Force a crash
+
     // Inflate the layout for this fragment
     _binding = FragmentCalcProgBinding.inflate(inflater, container, false)
     return binding.root
