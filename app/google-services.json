@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "764726082797",
+    "project_id": "ai-code-aec31",
+    "storage_bucket": "ai-code-aec31.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:764726082797:android:b0e0854b5704cd64eba0e4",
+        "android_client_info": {
+          "package_name": "com.thecloudsite.aicode"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "764726082797-90s28q4i4ie0703f1cph59599086nm9u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDCVHS4GaNRnQrB3CHYzFwH-UWwpmPeCsY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "764726082797-90s28q4i4ie0703f1cph59599086nm9u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

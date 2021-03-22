@@ -1,0 +1,103 @@
+<!-- Copyright AI code
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License. -->
+
+<resources>
+  <string name="import_error">Die ausgewählte Datei konnte nicht geladen werden.\n%1$s</string>
+  <string name="export_error">Ein Fehler beim Speichern ist aufgetreten:\n%1$s</string>
+  <string name="export_select_file">Wählen Sie eine Datei aus</string>
+  <string name="import_select_file">Wählen Sie eine Datei aus</string>
+  <string name="app_theme">Farbdesign</string>
+  <string name="calc_title">AI code</string>
+  <string name="calc_copy">Kopieren</string>
+  <string name="calc_paste">Einfügen</string>
+  <string name="title_activity_calc_settings">AI-Einstellungen</string>
+  <string name="calc_format_header">Angezeigeformat</string>
+  <string name="calc_format_displayed_decimals">Angezeigte Nachkommastellen</string>
+  <string name="calc_format_displayed_decimals_desc">Legt fest wieviel Nachkommastellen angezeigt werden.</string>
+  <string name="calc_format_decimal_separator">Dezimalzeichen</string>
+  <string name="calc_format_decimal_separator_desc">Legt das Dezimalzeichen fest. Zum Beispiel 3,14</string>
+  <string name="calc_format_display_group_separator">Gruppentrenner anzeigen</string>
+  <string name="calc_format_display_group_separator_desc">Zeigt den Tausender-Gruppentrenner für die Zahl an. Zum Beispiel 1.234.567</string>
+  <string name="clipboard">Zwischenablage=</string>
+  <string name="calc_headline">AI</string>
+  <string name="calc_prog_headline">AI code</string>
+  <string name="calc_format_radian">Grad/Radiant</string>
+  <string name="calc_format_radian_desc">Verwendet das Bogenmaß 2π anstelle von 360° für trigonometrische Funktionen.</string>
+  <string name="calc_display_name">Anzeigename:</string>
+  <string name="calc_code">AI code</string>
+  <string name="execute">Ausführen</string>
+  <string name="export_code">AI speichern</string>
+  <string name="export_code_desc">AI code in eine .JSON-Datei speichern.</string>
+  <string name="import_code">AI laden</string>
+  <string name="import_code_desc">AI code von einer JSON-Datei laden.</string>
+  <string name="load_code_msg">Der AI code wurde von einer .JSON-Datei geladen.</string>
+  <string name="save_code_msg">Der AI code wurde in eine .JSON-Datei gespeichert.</string>
+  <string name="calc_invalid_args">Fehlende Zahlen.</string>
+  <string name="calc_error_msg">Fehler bei Symbol \'%1$s\'.</string>
+  <string name="calc_error_parsing_msg">Fehler bei \'%1$s\'.</string>
+  <string name="calc_F1_code">// Berechnet prozentuale Änderung\n// von a zu b\n\n// 2: a\n// 1: b\n// ∆% = 100 * (b - a) / a\nover - swap / 100 *\n\n// Auf 2 Nachkommastellen runden\nround2\n\n// \"∆% \" dem Ergebnis hinzufügen\n\"∆% \" +\n\n// perc ist die eingebaute Funktion für prozentuale Änderung ohne Rundung\n// 10 12 perc</string>
+  <string name="calc_F1_desc">∆% .2</string>
+  <string name="calc_F2_code">// Kreditberechnung\n// Monatliche Rate\n\n// 3: Kreditbetrag\n// 2: Laufzeit in Jahren\n// 1: Jährlicher Zinssatz in %\n\n1200 / dup 1 + rot -12 * ^ 1 swap - / * round2 \"Monatliche Rate \" +</string>
+  <string name="calc_F2_desc">Kredit Rate</string>
+  <string name="calc_F3_code">// Kreditberechnung\n// Kreditbetrag\n\n// 3: Monatliche Rate\n// 2: Laufzeit in Jahren\n// 1: Jährlicher Zinssatz in %\n\n1200 / rot over / rot rot 1 + swap -12 * ^ 1 swap - * round2 \"Kreditbetrag \" +</string>
+  <string name="calc_F3_desc">Kredit Betrag</string>
+  <string name="calc_F4_code">// Kreditberechnung\n// Laufzeit in Jahren\n\n// 3: Kreditbetrag\n// 2: Monatliche Rate\n// 1: Jährlicher Zinssatz in %\n\n1200 / rot rot / over * 1 swap - ln swap 1 + ln / -12 / round2 \"Laufzeit in Jahren \" +</string>
+  <string name="calc_F4_desc">Kredit Laufzeit</string>
+  <string name="calc_F5_code">// Quadratische Gleichung\n// x²+ax+b\n\nswap -2 / dup dup * rot - sqrt over over + \"x₁=\" + rot rot - \"x₂=\" +"</string>
+  <string name="calc_F5_desc">x²+ax+b</string>
+  <string name="calc_F6_code">// if-Bedingung Beispiel (aiaman)\n\n// 4: else-Teil\n// 3: then-Teil\n// 2: Bedingung op2\n// 1: Bedingung op1\n\n// if equal (op2 == op1)?\n// Ergebnis ist 4, nicht gleich\n4 \"false \" +\n3 \"true \" +\n2 1 if.eq\n\n// if greater than (op2 \u003e op1)?\n// Ergebnis ist 3, größer als\n4 \"false \" +\n3 \"true \" +\n2 1 if.gt\n\n// if less than (op2 \u003c op1)?\n// Ergebnis ist 4, nicht kleiner als\n4 \"false \"\n+ 3 \"true \"\n+ 2 1 if.lt\n\n\n// if-Bedingung-Marke Beispiel (aiaman)\n\n// 2: Bedingung op2\n// 1: Bedingung op1\n1 2\nif.lt.end // Mach bei .end weiter wenn op2 \u003c op1 ist\n123 // wird nicht ausgeführt\n.end</string>
+  <string name="calc_F6_desc">if Beispiel</string>
+  <string name="calc_F7_code">// Schleifenbeispiel\n\n\"1..10 +1\"\n1\ndo.incrLabel\n  dup 1 + dup 10\nwhile.le.incrLabel\ndrop\n\n\n\"10..1 -1\"\n10\ndo.decrLabel\n  dup 1 - dup 1\nwhile.ge.decrLabel\ndrop\n\n// Rekursion\n// 10..1\n: n dup 1 if.le.10..1 dup 1 - n .10..1 ;\n10 n\n\n// Summe 1..10\n: sum dup 1 if.le.sum dup 1 - sum + .sum ;\n10 sum\n\n// Fibonacci\n: fib dup 2 if.le.fib dup 2 - fib swap 1 - fib + .fib ;\n10 fib\n\n// Fakultät\n: ! dup 1 if.le.! dup 1 - ! * .! ;\n7 !\n\n\n:degree // verwende 360°\n//:radian // verwende 2π\n\"0..360 +22,5\"\n0\ndo.f(x)\n  dup\n    // f(x)\u003dsin(x)\n    sin\n  // \"sin(x)\u003d\"\n  \"sin(\" 3 pick toStr + + \"°)\u003d\" +\n  // \u003c\u003d 360 ?\n  swap 22,5 + dup 360\nwhile.le.f(x)\ndrop\n\n// goto Beispiel\n// Überspringe 1234\ngoto.end\n1234\n.end</string>
+  <string name="calc_F7_desc">while Beispiel</string>
+  <string name="calc_F8_code">// Alles löschen\nclear\n\n\n// Variablen\n// Zahl in Variable \u0027abc\u0027 speichern\n123 \"abc\u003d\" + sto.abc\n// Ergebnis in Variable \u0027x\u0027 speichern\n2 e * π ^ sqrt \"x\u003d\" + sto.x\n\n// Variable \u0027abc\u0027 lesen\nrcl.abc\n\n// Alle Variablen lesen\nrcl\n\n// Dezimalzahl in Bruch (x/y)\n0,75 frac // 3/4\n0,40476190476 frac // 17/42\n\n:radian\npi sin \"sin(π)\u003d\" +\n:degree\n180 sin \"sin(180°)\u003d\" +\n\n// Modulo\n23 7 mod\n\n// Stack\n// n pick\n1 2 3 4 4 pick \"Kopiert von 4:\" // 1 2 3 4 1\n\n// n roll\n1 2 3 4 4 roll \"Verschoben von 4:\" // 2 3 4 1\n\n// Stackgröße\ndepth \"Anzahl\u003d\" +\n\n\n// Funktionsdefinition\n: add5 5 + ;\n\n// Funktionsdefinition ausführen\n1 add5\n\n// als Funktionszeiger ausführen\n2\n(add5) // Funktionszeiger von add5\n() // Funktionszeiger ausführen\n\n\n// Anonyme Funktionsdefinition\n2\n{ dup * }\n() // Ausführen\n\n// Anonyme Funktionsdefinition speichern\n{ dup * } sto.a\n// Ausführen\n3 rcl.a ()\n\n\n// Statistik\n// var (Varianz)\n// sum (Summe)</string>
+  <string name="calc_F8_desc">Weitere Beispiele</string>
+  <string name="calc_F9_code">clear</string>
+  <string name="calc_F9_desc">Alles löschen</string>
+  <string name="calc_F10_code">// Funktionsdefinition\n// : name ... ;\n\n// Numerische Integration von f(x)\n// 1: Startwert\n// 2: Endwert\n// 3: Genauigkeit\n// 4: f(x) als lambda\n\n: integral\nsto.fxLambda // f(x)\nsto.dx // Genauigkeit\nsto.x2 // Endwert\n0\ndo.∫x\n  over\n    // f(x)\n    rcl.fxLambda ()\n  + swap rcl.dx + swap over rcl.x2\nwhile.lt.∫x\nswap drop rcl.dx * \"∫f(x)dx\u003d\" +\n;\n\n// Numerische Nullstellenberechnung von f(x)\n// 1: Startwert\n// 2: f(x) als lambda\n\n: nullstelle\nsto.fxLambda // f(x)\n// dx \u003d f(x) - f(x-∆x) / ∆x\n0,001 sto.∆x\n\n// Genauigkeit\n0,0000001 sto.ε\n\ndo.∆x\n  dup dup rcl.fxLambda () dup 3 pick rcl.∆x - rcl.fxLambda () - / rcl.∆x * - swap over - abs rcl.ε\nwhile.gt.∆x\n\"x₀\u003d\" +\n;\n\n// Endlosschleifenerkennung abschalten\n:loop</string>
+  <string name="calc_F10_desc">mathlib</string>
+  <string name="calc_F11_code">import.\"mathlib\"\n\n// Numerische Integration von f(x)\n\n//          ₄\n// Beispiel ∫x²dx\n//          ¹\n\n1 // Startwert\n4 // Endwert\n0,001 // Genauigkeit\n{ dup * } // f(x) als lambda\nintegral\n\n\n// Beispiel ∫sin(x)dx von 0..π\n\n// f(x) als Funktionsdefinition\n: f2 sin ;\n//:degree // verwende 360°\n:radian // verwende 2π\n\n0 // Startwert\nπ // Endwert\nπ 100 / // Genauigkeit\n(f2) // f(x) als lambda\nintegral\n\n\n// Numerische Nullstellenberechnung von f(x)\n1 // Startwert\n{ sq 3 - } // f(x)\u003dx²-3\nnullstelle\n</string>
+  <string name="calc_F11_desc">∫f(x)dx\nf(x)\u003d0</string>
+  <string name="calc_F12_code">// Wochentag nach Gauss\n// 3: Tag\n// 2: Monat\n// 1: Jahr\n\nswap\n\n// Korrektur für Jan und Feb\ndup 2\n if.gt.endif\n  // Monat+12\n  // Jahr-1\n  12 + swap 1 - swap\n .endif\n\n// y\nrot rot dup 100 / int swap 100 mod 5 * 4 / int\n// c\nswap dup 4 / int swap 2 * - 1 -\n// m \n4 roll 1 + 26 * 10 / int \n// y+c+m+d\n+ + + 77 + 7 mod 1 +\n\n\"Samstag\"\n\"Freitag\"\n\"Donnerstag\"\n\"Mittwoch\"\n\"Dienstag\"\n\"Montag\"\n\"Sonntag\"\n// Sonntag ist 1, ...\n// Ergebnis nach oben verschieben\n8 roll\n// Entsprechenden Text wählen\nroll\n// Den Rest löschen\nsd2 sd2 sd2\n\"Ist ein \" swap +\n\n: sd swap drop ;\n: sd2 sd sd ;\n</string>
+  <string name="calc_F12_desc">Wochentag</string>
+  <string name="calc_F13_code"></string>
+  <string name="calc_F13_desc"></string>
+  <string name="calc_F14_code"></string>
+  <string name="calc_F14_desc"></string>
+  <string name="calc_F15_code"></string>
+  <string name="calc_F15_desc"></string>
+  <string name="calc_F16_code"></string>
+  <string name="calc_F16_desc"></string>
+  <string name="calc_endless_loop">Mögliche Endlosschleife. Vorgang abgebrochen.</string>
+  <string name="calc_missing_label">Fehlende Marke \'.%1$s\'.</string>
+  <string name="calc_missing_while_label">Fehlende while-Marke \'do.%1$s\'.</string>
+  <string name="calc_missing_if_label">Fehlende if-Marke \'.%1$s\'.</string>
+  <string name="calc_duplicate_label">Marke \'.%1$s\' darf nur einmal verwendet werden.</string>
+  <string name="calc_duplicate_while_label">while-Marke \'.%1$s\' darf nur einmal verwendet werden.</string>
+  <string name="calc_invalid_while_args">Fehlende Zahlen für \'while\'.</string>
+  <string name="calc_invalid_if_args">Fehlende Zahlen für \'if\'.</string>
+  <string name="calc_unknown_while_condition">Unbekannte while-Bedingung \'%1$s\'. Verwende while.[eq ge gt le lt].</string>
+  <string name="calc_unknown_if_condition">Unbekannte if-Bedingung \'%1$s\'. Verwende if.[eq ge gt le lt].</string>
+  <string name="calc_incomplete_definition">Funktionseintrag \'%1$s\' ist nicht abgeschlossen.</string>
+  <string name="calc_definition_entry_exists">Funktionseintrag \'%1$s\' ist bereits vorhanden.</string>
+  <string name="calc_definition_is_keyword">Funktionsname \'%1$s\' darf kein Schlüsselwort sein.</string>
+  <string name="calc_unknown_import">\'%1$s\' ist nicht vorhanden.</string>
+  <string name="calc_multiple_imports">\'%1$s\' ist mehrfach vorhanden.</string>
+  <string name="calc_missing_lambda">Der Befehl \'()\' erwartet eine Funktion.</string>
+  <string name="calc_lambda_not_terminated">Fehlendes schließendes \'}\'.</string>
+  <string name="calc_empty_definition">Funktionseintrag darf nicht leer sein.</string>
+  <string name="save">Speichern</string>
+  <string name="cancel">Abbrechen</string>
+  <string name="ok">OK</string>
+  <string name="version">Version</string>
+</resources>

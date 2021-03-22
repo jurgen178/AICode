@@ -1,0 +1,4 @@
+
+set JAVA_HOME=C:\android-studio\jre
+cd C:\Repos\AICode
+gradlew :app:assembleDebug --scan

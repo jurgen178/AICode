@@ -1,0 +1,135 @@
+<!-- Copyright AI code
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License. -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <!-- Base application theme. -->
+  <style name="AppTheme" parent="Theme.MaterialComponents.DayNight">
+    <!-- Customize your theme here. -->
+    <item name="colorPrimary">@color/colorPrimary</item>
+    <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+    <item name="colorAccent">@color/colorAccent</item>
+    <item name="actionBarTheme">@style/ThemeOverlay.AppTheme.ActionBar</item>
+  </style>
+
+  <style name="ThemeOverlay.AppTheme.ActionBar" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+    <!-- title text color -->
+    <item name="android:textColorPrimary">#ffffff</item>
+  </style>
+
+  <style name="calc_style">
+    <item name="android:layout_width">0dp</item>
+    <item name="android:layout_height">0dp</item>
+    <item name="android:layout_margin">4dp</item>
+    <item name="android:padding">4dp</item>
+    <item name="android:textSize">20sp</item>
+    <item name="android:textColor">#FFFFFF</item>
+    <item name="android:background">@drawable/calc_roundcorner</item>
+  </style>
+
+  <style name="calc_extrakeys_style">
+    <item name="android:layout_width">0dp</item>
+    <item name="android:layout_height">0dp</item>
+    <item name="android:layout_margin">4dp</item>
+    <item name="android:padding">4dp</item>
+    <item name="android:textSize">12sp</item>
+    <item name="android:textColor">#FFFFFF</item>
+    <item name="android:background">@drawable/calc_roundcorner</item>
+  </style>
+
+  <style name="calc_function_style">
+    <item name="android:layout_width">0dp</item>
+    <item name="android:layout_height">0dp</item>
+    <item name="android:layout_margin">4dp</item>
+    <item name="android:padding">4dp</item>
+    <item name="android:textSize">12sp</item>
+    <item name="android:textColor">#FFFFFF</item>
+    <item name="android:background">@drawable/calc_function_roundcorner</item>
+  </style>
+
+  <style name="calc_inidicator_style">
+    <item name="android:layout_width">0dp</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:textSize">12sp</item>
+    <item name="android:textColor">#888888</item>
+    <item name="android:background">#CCC69B</item>
+  </style>
+
+  <style name="calc_selection_style">
+    <item name="android:layout_width">0dp</item>
+    <item name="android:layout_height">0dp</item>
+    <item name="android:layout_margin">4dp</item>
+    <item name="android:padding">4dp</item>
+    <item name="android:textSize">20sp</item>
+    <item name="android:textColor">#FFFFFF</item>
+    <item name="android:background">@drawable/calc_selection_roundcorner</item>
+  </style>
+
+  <style name="calc_shift_style">
+    <item name="android:layout_width">0dp</item>
+    <item name="android:layout_height">0dp</item>
+    <item name="android:layout_margin">4dp</item>
+    <item name="android:padding">4dp</item>
+    <item name="android:textSize">20sp</item>
+    <item name="android:textColor">#FFFFFF</item>
+    <item name="android:background">@drawable/calc_shift_roundcorner</item>
+  </style>
+
+  <style name="calc_land_style">
+    <item name="android:layout_width">0dp</item>
+    <item name="android:layout_height">0dp</item>
+    <item name="android:layout_margin">4dp</item>
+    <item name="android:padding">4dp</item>
+    <item name="android:textSize">14sp</item>
+    <item name="android:textColor">#FFFFFF</item>
+    <item name="android:background">@drawable/calc_roundcorner</item>
+  </style>
+
+  <style name="calc_extrakeys_land_style">
+    <item name="android:layout_width">0dp</item>
+    <item name="android:layout_height">0dp</item>
+    <item name="android:layout_margin">4dp</item>
+    <item name="android:padding">4dp</item>
+    <item name="android:textSize">12sp</item>
+    <item name="android:textColor">#FFFFFF</item>
+    <item name="android:background">@drawable/calc_roundcorner</item>
+  </style>
+
+  <style name="calc_function_land_style">
+    <item name="android:layout_width">0dp</item>
+    <item name="android:layout_height">0dp</item>
+    <item name="android:layout_margin">4dp</item>
+    <item name="android:padding">4dp</item>
+    <item name="android:textSize">10sp</item>
+    <item name="android:textColor">#FFFFFF</item>
+    <item name="android:background">@drawable/calc_function_roundcorner</item>
+  </style>
+
+  <style name="calc_shift_land_style">
+    <item name="android:layout_width">0dp</item>
+    <item name="android:layout_height">0dp</item>
+    <item name="android:layout_margin">4dp</item>
+    <item name="android:padding">4dp</item>
+    <item name="android:textSize">14sp</item>
+    <item name="android:textColor">#FFFFFF</item>
+    <item name="android:background">@drawable/calc_shift_roundcorner</item>
+  </style>
+
+  <declare-styleable name="Editor">
+    <attr name="text" format="string" />
+    <attr name="textSize" format="dimension"/>
+    <attr name="fontFamily" format="string"/>
+  </declare-styleable>
+
+</resources>
