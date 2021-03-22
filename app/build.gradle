@@ -11,10 +11,10 @@ apply plugin: 'kotlin-kapt'
 android {
   signingConfigs {
     aicode {
-      storeFile file(RELEASE_STORE_FILE)
-      storePassword RELEASE_STORE_PASSWORD
-      keyAlias RELEASE_KEY_ALIAS
-      keyPassword RELEASE_KEY_PASSWORD
+      storeFile file(RELEASE_STORE_FILE2)
+      storePassword RELEASE_STORE_PASSWORD2
+      keyAlias RELEASE_KEY_ALIAS2
+      keyPassword RELEASE_KEY_PASSWORD2
       v2SigningEnabled true
     }
   }
