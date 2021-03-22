@@ -34,10 +34,10 @@ class MainActivity : AppCompatActivity() {
   private lateinit var symbol: String
 
   override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-
     setAppTheme(this)
-    delegate.applyDayNight()
+    //delegate.applyDayNight()
+
+    super.onCreate(savedInstanceState)
 
     binding = ActivityCalcBinding.inflate(layoutInflater)
     val view = binding.root
