@@ -61,6 +61,25 @@
         />
 
     <Preference
+        android:title="@string/email_feedback_title"
+        android:summary="@string/email_feedback_summary"
+        app:icon="@drawable/ic_action_email"
+        >
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="mailto:jurgen172020@gmail.com">
+            <extra
+                android:name="android.intent.extra.SUBJECT"
+                android:value="AI code Feedback"/>
+            <!--
+                    <extra
+                        android:name="android.intent.extra.TEXT"
+                        android:value="text"/>
+            -->
+        </intent>
+    </Preference>
+
+    <Preference
         app:key="version"
         app:title="@string/version" />
 
