@@ -22,7 +22,6 @@ limitations under the License. -->
   <string name="calc_copy">Kopieren</string>
   <string name="calc_paste">Einfügen</string>
   <string name="title_activity_calc_settings">AI-Einstellungen</string>
-  <string name="calc_format_header">Angezeigeformat</string>
   <string name="calc_format_displayed_decimals">Angezeigte Nachkommastellen</string>
   <string name="calc_format_displayed_decimals_desc">Legt fest wieviel Nachkommastellen angezeigt werden.</string>
   <string name="calc_format_decimal_separator">Dezimalzeichen</string>
@@ -64,7 +63,7 @@ limitations under the License. -->
   <string name="calc_F8_desc">Weitere Beispiele</string>
   <string name="calc_F9_code">clear</string>
   <string name="calc_F9_desc">Alles löschen</string>
-  <string name="calc_F10_code">// Funktionsdefinition\n// : name ... ;\n\n// Numerische Integration von f(x)\n// 1: Startwert\n// 2: Endwert\n// 3: Genauigkeit\n// 4: f(x) als lambda\n\n: integral\nsto.fxLambda // f(x)\nsto.dx // Genauigkeit\nsto.x2 // Endwert\n0\ndo.∫x\n  over\n    // f(x)\n    rcl.fxLambda ()\n  + swap rcl.dx + swap over rcl.x2\nwhile.lt.∫x\nswap drop rcl.dx * \"∫f(x)dx\u003d\" +\n;\n\n// Numerische Nullstellenberechnung von f(x)\n// 1: Startwert\n// 2: f(x) als lambda\n\n: nullstelle\nsto.fxLambda // f(x)\n// dx \u003d f(x) - f(x-∆x) / ∆x\n0,001 sto.∆x\n\n// Genauigkeit\n0,0000001 sto.ε\n\ndo.∆x\n  dup dup rcl.fxLambda () dup 3 pick rcl.∆x - rcl.fxLambda () - / rcl.∆x * - swap over - abs rcl.ε\nwhile.gt.∆x\n\"x₀\u003d\" +\n;\n\n// Endlosschleifenerkennung abschalten\n:loop</string>
+  <string name="calc_F10_code">// Funktionsdefinition\n// : name ... ;\n\n// Numerische Integration von f(x)\n// 1: Startwert\n// 2: Endwert\n// 3: Genauigkeit\n// 4: f(x) als lambda\n\n: integral\nsto.fxLambda@MathLib // f(x)\nsto.dx@MathLib // Genauigkeit\nsto.x2@MathLib // Endwert\n0\ndo.∫x@MathLib\n  over\n    // f(x)\n    rcl.fxLambda@MathLib ()\n  + swap rcl.dx@MathLib + swap over rcl.x2@MathLib\nwhile.lt.∫x@MathLib\nswap drop rcl.dx@MathLib * \"∫f(x)dx\u003d\" +\n;\n\n// Numerische Nullstellenberechnung von f(x)\n// 1: Startwert\n// 2: f(x) als lambda\n\n: nullstelle\nsto.fxLambda@MathLib // f(x)\n// dx \u003d f(x) - f(x-∆x) / ∆x\n0,001 sto.∆x@MathLib\n\n// Genauigkeit\n0,0000001 sto.ε@MathLib\n\ndo.∆x@MathLib\n  dup dup rcl.fxLambda@MathLib () dup 3 pick rcl.∆x@MathLib - rcl.fxLambda@MathLib () - / rcl.∆x@MathLib * - swap over - abs rcl.ε@MathLib\nwhile.gt.∆x@MathLib\n\"x₀\u003d\" +\n;\n\n// Endlosschleifenerkennung abschalten\n:loop</string>
   <string name="calc_F10_desc">mathlib</string>
   <string name="calc_F11_code">import.\"mathlib\"\n\n// Numerische Integration von f(x)\n\n//          ₄\n// Beispiel ∫x²dx\n//          ¹\n\n1 // Startwert\n4 // Endwert\n0,001 // Genauigkeit\n{ dup * } // f(x) als lambda\nintegral\n\n\n// Beispiel ∫sin(x)dx von 0..π\n\n// f(x) als Funktionsdefinition\n: f2 sin ;\n//:degree // verwende 360°\n:radian // verwende 2π\n\n0 // Startwert\nπ // Endwert\nπ 100 / // Genauigkeit\n(f2) // f(x) als lambda\nintegral\n\n\n// Numerische Nullstellenberechnung von f(x)\n1 // Startwert\n{ sq 3 - } // f(x)\u003dx²-3\nnullstelle\n</string>
   <string name="calc_F11_desc">∫f(x)dx\nf(x)\u003d0</string>
