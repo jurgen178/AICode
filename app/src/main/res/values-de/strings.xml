@@ -73,10 +73,10 @@ limitations under the License. -->
   <string name="calc_F13_desc"></string>
   <string name="calc_F14_code"></string>
   <string name="calc_F14_desc"></string>
-  <string name="calc_F15_code"></string>
-  <string name="calc_F15_desc"></string>
-  <string name="calc_F16_code"></string>
-  <string name="calc_F16_desc"></string>
+  <string name="calc_F15_code">import.\"mathlib\"\n\n// Math calculus test\n:radian\n\n// -e^(x-2)\n{ 2 - e swap ^ -1 * } sto.fx1\n\n0 // Startwert\n2 // Endwert\n0,001 // Genauigkeit\nrcl.fx1 // f(x) als lambda\nintegral\n\n// x^3+x^2-4x-4\n{ sto.x rcl.x dup dup * * rcl.x dup * + rcl.x 4 * - 4 - } sto.fx2\n\n-3 // Startwert\nrcl.fx2\nnullstelle\n\n0 // Startwert\nrcl.fx2\nnullstelle\n\n3 // Startwert\nrcl.fx2\nnullstelle\n\n// Tabelle -3..3\n\"-----------------\"\n\"f(x) -3..3\"\n\"-----------------\"\n-3 sto.x1\n3 sto.x2\n1 sto.?x\ndo.Tabelle\n\n rcl.x1\n rcl.fx2 ()\n // \"f(x)\u003d\"\n \"f(\" rcl.x1 toStr + \")\u003d\" + +\n\n // x1+\u003d?x\n rcl.x1 rcl.?x + sto.x1\n\n // x1 \u003c\u003d x2 ?\n rcl.x1\n rcl.x2\nwhile.le.Tabelle\n\"-----------------\"\n\n// abs(x^3+x^2-4x-4)\n{ sto.x rcl.x dup dup * * rcl.x dup * + rcl.x 4 * - 4 - abs } sto.fx3\n\n-2 // Startwert\n2 // Endwert\n0,001 // Genauigkeit\nrcl.fx3 // f(x) als lambda\nintegral\n</string>
+  <string name="calc_F15_desc">Math 1</string>
+  <string name="calc_F16_code">import.\"mathlib\"\n\n// Math calculus final\n:radian\n\n// 4•x•e^(-x) - 1\n{ dup -1 * e swap ^ 4 * * 1 - } sto.fx1\n\n0 // Startwert\nrcl.fx1\nnullstelle\n\n2 // Startwert\nrcl.fx1\nnullstelle\n\nover over\n\n0,001 // Genauigkeit\nrcl.fx1 // f(x) als lambda\nintegral\n\n// sqrt(x)•sin(x•p/2)\n{ dup sqrt swap pi * 2 / sin * } sto.fx\n\n0 // Startwert\n2 // Endwert\n0,001 // Genauigkeit\nrcl.fx // f(x) als lambda\nintegral\n\n2 // Startwert\n4 // Endwert\n0,001 // Genauigkeit\nrcl.fx // f(x) als lambda\nintegral\nabs \n\n4 // Startwert\n6 // Endwert\n0,001 // Genauigkeit\nrcl.fx // f(x) als lambda\nintegral\n\n6 // Startwert\n8 // Endwert\n0,001 // Genauigkeit\nrcl.fx // f(x) als lambda\nintegral\nabs\n\n0 // Startwert\n8 // Endwert\n0,001 // Genauigkeit\n// abs(vx•sin(x•p/2))\n{ dup sqrt swap pi * 2 / sin * abs } // f(x) als lambda\nintegral\n</string>
+  <string name="calc_F16_desc">Math 2</string>
   <string name="calc_endless_loop">Mögliche Endlosschleife. Vorgang abgebrochen.</string>
   <string name="calc_missing_label">Fehlende Marke \'.%1$s\'.</string>
   <string name="calc_missing_while_label">Fehlende while-Marke \'do.%1$s\'.</string>
