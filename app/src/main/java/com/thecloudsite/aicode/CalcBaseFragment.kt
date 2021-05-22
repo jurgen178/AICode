@@ -145,7 +145,6 @@ open class CalcBaseFragment(val stockSymbol: String) : Fragment() {
         }
 
         calcViewModel.radian = radian
-        calcViewModel.radix = radix
         calcViewModel.separatorChar = separatorChar
         calcViewModel.numberFormat = numberFormat
 

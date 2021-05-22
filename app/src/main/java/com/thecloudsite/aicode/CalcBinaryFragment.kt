@@ -121,6 +121,15 @@ class CalcBinaryFragment(stockSymbol: String = "") : CalcBaseFragment(stockSymbo
         binding.calcBin.setOnTouchListener { view, event -> touchHelper(view, event); false }
         binding.calcBin.setOnClickListener { updateRadix(2) }
 
+        binding.calcAND.setOnTouchListener { view, event -> touchHelper(view, event); false }
+        binding.calcAND.setOnClickListener { calcViewModel.opBinary(BinaryArgument.AND) }
+        binding.calcOR.setOnTouchListener { view, event -> touchHelper(view, event); false }
+        binding.calcOR.setOnClickListener { calcViewModel.opBinary(BinaryArgument.OR) }
+        binding.calcXOR.setOnTouchListener { view, event -> touchHelper(view, event); false }
+        binding.calcXOR.setOnClickListener { calcViewModel.opBinary(BinaryArgument.XOR) }
+        binding.calcNOT.setOnTouchListener { view, event -> touchHelper(view, event); false }
+        binding.calcNOT.setOnClickListener { calcViewModel.opUnary(UnaryArgument.NOT) }
+
         binding.calcEnter.setOnTouchListener { view, event -> touchHelper(view, event); false }
         binding.calcEnter.setOnClickListener { calcViewModel.enter(radix) }
 

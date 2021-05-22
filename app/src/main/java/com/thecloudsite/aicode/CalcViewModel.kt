@@ -88,6 +88,7 @@ enum class UnaryArgument {
     EX,
     LOG,
     ZX,
+    NOT,
 }
 
 enum class BinaryArgument {
@@ -101,6 +102,9 @@ enum class BinaryArgument {
     MOD,  // modulo
     PER,  // Percent
     PERC, // Percent change
+    AND,
+    OR,
+    XOR,
 }
 
 enum class TernaryArgument {
@@ -800,6 +804,20 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     validArgs = opBinary(calcData, BinaryArgument.PERC)
                 }
 
+                // logic operations
+                "and" -> {
+                    validArgs = opBinary(calcData, BinaryArgument.AND)
+                }
+                "or" -> {
+                    validArgs = opBinary(calcData, BinaryArgument.OR)
+                }
+                "xor" -> {
+                    validArgs = opBinary(calcData, BinaryArgument.XOR)
+                }
+                "not" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.NOT)
+                }
+
                 // Stack operations
                 "clear" -> {
                     opZero(calcData, ZeroArgument.CLEAR)
@@ -1438,6 +1456,14 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 UnaryArgument.ZX -> {
                     calcData.numberList.add(CalcLine(desc = "", value = 10.0.pow(op1.value)))
                 }
+                UnaryArgument.NOT -> {
+                    calcData.numberList.add(
+                        CalcLine(
+                            desc = "",
+                            value = op1.value.toLong().inv().toDouble()
+                        )
+                    )
+                }
             }
         } else {
             calcData.errorMsg = context.getString(R.string.calc_invalid_args)
@@ -1545,6 +1571,30 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                         CalcLine(
                             desc = "∆% ",
                             value = (op1.value - op2.value) / op2.value * 100
+                        )
+                    )
+                }
+                BinaryArgument.AND -> {
+                    calcData.numberList.add(
+                        CalcLine(
+                            desc = "",
+                            value = op2.value.toLong().and(op1.value.toLong()).toDouble()
+                        )
+                    )
+                }
+                BinaryArgument.OR -> {
+                    calcData.numberList.add(
+                        CalcLine(
+                            desc = "",
+                            value = op2.value.toLong().or(op1.value.toLong()).toDouble()
+                        )
+                    )
+                }
+                BinaryArgument.XOR -> {
+                    calcData.numberList.add(
+                        CalcLine(
+                            desc = "",
+                            value = op2.value.toLong().xor(op1.value.toLong()).toDouble()
                         )
                     )
                 }
@@ -1666,7 +1716,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
         calcRepository.updateData(calcData)
     }
 
-    fun enter(radix: Int) {
+    fun enter(radix: Int = 0) {
         val calcData1 = calcData.value!!
 
         val calcData = if (calcData1.editMode) {
