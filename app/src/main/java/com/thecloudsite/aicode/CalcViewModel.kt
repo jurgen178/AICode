@@ -44,76 +44,76 @@ import kotlin.math.tanh
 import kotlin.text.RegexOption.IGNORE_CASE
 
 enum class VariableArguments {
-  PICK,
-  ROLL,
-  SUM,
-  VAR,  // Varianz
-  VALIDATE,
+    PICK,
+    ROLL,
+    SUM,
+    VAR,  // Varianz
+    VALIDATE,
 }
 
 enum class ZeroArgument {
-  DEPTH,
-  CLEAR,
-  PI,
-  E,
+    DEPTH,
+    CLEAR,
+    PI,
+    E,
 }
 
 enum class UnaryArgument {
-  DROP,
-  DUP,
-  SQRT,
-  SQ,
-  INV,
-  ABS,
-  SIGN,
-  SIN,
-  SINH,
-  COS,
-  COSH,
-  TAN,
-  TANH,
-  ARCSIN,
-  ARCSINH,
-  ARCCOS,
-  ARCCOSH,
-  ARCTAN,
-  ARCTANH,
-  INT,    // Integer part
-  ROUND,  // Round to nearest int
-  ROUND2, // Round to two digits
-  ROUND4, // Round to four digits
-  FRAC,
-  TOSTR,  // toStr
-  LN,
-  EX,
-  LOG,
-  ZX,
+    DROP,
+    DUP,
+    SQRT,
+    SQ,
+    INV,
+    ABS,
+    SIGN,
+    SIN,
+    SINH,
+    COS,
+    COSH,
+    TAN,
+    TANH,
+    ARCSIN,
+    ARCSINH,
+    ARCCOS,
+    ARCCOSH,
+    ARCTAN,
+    ARCTANH,
+    INT,    // Integer part
+    ROUND,  // Round to nearest int
+    ROUND2, // Round to two digits
+    ROUND4, // Round to four digits
+    FRAC,
+    TOSTR,  // toStr
+    LN,
+    EX,
+    LOG,
+    ZX,
 }
 
 enum class BinaryArgument {
-  ADD,
-  SUB,
-  MULT,
-  DIV,
-  POW,
-  SWAP,
-  OVER,
-  MOD,  // modulo
-  PER,  // Percent
-  PERC, // Percent change
+    ADD,
+    SUB,
+    MULT,
+    DIV,
+    POW,
+    SWAP,
+    OVER,
+    MOD,  // modulo
+    PER,  // Percent
+    PERC, // Percent change
 }
 
 enum class TernaryArgument {
-  ROT,
-  ZinsMonat,
+    ROT,
+    ZinsMonat,
 }
 
 enum class QuadArgument {
-  IFEQ, // if equal
-  IFGE, // if greater or equal than
-  IFGT, // if greater than
-  IFLE, // if less or equal then
-  IFLT, // if less then
+    IFEQ, // if equal
+    IFGE, // if greater or equal than
+    IFGT, // if greater than
+    IFLE, // if less or equal then
+    IFLT, // if less then
 }
 
 //val wordListRegex =
@@ -125,804 +125,808 @@ val wordListRegex = "[\"':;(){}\\[\\]]".toRegex()
 val wordDefinitionRegex = Regex("(?s):\\s(.+?)\\s(?:.*?\\s)?;")
 
 data class CodeType
-  (
-  val code: String,
-  val name: String,
+    (
+    val code: String,
+    val name: String,
 )
 
 data class CodeTypeJson
-  (
-  val key: String,
-  val code: String,
-  val name: String,
+    (
+    val key: String,
+    val code: String,
+    val name: String,
 )
 
 class CalcViewModel(application: Application) : AndroidViewModel(application) {
 
-  private val context = application
-  private val calcRepository: CalcRepository = CalcRepository(application)
-  private var aic: Int = 0
-  private val varMap: MutableMap<String, CalcLine> = mutableMapOf()
-  var symbol: String = ""
-  var shiftLevel: Int = 0
-  var calcData: LiveData<CalcData> = calcRepository.calcLiveData
-  var radian = 1.0
-  var separatorChar = ','
-  var numberFormat: NumberFormat = NumberFormat.getNumberInstance()
+    private val context = application
+    private val calcRepository: CalcRepository = CalcRepository(application)
+    private var aic: Int = 0
+    private val varMap: MutableMap<String, CalcLine> = mutableMapOf()
+    var symbol: String = ""
+    var shiftLevel: Int = 0
+    var calcData: LiveData<CalcData> = calcRepository.calcLiveData
+    var radian = 1.0
+    var separatorChar = ','
+    var numberFormat: NumberFormat = NumberFormat.getNumberInstance()
 
-  val codeMap: MutableMap<String, CodeType> = mutableMapOf()
+    val codeMap: MutableMap<String, CodeType> = mutableMapOf()
 
-  init {
-    calcRepository.updateData(calcRepository.getData())
-  }
-
-  private fun getRegexOneGroup(text: String, regex: Regex): String? {
-    val match = regex.matchEntire(text)
-    if (match != null
-      && match.groups.size == 2
-      && match.groups[1] != null
-    ) {
-      // first group (groups[0]) is entire src
-      // first capture is in groups[1]
-      return match.groups[1]!!.value
+    init {
+        calcRepository.updateData(calcRepository.getData())
     }
 
-    return null
-  }
-
-  private fun getRegexTwoGroups(text: String, regex: Regex): Pair<String, String>? {
-    val match = regex.matchEntire(text)
-    if (match != null
-      && match.groups.size == 3
-      && match.groups[1] != null
-      && match.groups[2] != null
-    ) {
-      // first group (groups[0]) is entire src
-      // first capture is in groups[1]
-      // second capture is in groups[2]
-      return Pair(match.groups[1]!!.value, match.groups[2]!!.value)
-    }
-
-    return null
-  }
-
-  private fun getRegexThreeGroups(text: String, regex: Regex): Triple<String, String, String>? {
-    val match = regex.matchEntire(text)
-    if (match != null
-      && match.groups.size == 4
-      && match.groups[1] != null
-      && match.groups[2] != null
-      && match.groups[3] != null
-    ) {
-      // first group (groups[0]) is entire src
-      // first capture is in groups[1]
-      // second capture is in groups[2]
-      // third capture is in groups[2]
-      return Triple(match.groups[1]!!.value, match.groups[2]!!.value, match.groups[3]!!.value)
-    }
-
-    return null
-  }
-
-  fun function(code: String, codeMapKey: String = "") {
-    val calcData = submitEditline(calcData.value!!)
-
-    endEdit(calcData)
-
-    // remove comments
-    var codePreprocessed = code
-      .replace("(?s)/[*].*?[*]/".toRegex(), " ")
-
-      //.replace("(?s): [a-z]+ .*? ;".toRegex(IGNORE_CASE), " ")
-
-      //.replace("//.*?(\n|$)".toRegex(), " ")
-
-      // multiline (?m) accept the anchors ^ and $ to match at the start and end of each line
-      // (otherwise they only match at the start/end of the entire string)
-      .replace("(?m)//.*?$".toRegex(), " ")
-
-    // resolve imports
-    val regex = Regex("(?i)(?:\\s|^)import[.]\"(.+?)\"")
-    val matches = regex.findAll(codePreprocessed)
-
-    // process each import statement
-    matches.forEach { matchResult ->
-      val import = matchResult.groupValues[1]
-
-      // do not import the own code
-      if (!(codeMapKey.isNotEmpty()
-            && codeMap.containsKey(codeMapKey)
-            && import.equals(codeMap[codeMapKey]!!.name, true))
-      ) {
-        // Search all code entries for a matching name.
-        val codeKey = codeMap.filterValues { codeValue ->
-          codeValue.name.equals(import, true)
+    private fun getRegexOneGroup(text: String, regex: Regex): String? {
+        val match = regex.matchEntire(text)
+        if (match != null
+            && match.groups.size == 2
+            && match.groups[1] != null
+        ) {
+            // first group (groups[0]) is entire src
+            // first capture is in groups[1]
+            return match.groups[1]!!.value
         }
 
-        when {
-          codeKey.size == 1 -> {
+        return null
+    }
 
-            // Get all definitions in the import.
-            val importedCode = codeKey.values.first().code
-              .replace("(?s)/[*].*?[*]/".toRegex(), " ")
-              .replace("(?m)//.*?$".toRegex(), " ")
-            val matchesDefinition = wordDefinitionRegex.findAll(importedCode)
-            matchesDefinition.forEach { matchResultDefinition ->
-              val definition = matchResultDefinition.groupValues[0]
-              codePreprocessed += " $definition "
+    private fun getRegexTwoGroups(text: String, regex: Regex): Pair<String, String>? {
+        val match = regex.matchEntire(text)
+        if (match != null
+            && match.groups.size == 3
+            && match.groups[1] != null
+            && match.groups[2] != null
+        ) {
+            // first group (groups[0]) is entire src
+            // first capture is in groups[1]
+            // second capture is in groups[2]
+            return Pair(match.groups[1]!!.value, match.groups[2]!!.value)
+        }
+
+        return null
+    }
+
+    private fun getRegexThreeGroups(text: String, regex: Regex): Triple<String, String, String>? {
+        val match = regex.matchEntire(text)
+        if (match != null
+            && match.groups.size == 4
+            && match.groups[1] != null
+            && match.groups[2] != null
+            && match.groups[3] != null
+        ) {
+            // first group (groups[0]) is entire src
+            // first capture is in groups[1]
+            // second capture is in groups[2]
+            // third capture is in groups[2]
+            return Triple(match.groups[1]!!.value, match.groups[2]!!.value, match.groups[3]!!.value)
+        }
+
+        return null
+    }
+
+    fun function(code: String, codeMapKey: String = "") {
+        val calcData = submitEditline(calcData.value!!)
+
+        endEdit(calcData)
+
+        // remove comments
+        var codePreprocessed = code
+            .replace("(?s)/[*].*?[*]/".toRegex(), " ")
+
+            //.replace("(?s): [a-z]+ .*? ;".toRegex(IGNORE_CASE), " ")
+
+            //.replace("//.*?(\n|$)".toRegex(), " ")
+
+            // multiline (?m) accept the anchors ^ and $ to match at the start and end of each line
+            // (otherwise they only match at the start/end of the entire string)
+            .replace("(?m)//.*?$".toRegex(), " ")
+
+        // resolve imports
+        val regex = Regex("(?i)(?:\\s|^)import[.]\"(.+?)\"")
+        val matches = regex.findAll(codePreprocessed)
+
+        // process each import statement
+        matches.forEach { matchResult ->
+            val import = matchResult.groupValues[1]
+
+            // do not import the own code
+            if (!(codeMapKey.isNotEmpty()
+                        && codeMap.containsKey(codeMapKey)
+                        && import.equals(codeMap[codeMapKey]!!.name, true))
+            ) {
+                // Search all code entries for a matching name.
+                val codeKey = codeMap.filterValues { codeValue ->
+                    codeValue.name.equals(import, true)
+                }
+
+                when {
+                    codeKey.size == 1 -> {
+
+                        // Get all definitions in the import.
+                        val importedCode = codeKey.values.first().code
+                            .replace("(?s)/[*].*?[*]/".toRegex(), " ")
+                            .replace("(?m)//.*?$".toRegex(), " ")
+                        val matchesDefinition = wordDefinitionRegex.findAll(importedCode)
+                        matchesDefinition.forEach { matchResultDefinition ->
+                            val definition = matchResultDefinition.groupValues[0]
+                            codePreprocessed += " $definition "
+                        }
+
+                        // Get special instructions from the import.
+                        if (importedCode.contains(":loop", true)) {
+                            codePreprocessed += " :loop "
+                        }
+                    }
+                    codeKey.size > 1 -> {
+                        calcData.errorMsg =
+                            context.getString(R.string.calc_multiple_imports, import)
+                        calcRepository.updateData(calcData)
+
+                        // multiple imports exist, end loop
+                        return
+                    }
+                    else -> {
+                        calcData.errorMsg = context.getString(R.string.calc_unknown_import, import)
+                        calcRepository.updateData(calcData)
+
+                        // import missing, end loop
+                        return
+                    }
+                }
             }
+        }
 
-            // Get special instructions from the import.
-            if (importedCode.contains(":loop", true)) {
-              codePreprocessed += " :loop "
+        // Split by spaces not followed by even amount of quotes so only spaces outside of quotes are replaced.
+        val words = codePreprocessed
+            .split("\\s+(?=([^\"']*[\"'][^\"']*[\"'])*[^\"']*$)".toRegex())
+
+        var success = true
+        var validArgs = true
+        var checkLoop = true
+
+        // Label has optional 'do' (do.label1 instead of .label1) at the beginning
+        // for better readability when used for while loop.
+        // ?: = non capturing group
+        // (?s) = dotall = . + \n
+        val labelRegex = "^(?:do)?[.](.+?)$".toRegex(IGNORE_CASE)
+        val whileIfRegex = "^(while|if)[.](\\w+)[.](.+?)$".toRegex(IGNORE_CASE)
+        val gotoRegex = "^goto[.](.+?)$".toRegex(IGNORE_CASE)
+        val stoRegex = "^sto[.](.+)$".toRegex(IGNORE_CASE)
+        val rclRegex = "^rcl[.](.+)$".toRegex(IGNORE_CASE)
+        val commentRegex = "(?s)^[\"'](.+?)[\"']$".toRegex()
+        val definitionRegex = "^[(](.+?)[)]$".toRegex()
+
+        // Stores the index of the labels.
+        val labelMap: MutableMap<String, Int> = mutableMapOf()
+
+        // validate and store all .labels
+        words.forEachIndexed { index, word ->
+            val labelMatch = getRegexOneGroup(word, labelRegex)
+            // is label?
+            if (labelMatch != null) {
+                val label = labelMatch.toLowerCase(Locale.ROOT)
+
+                if (labelMap.containsKey(label)) {
+                    calcData.errorMsg = context.getString(R.string.calc_duplicate_label, labelMatch)
+                    calcRepository.updateData(calcData)
+
+                    // duplicate label, end loop
+                    return
+                } else {
+                    // Store label
+                    labelMap[label] = index
+                }
+            } else {
+                when (word.toLowerCase(Locale.ROOT)) {
+                    // disable loop check
+                    ":loop" -> {
+                        checkLoop = false
+                    }
+                }
             }
-          }
-          codeKey.size > 1 -> {
-            calcData.errorMsg = context.getString(R.string.calc_multiple_imports, import)
-            calcRepository.updateData(calcData)
-
-            // multiple imports exist, end loop
-            return
-          }
-          else -> {
-            calcData.errorMsg = context.getString(R.string.calc_unknown_import, import)
-            calcRepository.updateData(calcData)
-
-            // import missing, end loop
-            return
-          }
-        }
-      }
-    }
-
-    // Split by spaces not followed by even amount of quotes so only spaces outside of quotes are replaced.
-    val words = codePreprocessed
-      .split("\\s+(?=([^\"']*[\"'][^\"']*[\"'])*[^\"']*$)".toRegex())
-
-    var success = true
-    var validArgs = true
-    var checkLoop = true
-
-    // Label has optional 'do' (do.label1 instead of .label1) at the beginning
-    // for better readability when used for while loop.
-    // ?: = non capturing group
-    // (?s) = dotall = . + \n
-    val labelRegex = "^(?:do)?[.](.+?)$".toRegex(IGNORE_CASE)
-    val whileIfRegex = "^(while|if)[.](\\w+)[.](.+?)$".toRegex(IGNORE_CASE)
-    val gotoRegex = "^goto[.](.+?)$".toRegex(IGNORE_CASE)
-    val stoRegex = "^sto[.](.+)$".toRegex(IGNORE_CASE)
-    val rclRegex = "^rcl[.](.+)$".toRegex(IGNORE_CASE)
-    val commentRegex = "(?s)^[\"'](.+?)[\"']$".toRegex()
-    val definitionRegex = "^[(](.+?)[)]$".toRegex()
-
-    // Stores the index of the labels.
-    val labelMap: MutableMap<String, Int> = mutableMapOf()
-
-    // validate and store all .labels
-    words.forEachIndexed { index, word ->
-      val labelMatch = getRegexOneGroup(word, labelRegex)
-      // is label?
-      if (labelMatch != null) {
-        val label = labelMatch.toLowerCase(Locale.ROOT)
-
-        if (labelMap.containsKey(label)) {
-          calcData.errorMsg = context.getString(R.string.calc_duplicate_label, labelMatch)
-          calcRepository.updateData(calcData)
-
-          // duplicate label, end loop
-          return
-        } else {
-          // Store label
-          labelMap[label] = index
-        }
-      } else {
-        when (word.toLowerCase(Locale.ROOT)) {
-          // disable loop check
-          ":loop" -> {
-            checkLoop = false
-          }
-        }
-      }
-    }
-
-    // validate and store all while|if.labels
-    val whileMap: MutableMap<String, Int> = mutableMapOf()
-    words.forEachIndexed { index, word ->
-      val whileIfMatch =
-        getRegexThreeGroups(word, whileIfRegex)
-      // is while or if?
-      if (whileIfMatch != null) {
-        val isWhile = whileIfMatch.first.equals("while", true)
-        val compare = whileIfMatch.second
-        val labelStr = whileIfMatch.third
-        val label = labelStr.toLowerCase(Locale.ROOT)
-
-        if (!compare.matches("eq|le|lt|ge|gt".toRegex())) {
-          calcData.errorMsg = if (isWhile) {
-            context.getString(R.string.calc_unknown_while_condition, compare)
-          } else {
-            context.getString(R.string.calc_unknown_if_condition, compare)
-          }
-          calcRepository.updateData(calcData)
-
-          // label missing, end loop
-          return
         }
 
-        // check if while-labels are unique
-        // if-labels are not checked
-        if (isWhile) {
-          if (whileMap.containsKey(label)) {
-            calcData.errorMsg = context.getString(R.string.calc_duplicate_while_label, labelStr)
-            calcRepository.updateData(calcData)
+        // validate and store all while|if.labels
+        val whileMap: MutableMap<String, Int> = mutableMapOf()
+        words.forEachIndexed { index, word ->
+            val whileIfMatch =
+                getRegexThreeGroups(word, whileIfRegex)
+            // is while or if?
+            if (whileIfMatch != null) {
+                val isWhile = whileIfMatch.first.equals("while", true)
+                val compare = whileIfMatch.second
+                val labelStr = whileIfMatch.third
+                val label = labelStr.toLowerCase(Locale.ROOT)
 
-            // duplicate label, end loop
-            return
-          } else {
-            // Store label
-            whileMap[label] = index
-          }
+                if (!compare.matches("eq|le|lt|ge|gt".toRegex())) {
+                    calcData.errorMsg = if (isWhile) {
+                        context.getString(R.string.calc_unknown_while_condition, compare)
+                    } else {
+                        context.getString(R.string.calc_unknown_if_condition, compare)
+                    }
+                    calcRepository.updateData(calcData)
+
+                    // label missing, end loop
+                    return
+                }
+
+                // check if while-labels are unique
+                // if-labels are not checked
+                if (isWhile) {
+                    if (whileMap.containsKey(label)) {
+                        calcData.errorMsg =
+                            context.getString(R.string.calc_duplicate_while_label, labelStr)
+                        calcRepository.updateData(calcData)
+
+                        // duplicate label, end loop
+                        return
+                    } else {
+                        // Store label
+                        whileMap[label] = index
+                    }
+                }
+
+                if (!labelMap.containsKey(label)) {
+                    calcData.errorMsg = if (isWhile) {
+                        context.getString(R.string.calc_missing_while_label, labelStr)
+                    } else {
+                        context.getString(R.string.calc_missing_if_label, labelStr)
+                    }
+                    calcRepository.updateData(calcData)
+
+                    // label missing, end loop
+                    return
+                }
+            }
         }
 
-        if (!labelMap.containsKey(label)) {
-          calcData.errorMsg = if (isWhile) {
-            context.getString(R.string.calc_missing_while_label, labelStr)
-          } else {
-            context.getString(R.string.calc_missing_if_label, labelStr)
-          }
-          calcRepository.updateData(calcData)
-
-          // label missing, end loop
-          return
-        }
-      }
-    }
-
-    // validate and store all definitions
-    // : name ... ;
-    val definitionMap: MutableMap<String, Int> = mutableMapOf()
-    var k = 0
-    while (k < words.size) {
-      // Search begin of definition.
-      if (words[k] == ":") {
-        k++
-        var endIndex = -1
-        var name = ""
-        if (k < words.size) {
-          name = words[k]
-          if (name == ";") {
-            calcData.errorMsg = context.getString(R.string.calc_empty_definition)
-            calcRepository.updateData(calcData)
-
-            // empty definition, end loop
-            return
-          }
-          k++
-        }
-        val startIndex = k
-        // Search end of definition.
+        // validate and store all definitions
+        // : name ... ;
+        val definitionMap: MutableMap<String, Int> = mutableMapOf()
+        var k = 0
         while (k < words.size) {
-          if (words[k] == ";") {
-            endIndex = k
-            break
-          }
-          k++
+            // Search begin of definition.
+            if (words[k] == ":") {
+                k++
+                var endIndex = -1
+                var name = ""
+                if (k < words.size) {
+                    name = words[k]
+                    if (name == ";") {
+                        calcData.errorMsg = context.getString(R.string.calc_empty_definition)
+                        calcRepository.updateData(calcData)
+
+                        // empty definition, end loop
+                        return
+                    }
+                    k++
+                }
+                val startIndex = k
+                // Search end of definition.
+                while (k < words.size) {
+                    if (words[k] == ";") {
+                        endIndex = k
+                        break
+                    }
+                    k++
+                }
+
+                // Add definition name and start index to definition
+                if (endIndex > 0) {
+                    when {
+                        wordListRegex.matches(name) -> {
+                            calcData.errorMsg =
+                                context.getString(R.string.calc_definition_is_keyword, name)
+                            calcRepository.updateData(calcData)
+
+                            // definition is keyword, end loop
+                            return
+                        }
+                        definitionMap.containsKey(name) -> {
+                            calcData.errorMsg =
+                                context.getString(R.string.calc_definition_entry_exists, name)
+                            calcRepository.updateData(calcData)
+
+                            // already exists, end loop
+                            return
+                        }
+                        else -> {
+                            definitionMap[name] = startIndex
+                        }
+                    }
+                } else {
+                    calcData.errorMsg = context.getString(R.string.calc_incomplete_definition, name)
+                    calcRepository.updateData(calcData)
+
+                    // incomplete definition, end loop
+                    return
+                }
+            }
+
+            k++
         }
 
-        // Add definition name and start index to definition
-        if (endIndex > 0) {
-          when {
-            wordListRegex.matches(name) -> {
-              calcData.errorMsg = context.getString(R.string.calc_definition_is_keyword, name)
-              calcRepository.updateData(calcData)
+        val returnStack = Stack<Int>()
+        var loopCounter: Int = 0
+        val currentSize = calcData.numberList.size
+        var i: Int = 0
+        while (i < words.size) {
 
-              // definition is keyword, end loop
-              return
+            val word = words[i++]
+
+            // is import?
+            if (word.startsWith("import", true)) {
+                // skip to next word
+                continue
             }
-            definitionMap.containsKey(name) -> {
-              calcData.errorMsg = context.getString(R.string.calc_definition_entry_exists, name)
-              calcRepository.updateData(calcData)
 
-              // already exists, end loop
-              return
+            // is label?
+            if (getRegexOneGroup(word, labelRegex) != null) {
+                // skip to next word
+                continue
             }
-            else -> {
-              definitionMap[name] = startIndex
+
+            // Check for endless loop.
+            if (checkLoop && (loopCounter > 10000 || (calcData.numberList.size - currentSize >= 1000))) {
+                calcData.errorMsg = context.getString(R.string.calc_endless_loop)
+                calcRepository.updateData(calcData)
+                return
             }
-          }
-        } else {
-          calcData.errorMsg = context.getString(R.string.calc_incomplete_definition, name)
-          calcRepository.updateData(calcData)
 
-          // incomplete definition, end loop
-          return
-        }
-      }
+            // While loop, if jump
+            // while|if.[compare].[label]
+            // while|if.gt.label1
+            val whileIfMatch =
+                getRegexThreeGroups(word, whileIfRegex)
+            // is while?
+            if (whileIfMatch != null) {
+                loopCounter++
 
-      k++
-    }
+                // captured compare is in first
+                // captured label is in second
+                val isWhile = whileIfMatch.first.equals("while", true)
+                val compare = whileIfMatch.second
+                val labelStr = whileIfMatch.third
+                val label = labelStr.toLowerCase(Locale.ROOT)
 
-    val returnStack = Stack<Int>()
-    var loopCounter: Int = 0
-    val currentSize = calcData.numberList.size
-    var i: Int = 0
-    while (i < words.size) {
+                // already checked in validation, kept as runtime test-case
+                if (!labelMap.containsKey(label)) {
+                    calcData.errorMsg = if (isWhile) {
+                        context.getString(R.string.calc_missing_while_label, labelStr)
+                    } else {
+                        context.getString(R.string.calc_missing_if_label, labelStr)
+                    }
+                    calcRepository.updateData(calcData)
 
-      val word = words[i++]
+                    // label missing, end loop
+                    return
+                }
 
-      // is import?
-      if (word.startsWith("import", true)) {
-        // skip to next word
-        continue
-      }
+                val argsValid = calcData.numberList.size > 1
+                if (argsValid) {
 
-      // is label?
-      if (getRegexOneGroup(word, labelRegex) != null) {
-        // skip to next word
-        continue
-      }
+                    // 2: op2
+                    // 1: op1
+                    val op1 = calcData.numberList.removeLast()
+                    val op2 = calcData.numberList.removeLast()
 
-      // Check for endless loop.
-      if (checkLoop && (loopCounter > 10000 || (calcData.numberList.size - currentSize >= 1000))) {
-        calcData.errorMsg = context.getString(R.string.calc_endless_loop)
-        calcRepository.updateData(calcData)
-        return
-      }
+                    when (compare.toLowerCase(Locale.ROOT)) {
 
-      // While loop, if jump
-      // while|if.[compare].[label]
-      // while|if.gt.label1
-      val whileIfMatch =
-        getRegexThreeGroups(word, whileIfRegex)
-      // is while?
-      if (whileIfMatch != null) {
-        loopCounter++
+                        "ge" -> {
+                            if (op2.value >= op1.value) {
+                                // jump to label
+                                i = labelMap[label]!!
+                            }
+                        }
+                        "gt" -> {
+                            if (op2.value > op1.value) {
+                                // jump to label
+                                i = labelMap[label]!!
+                            }
+                        }
+                        "le" -> {
+                            if (op2.value <= op1.value) {
+                                // jump to label
+                                i = labelMap[label]!!
+                            }
+                        }
+                        "lt" -> {
+                            if (op2.value < op1.value) {
+                                // jump to label
+                                i = labelMap[label]!!
+                            }
+                        }
+                        "eq" -> {
+                            if (op2.value == op1.value) {
+                                // jump to label
+                                i = labelMap[label]!!
+                            }
+                        }
+                        else -> {
+                            // already checked in validation, kept as runtime test-case
+                            calcData.errorMsg = if (isWhile) {
+                                context.getString(R.string.calc_unknown_while_condition, compare)
+                            } else {
+                                context.getString(R.string.calc_unknown_if_condition, compare)
+                            }
 
-        // captured compare is in first
-        // captured label is in second
-        val isWhile = whileIfMatch.first.equals("while", true)
-        val compare = whileIfMatch.second
-        val labelStr = whileIfMatch.third
-        val label = labelStr.toLowerCase(Locale.ROOT)
+                            calcRepository.updateData(calcData)
 
-        // already checked in validation, kept as runtime test-case
-        if (!labelMap.containsKey(label)) {
-          calcData.errorMsg = if (isWhile) {
-            context.getString(R.string.calc_missing_while_label, labelStr)
-          } else {
-            context.getString(R.string.calc_missing_if_label, labelStr)
-          }
-          calcRepository.updateData(calcData)
+                            // label missing, end loop
+                            return
+                        }
+                    }
 
-          // label missing, end loop
-          return
-        }
+                    continue
 
-        val argsValid = calcData.numberList.size > 1
-        if (argsValid) {
+                } else {
+                    calcData.errorMsg = if (isWhile) {
+                        context.getString(R.string.calc_invalid_while_args)
+                    } else {
+                        context.getString(R.string.calc_invalid_if_args)
+                    }
+                    calcRepository.updateData(calcData)
 
-          // 2: op2
-          // 1: op1
-          val op1 = calcData.numberList.removeLast()
-          val op2 = calcData.numberList.removeLast()
+                    // invalid args, end instruction
+                    return
+                }
+            }
 
-          when (compare.toLowerCase(Locale.ROOT)) {
+            // Goto
+            // goto.[label]
+            val gotoMatch =
+                getRegexOneGroup(word, gotoRegex)
+            if (gotoMatch != null) {
+                loopCounter++
+                val label = gotoMatch.toLowerCase(Locale.ROOT)
 
-            "ge" -> {
-              if (op2.value >= op1.value) {
+                if (!labelMap.containsKey(label)) {
+                    calcData.errorMsg = context.getString(R.string.calc_missing_label, gotoMatch)
+                    calcRepository.updateData(calcData)
+
+                    // label missing, end instruction
+                    return
+                }
+
                 // jump to label
                 i = labelMap[label]!!
-              }
+                continue
             }
-            "gt" -> {
-              if (op2.value > op1.value) {
-                // jump to label
-                i = labelMap[label]!!
-              }
+
+            // { lambda }
+            // Add the index of the lambda definition.
+            if (word == "{") {
+                loopCounter++
+
+                calcData.numberList.add(
+                    CalcLine(
+                        desc = "",
+                        value = Double.NaN,
+                        lambda = i,
+                        definition = "\uD83D\uDC7D@$i"
+                    )
+                )
+
+                var lambdaEnd = false
+                // Search end of definition.
+                var j = i
+                while (j < words.size) {
+                    if (words[j++] == "}") {
+                        lambdaEnd = true
+                        break
+                    }
+                }
+
+                if (!lambdaEnd) {
+                    calcData.errorMsg = context.getString(R.string.calc_lambda_not_terminated)
+                    calcRepository.updateData(calcData)
+
+                    // terminator missing, end instruction
+                    return
+                }
+
+                i = j
+                continue
             }
-            "le" -> {
-              if (op2.value <= op1.value) {
-                // jump to label
-                i = labelMap[label]!!
-              }
+
+            // definition function?
+            val wordLwr = word.toLowerCase(Locale.ROOT)
+            if (definitionMap.containsKey(wordLwr)) {
+                loopCounter++
+
+                returnStack.push(i)
+                i = definitionMap[wordLwr]!!
+
+                continue
             }
-            "lt" -> {
-              if (op2.value < op1.value) {
-                // jump to label
-                i = labelMap[label]!!
-              }
+
+            // (definition)
+            // Add the index of the definition.
+            val definitionMatch =
+                getRegexOneGroup(word, definitionRegex)
+            if (definitionMatch != null) {
+                loopCounter++
+
+                val definition = definitionMatch.toLowerCase(Locale.ROOT)
+                if (definitionMap.containsKey(definition)) {
+                    loopCounter++
+
+                    calcData.numberList.add(
+                        CalcLine(
+                            desc = "",
+                            value = Double.NaN,
+                            lambda = definitionMap[definition]!!,
+                            definition = definitionMatch
+                        )
+                    )
+
+                    continue
+                }
             }
-            "eq" -> {
-              if (op2.value == op1.value) {
-                // jump to label
-                i = labelMap[label]!!
-              }
+
+            // ()
+            // Run the address of the current item.
+            if (word == "()") {
+                val op = calcData.numberList.removeLast()
+                if (op.lambda >= 0) {
+                    loopCounter++
+
+                    returnStack.push(i)
+                    i = op.lambda
+
+                    continue
+                } else {
+                    calcData.errorMsg = context.getString(R.string.calc_missing_lambda)
+                    calcRepository.updateData(calcData)
+
+                    // lambda missing, end instruction
+                    return
+                }
             }
-            else -> {
-              // already checked in validation, kept as runtime test-case
-              calcData.errorMsg = if (isWhile) {
-                context.getString(R.string.calc_unknown_while_condition, compare)
-              } else {
-                context.getString(R.string.calc_unknown_if_condition, compare)
-              }
 
-              calcRepository.updateData(calcData)
+            // skip definition declarations :..;
+            if (word == ":") {
+                loopCounter++
 
-              // label missing, end loop
-              return
+                do {
+                    i++
+                } while (i < words.size && words[i] != ";")
+                // skip ;
+                i++
+
+                continue
             }
-          }
 
-          continue
+            // Definition function or lambda was called, return to the calling word.
+            if (word == ";" || word == "}") {
+                loopCounter++
 
-        } else {
-          calcData.errorMsg = if (isWhile) {
-            context.getString(R.string.calc_invalid_while_args)
-          } else {
-            context.getString(R.string.calc_invalid_if_args)
-          }
-          calcRepository.updateData(calcData)
+                if (returnStack.isNotEmpty()) {
+                    i = returnStack.pop()
+                }
 
-          // invalid args, end instruction
-          return
-        }
-      }
+                continue
+            }
 
-      // Goto
-      // goto.[label]
-      val gotoMatch =
-        getRegexOneGroup(word, gotoRegex)
-      if (gotoMatch != null) {
-        loopCounter++
-        val label = gotoMatch.toLowerCase(Locale.ROOT)
+            // process words
+            when (wordLwr) {
 
-        if (!labelMap.containsKey(label)) {
-          calcData.errorMsg = context.getString(R.string.calc_missing_label, gotoMatch)
-          calcRepository.updateData(calcData)
+                // Math operations
+                "sin" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.SIN)
+                }
+                "cos" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.COS)
+                }
+                "tan" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.TAN)
+                }
+                "arcsin" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.ARCSIN)
+                }
+                "arccos" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.ARCCOS)
+                }
+                "arctan" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.ARCTAN)
+                }
+                "sinh" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.SINH)
+                }
+                "cosh" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.COSH)
+                }
+                "tanh" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.TANH)
+                }
+                "arcsinh" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.ARCSINH)
+                }
+                "arccosh" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.ARCCOSH)
+                }
+                "arctanh" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.ARCTANH)
+                }
+                "ln" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.LN)
+                }
+                "log" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.LOG)
+                }
+                "sq" -> {
+                    success = opUnary(calcData, UnaryArgument.SQ)
+                }
+                "sqrt" -> {
+                    success = opUnary(calcData, UnaryArgument.SQRT)
+                }
+                "inv" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.INV)
+                }
+                "abs" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.ABS)
+                }
+                "int" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.INT)
+                }
+                "mod" -> {
+                    validArgs = opBinary(calcData, BinaryArgument.MOD)
+                }
+                "round" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.ROUND)
+                }
+                "round2" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.ROUND2)
+                }
+                "round4" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.ROUND4)
+                }
+                "frac" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.FRAC)
+                }
+                "tostr" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.TOSTR)
+                }
+                "sum" -> {
+                    validArgs = opVarArg(calcData, VariableArguments.SUM)
+                }
+                "var" -> {
+                    validArgs = opVarArg(calcData, VariableArguments.VAR)
+                }
+                "per" -> {
+                    validArgs = opBinary(calcData, BinaryArgument.PER)
+                }
+                "perc" -> {
+                    validArgs = opBinary(calcData, BinaryArgument.PERC)
+                }
 
-          // label missing, end instruction
-          return
-        }
+                // Stack operations
+                "clear" -> {
+                    opZero(calcData, ZeroArgument.CLEAR)
+                }
+                "depth" -> {
+                    opZero(calcData, ZeroArgument.DEPTH)
+                }
+                "drop" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.DROP)
+                }
+                "dup" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.DUP)
+                }
+                "over" -> {
+                    validArgs = opBinary(calcData, BinaryArgument.OVER)
+                }
+                "swap" -> {
+                    validArgs = opBinary(calcData, BinaryArgument.SWAP)
+                }
+                "rot" -> {
+                    validArgs = opTernary(calcData, TernaryArgument.ROT)
+                }
+                "pick" -> {
+                    validArgs = opVarArg(calcData, VariableArguments.PICK)
+                }
+                "roll" -> {
+                    validArgs = opVarArg(calcData, VariableArguments.ROLL)
+                }
 
-        // jump to label
-        i = labelMap[label]!!
-        continue
-      }
+                // Conditional operations
+                "if.eq" -> {
+                    validArgs = opQuad(calcData, QuadArgument.IFEQ)
+                }
+                "if.ge" -> {
+                    validArgs = opQuad(calcData, QuadArgument.IFGE)
+                }
+                "if.gt" -> {
+                    validArgs = opQuad(calcData, QuadArgument.IFGT)
+                }
+                "if.le" -> {
+                    validArgs = opQuad(calcData, QuadArgument.IFLE)
+                }
+                "if.lt" -> {
+                    validArgs = opQuad(calcData, QuadArgument.IFLT)
+                }
 
-      // { lambda }
-      // Add the index of the lambda definition.
-      if (word == "{") {
-        loopCounter++
+                // Arithmetic operations
+                "+" -> {
+                    validArgs = opBinary(calcData, BinaryArgument.ADD)
+                }
+                "-" -> {
+                    validArgs = opBinary(calcData, BinaryArgument.SUB)
+                }
+                "*" -> {
+                    validArgs = opBinary(calcData, BinaryArgument.MULT)
+                }
+                "/" -> {
+                    validArgs = opBinary(calcData, BinaryArgument.DIV)
+                }
+                "^", "pow" -> {
+                    validArgs = opBinary(calcData, BinaryArgument.POW)
+                }
 
-        calcData.numberList.add(
-          CalcLine(
-            desc = "",
-            value = Double.NaN,
-            lambda = i,
-            definition = "\uD83D\uDC7D@$i"
-          )
-        )
+                // Formatting and number operations
+                "", ":loop" -> {
+                    // Skip empty lines and instructions.
+                }
+                ":radian" -> {
+                    radian = 1.0
+                }
+                ":clearcode" -> {
+                    codeMap.clear()
+                    // Add empty entry to not set to default if code is all empty.
+                    codeMap["F0"] = CodeType(code = "", name = "")
+                }
+                ":defaultcode" -> {
+                    codeMap.clear()
+                }
+                ":degree" -> {
+                    radian = Math.PI / 180
+                }
+                "pi", "π" -> {
+                    opZero(calcData, ZeroArgument.PI)
+                }
+                "e" -> {
+                    opZero(calcData, ZeroArgument.E)
+                }
+                "\u0061\u006c\u0069\u0065\u006e" -> {
+                    val a = "\uD83D\uDEF8\uD83D\uDC7D\uD83D\uDC7E" +
+                            " ".repeat((1..17).shuffled().first())
+                    if (calcData.numberList.isEmpty()) {
+                        calcData.numberList.add(
+                            CalcLine(
+                                desc = a,
+                                value = Double.NaN
+                            )
+                        )
+                    } else {
+                        val op = calcData.numberList.removeLast()
+                        calcData.numberList.add(
+                            CalcLine(
+                                desc = "$a ${op.desc}",
+                                value = op.value
+                            )
+                        )
+                    }
+                }
+                "validate" -> {
+                    validArgs = opVarArg(calcData, VariableArguments.VALIDATE)
+                    // Stop here when validate fails.
+                    if (!validArgs) {
+                        return
+                    }
+                }
 
-        var lambdaEnd = false
-        // Search end of definition.
-        var j = i
-        while (j < words.size) {
-          if (words[j++] == "}") {
-            lambdaEnd = true
-            break
-          }
-        }
+                // Variable operation
+                "rcl" -> {
+                    recallAllVariables(calcData)
+                }
+                else -> {
 
-        if (!lambdaEnd) {
-          calcData.errorMsg = context.getString(R.string.calc_lambda_not_terminated)
-          calcRepository.updateData(calcData)
-
-          // terminator missing, end instruction
-          return
-        }
-
-        i = j
-        continue
-      }
-
-      // definition function?
-      val wordLwr = word.toLowerCase(Locale.ROOT)
-      if (definitionMap.containsKey(wordLwr)) {
-        loopCounter++
-
-        returnStack.push(i)
-        i = definitionMap[wordLwr]!!
-
-        continue
-      }
-
-      // (definition)
-      // Add the index of the definition.
-      val definitionMatch =
-        getRegexOneGroup(word, definitionRegex)
-      if (definitionMatch != null) {
-        loopCounter++
-
-        val definition = definitionMatch.toLowerCase(Locale.ROOT)
-        if (definitionMap.containsKey(definition)) {
-          loopCounter++
-
-          calcData.numberList.add(
-            CalcLine(
-              desc = "",
-              value = Double.NaN,
-              lambda = definitionMap[definition]!!,
-              definition = definitionMatch
-            )
-          )
-
-          continue
-        }
-      }
-
-      // ()
-      // Run the address of the current item.
-      if (word == "()") {
-        val op = calcData.numberList.removeLast()
-        if (op.lambda >= 0) {
-          loopCounter++
-
-          returnStack.push(i)
-          i = op.lambda
-
-          continue
-        } else {
-          calcData.errorMsg = context.getString(R.string.calc_missing_lambda)
-          calcRepository.updateData(calcData)
-
-          // lambda missing, end instruction
-          return
-        }
-      }
-
-      // skip definition declarations :..;
-      if (word == ":") {
-        loopCounter++
-
-        do {
-          i++
-        } while (i < words.size && words[i] != ";")
-        // skip ;
-        i++
-
-        continue
-      }
-
-      // Definition function or lambda was called, return to the calling word.
-      if (word == ";" || word == "}") {
-        loopCounter++
-
-        if (returnStack.isNotEmpty()) {
-          i = returnStack.pop()
-        }
-
-        continue
-      }
-
-      // process words
-      when (wordLwr) {
-
-        // Math operations
-        "sin" -> {
-          validArgs = opUnary(calcData, UnaryArgument.SIN)
-        }
-        "cos" -> {
-          validArgs = opUnary(calcData, UnaryArgument.COS)
-        }
-        "tan" -> {
-          validArgs = opUnary(calcData, UnaryArgument.TAN)
-        }
-        "arcsin" -> {
-          validArgs = opUnary(calcData, UnaryArgument.ARCSIN)
-        }
-        "arccos" -> {
-          validArgs = opUnary(calcData, UnaryArgument.ARCCOS)
-        }
-        "arctan" -> {
-          validArgs = opUnary(calcData, UnaryArgument.ARCTAN)
-        }
-        "sinh" -> {
-          validArgs = opUnary(calcData, UnaryArgument.SINH)
-        }
-        "cosh" -> {
-          validArgs = opUnary(calcData, UnaryArgument.COSH)
-        }
-        "tanh" -> {
-          validArgs = opUnary(calcData, UnaryArgument.TANH)
-        }
-        "arcsinh" -> {
-          validArgs = opUnary(calcData, UnaryArgument.ARCSINH)
-        }
-        "arccosh" -> {
-          validArgs = opUnary(calcData, UnaryArgument.ARCCOSH)
-        }
-        "arctanh" -> {
-          validArgs = opUnary(calcData, UnaryArgument.ARCTANH)
-        }
-        "ln" -> {
-          validArgs = opUnary(calcData, UnaryArgument.LN)
-        }
-        "log" -> {
-          validArgs = opUnary(calcData, UnaryArgument.LOG)
-        }
-        "sq" -> {
-          success = opUnary(calcData, UnaryArgument.SQ)
-        }
-        "sqrt" -> {
-          success = opUnary(calcData, UnaryArgument.SQRT)
-        }
-        "inv" -> {
-          validArgs = opUnary(calcData, UnaryArgument.INV)
-        }
-        "abs" -> {
-          validArgs = opUnary(calcData, UnaryArgument.ABS)
-        }
-        "int" -> {
-          validArgs = opUnary(calcData, UnaryArgument.INT)
-        }
-        "mod" -> {
-          validArgs = opBinary(calcData, BinaryArgument.MOD)
-        }
-        "round" -> {
-          validArgs = opUnary(calcData, UnaryArgument.ROUND)
-        }
-        "round2" -> {
-          validArgs = opUnary(calcData, UnaryArgument.ROUND2)
-        }
-        "round4" -> {
-          validArgs = opUnary(calcData, UnaryArgument.ROUND4)
-        }
-        "frac" -> {
-          validArgs = opUnary(calcData, UnaryArgument.FRAC)
-        }
-        "tostr" -> {
-          validArgs = opUnary(calcData, UnaryArgument.TOSTR)
-        }
-        "sum" -> {
-          validArgs = opVarArg(calcData, VariableArguments.SUM)
-        }
-        "var" -> {
-          validArgs = opVarArg(calcData, VariableArguments.VAR)
-        }
-        "per" -> {
-          validArgs = opBinary(calcData, BinaryArgument.PER)
-        }
-        "perc" -> {
-          validArgs = opBinary(calcData, BinaryArgument.PERC)
-        }
-
-        // Stack operations
-        "clear" -> {
-          opZero(calcData, ZeroArgument.CLEAR)
-        }
-        "depth" -> {
-          opZero(calcData, ZeroArgument.DEPTH)
-        }
-        "drop" -> {
-          validArgs = opUnary(calcData, UnaryArgument.DROP)
-        }
-        "dup" -> {
-          validArgs = opUnary(calcData, UnaryArgument.DUP)
-        }
-        "over" -> {
-          validArgs = opBinary(calcData, BinaryArgument.OVER)
-        }
-        "swap" -> {
-          validArgs = opBinary(calcData, BinaryArgument.SWAP)
-        }
-        "rot" -> {
-          validArgs = opTernary(calcData, TernaryArgument.ROT)
-        }
-        "pick" -> {
-          validArgs = opVarArg(calcData, VariableArguments.PICK)
-        }
-        "roll" -> {
-          validArgs = opVarArg(calcData, VariableArguments.ROLL)
-        }
-
-        // Conditional operations
-        "if.eq" -> {
-          validArgs = opQuad(calcData, QuadArgument.IFEQ)
-        }
-        "if.ge" -> {
-          validArgs = opQuad(calcData, QuadArgument.IFGE)
-        }
-        "if.gt" -> {
-          validArgs = opQuad(calcData, QuadArgument.IFGT)
-        }
-        "if.le" -> {
-          validArgs = opQuad(calcData, QuadArgument.IFLE)
-        }
-        "if.lt" -> {
-          validArgs = opQuad(calcData, QuadArgument.IFLT)
-        }
-
-        // Arithmetic operations
-        "+" -> {
-          validArgs = opBinary(calcData, BinaryArgument.ADD)
-        }
-        "-" -> {
-          validArgs = opBinary(calcData, BinaryArgument.SUB)
-        }
-        "*" -> {
-          validArgs = opBinary(calcData, BinaryArgument.MULT)
-        }
-        "/" -> {
-          validArgs = opBinary(calcData, BinaryArgument.DIV)
-        }
-        "^", "pow" -> {
-          validArgs = opBinary(calcData, BinaryArgument.POW)
-        }
-
-        // Formatting and number operations
-        "", ":loop" -> {
-          // Skip empty lines and instructions.
-        }
-        ":radian" -> {
-          radian = 1.0
-        }
-        ":clearcode" -> {
-          codeMap.clear()
-          // Add empty entry to not set to default if code is all empty.
-          codeMap["F0"] = CodeType(code = "", name = "")
-        }
-        ":defaultcode" -> {
-          codeMap.clear()
-        }
-        ":degree" -> {
-          radian = Math.PI / 180
-        }
-        "pi", "π" -> {
-          opZero(calcData, ZeroArgument.PI)
-        }
-        "e" -> {
-          opZero(calcData, ZeroArgument.E)
-        }
-        "\u0061\u006c\u0069\u0065\u006e" -> {
-          val a = "\uD83D\uDEF8\uD83D\uDC7D\uD83D\uDC7E" +
-              " ".repeat((1..17).shuffled().first())
-          if (calcData.numberList.isEmpty()) {
-            calcData.numberList.add(
-              CalcLine(
-                desc = a,
-                value = Double.NaN
-              )
-            )
-          } else {
-            val op = calcData.numberList.removeLast()
-            calcData.numberList.add(
-              CalcLine(
-                desc = "$a ${op.desc}",
-                value = op.value
-              )
-            )
-          }
-        }
-        "validate" -> {
-          validArgs = opVarArg(calcData, VariableArguments.VALIDATE)
-          // Stop here when validate fails.
-          if (!validArgs) {
-            return
-          }
-        }
-
-        // Variable operation
-        "rcl" -> {
-          recallAllVariables(calcData)
-        }
-        else -> {
-
-          // Comment
-          // If word is comment, add comment to the last entry.
-          // (?s) = dotall = . + \n
-          val comment = getRegexOneGroup(word, commentRegex)
-          // is comment?
-          if (comment != null) {
+                    // Comment
+                    // If word is comment, add comment to the last entry.
+                    // (?s) = dotall = . + \n
+                    val comment = getRegexOneGroup(word, commentRegex)
+                    // is comment?
+                    if (comment != null) {
 
 //            // Add line if list is empty to add the text to.
 //            if (calcData.numberList.isEmpty()) {
@@ -938,120 +942,121 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
 //              calcData.numberList.add(op)
 //            }
 
-            calcData.numberList.add(CalcLine(desc = comment, value = Double.NaN))
+                        calcData.numberList.add(CalcLine(desc = comment, value = Double.NaN))
 
-          } else {
+                    } else {
 
-            // sto[.name]
-            val variableName = getRegexOneGroup(word, stoRegex)
-            if (variableName != null) {
-              validArgs = storeVariable(calcData, variableName)
+                        // sto[.name]
+                        val variableName = getRegexOneGroup(word, stoRegex)
+                        if (variableName != null) {
+                            validArgs = storeVariable(calcData, variableName)
 
-            } else {
+                        } else {
 
-              // rcl[.name]
-              val recallVariable = getRegexOneGroup(word, rclRegex)
-              if (recallVariable != null) {
-                recallVariable(calcData, recallVariable)
+                            // rcl[.name]
+                            val recallVariable = getRegexOneGroup(word, rclRegex)
+                            if (recallVariable != null) {
+                                recallVariable(calcData, recallVariable)
 
-              } else {
+                            } else {
 
-                // Evaluate number
-                try {
-                  val value = numberFormat.parse(word)!!
-                    .toDouble()
+                                // Evaluate number
+                                try {
+                                    val value = numberFormat.parse(word)!!
+                                        .toDouble()
 
-                  calcData.numberList.add(CalcLine(desc = "", value = value))
-                } catch (e: Exception) {
-                  // Error
-                  calcData.errorMsg = context.getString(R.string.calc_error_parsing_msg, word)
-                  success = false
+                                    calcData.numberList.add(CalcLine(desc = "", value = value))
+                                } catch (e: Exception) {
+                                    // Error
+                                    calcData.errorMsg =
+                                        context.getString(R.string.calc_error_parsing_msg, word)
+                                    success = false
+                                }
+
+                            }
+                        }
+                    }
                 }
-
-              }
             }
-          }
-        }
-      }
 
-      if (!success) {
-        calcData.errorMsg = context.getString(R.string.calc_error_msg, word)
+            if (!success) {
+                calcData.errorMsg = context.getString(R.string.calc_error_msg, word)
+                calcRepository.updateData(calcData)
+
+                return
+            } else
+                if (!validArgs) {
+                    calcData.errorMsg = context.getString(R.string.calc_invalid_args)
+                    calcRepository.updateData(calcData)
+
+                    return
+                }
+        }
+
+        calcRepository.updateData(calcData)
+    }
+
+    private fun storeVariable(calcData: CalcData, name: String): Boolean {
+        val argsValid = calcData.numberList.size > 0
+
+        if (argsValid) {
+            endEdit(calcData)
+
+            // 1: op1
+            val op1 = calcData.numberList.removeLast()
+            varMap[name] = op1
+
+        } else {
+            calcData.errorMsg = context.getString(R.string.calc_invalid_args)
+        }
+
         calcRepository.updateData(calcData)
 
-        return
-      } else
-        if (!validArgs) {
-          calcData.errorMsg = context.getString(R.string.calc_invalid_args)
-          calcRepository.updateData(calcData)
+        return argsValid
+    }
 
-          return
+    private fun recallVariable(calcData: CalcData, name: String) {
+        endEdit(calcData)
+
+        if (varMap.containsKey(name)) {
+            calcData.numberList.add(varMap[name]!!)
+
+            calcRepository.updateData(calcData)
         }
     }
 
-    calcRepository.updateData(calcData)
-  }
+    private fun recallAllVariables(calcData: CalcData) {
+        endEdit(calcData)
 
-  private fun storeVariable(calcData: CalcData, name: String): Boolean {
-    val argsValid = calcData.numberList.size > 0
+        varMap.forEach { (name, line) ->
+            calcData.numberList.add(CalcLine(desc = "Variable '$name'", value = Double.NaN))
+            calcData.numberList.add(line)
+        }
+        //calcData.numberList.add(CalcLine(desc = "${varMap.size}", value = Double.NaN))
 
-    if (argsValid) {
-      endEdit(calcData)
-
-      // 1: op1
-      val op1 = calcData.numberList.removeLast()
-      varMap[name] = op1
-
-    } else {
-      calcData.errorMsg = context.getString(R.string.calc_invalid_args)
+        calcRepository.updateData(calcData)
     }
 
-    calcRepository.updateData(calcData)
+    // clipboard import/export
+    fun getText(): String {
+        val calcData = submitEditline(calcData.value!!)
+        calcRepository.updateData(calcData)
 
-    return argsValid
-  }
-
-  private fun recallVariable(calcData: CalcData, name: String) {
-    endEdit(calcData)
-
-    if (varMap.containsKey(name)) {
-      calcData.numberList.add(varMap[name]!!)
-
-      calcRepository.updateData(calcData)
+        return if (calcData.numberList.isNotEmpty()) {
+            // calcData.numberList.last().toString() converts to E-notation
+            // calcData.numberList.last().toBigDecimal().toPlainString()
+            numberFormat.format(calcData.numberList.last().value)
+        } else {
+            ""
+        }
     }
-  }
 
-  private fun recallAllVariables(calcData: CalcData) {
-    endEdit(calcData)
+    fun setText(text: String?, desc: String) {
+        if (text != null && text.isNotEmpty()) {
 
-    varMap.forEach { (name, line) ->
-      calcData.numberList.add(CalcLine(desc = "Variable '$name'", value = Double.NaN))
-      calcData.numberList.add(line)
-    }
-    //calcData.numberList.add(CalcLine(desc = "${varMap.size}", value = Double.NaN))
-
-    calcRepository.updateData(calcData)
-  }
-
-  // clipboard import/export
-  fun getText(): String {
-    val calcData = submitEditline(calcData.value!!)
-    calcRepository.updateData(calcData)
-
-    return if (calcData.numberList.isNotEmpty()) {
-      // calcData.numberList.last().toString() converts to E-notation
-      // calcData.numberList.last().toBigDecimal().toPlainString()
-      numberFormat.format(calcData.numberList.last().value)
-    } else {
-      ""
-    }
-  }
-
-  fun setText(text: String?, desc: String) {
-    if (text != null && text.isNotEmpty()) {
-
-      // Use function(...) to interpret the content instead of parsing as a number.
-      // This allows pasting code scripts.
-      function(text)
+            // Use function(...) to interpret the content instead of parsing as a number.
+            // This allows pasting code scripts.
+            function(text)
 
 //      val calcData = calcData.value!!
 //
@@ -1061,212 +1066,217 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
 //
 //      calcRepository.updateData(submitEditline(calcData, desc))
 
-    }
-  }
-
-  fun add(value: Double, desc: String) {
-    val calcData = calcData.value!!
-
-    endEdit(calcData)
-    calcData.numberList.add(CalcLine(desc = desc, value = value))
-
-    calcRepository.updateData(calcData)
-  }
-
-  fun addNum(char: Char, context: Context? = null) {
-    val calcData = calcData.value!!
-
-    if (char == separatorChar) {
-      aic++
-
-      if (context != null && aic == 7) {
-        AlertDialog.Builder(context)
-          // https://convertcodes.com/unicode-converter-encode-decode-utf/
-          .setTitle(
-            "\u0041\u0049\u0020\u003d\u0020\u0041\u006c\u0069\u0065\u006e\u0020\u0049\u006e\u0074\u0065\u006c\u006c\u0069\u0067\u0065\u006e\u0063\u0065"
-          )
-          .setMessage(
-            "\u0057\u0061\u0074\u0063\u0068\u0020\u006f\u0075\u0074\u002e"
-          )
-          .setPositiveButton(R.string.ok) { dialog, _ -> dialog.dismiss() }
-          .show()
-      }
-
-      // Validation:
-      // Only one separator char allowed.
-      if (calcData.editline.contains(char)) {
-        return
-      }
-    } else {
-      aic = 0
+        }
     }
 
-    calcData.editMode = true
-    calcData.editline += char
-    calcData.errorMsg = ""
+    fun add(value: Double, desc: String) {
+        val calcData = calcData.value!!
 
-    calcRepository.updateData(calcData)
-  }
+        endEdit(calcData)
+        calcData.numberList.add(CalcLine(desc = desc, value = value))
 
-  fun opVarArg(op: VariableArguments): Boolean {
-    val calcData = submitEditline(calcData.value!!)
-    return opVarArg(calcData, op)
-  }
+        calcRepository.updateData(calcData)
+    }
 
-  private fun opVarArg(calcData: CalcData, op: VariableArguments): Boolean {
-    var argsValid = false
-    endEdit(calcData)
+    fun addNum(char: Char, context: Context? = null) {
+        val calcData = calcData.value!!
 
-    when (op) {
-      VariableArguments.PICK -> {
-        var size = calcData.numberList.size
-        if (size > 1) {
+        if (char == separatorChar) {
+            aic++
 
-          val n = calcData.numberList.removeLast().value.toInt()
-          size = calcData.numberList.size
-          if (size - n >= 0 && n > 0) {
-            argsValid = true
-            // copy level n to level 1
-            val nLevelOp = calcData.numberList[size - n]
-            // Clone nLevelOp
-            calcData.numberList.add(CalcLine(desc = nLevelOp.desc, value = nLevelOp.value))
-          }
-        }
-      }
-      VariableArguments.ROLL -> {
-        var size = calcData.numberList.size
-        if (size > 1) {
-
-          val n = calcData.numberList.removeLast().value.toInt()
-          size = calcData.numberList.size
-          if (size - n >= 0 && n > 0) {
-            argsValid = true
-            // move level n to level 1
-            val nLevelOp = calcData.numberList.removeAt(size - n)
-            // Copy nLevelOp
-            calcData.numberList.add(nLevelOp)
-          }
-        }
-      }
-      VariableArguments.SUM -> {
-        var n = 0
-        var sum = 0.0
-        calcData.numberList.forEach { calcLine ->
-          if (calcLine.value.isFinite()) {
-            n++
-            sum += calcLine.value
-          }
-        }
-        if (n > 1) {
-          argsValid = true
-          calcData.numberList.clear()
-          calcData.numberList.add(CalcLine(desc = "Σ=", value = sum))
-          calcData.numberList.add(CalcLine(desc = "n=", value = n.toDouble()))
-        }
-      }
-      VariableArguments.VAR -> {
-        val size = calcData.numberList.size
-        if (size > 1) {
-          var sum = 0.0
-          var n = 0
-          calcData.numberList.forEach { calcLine ->
-            val x = calcLine.value
-            if (x.isFinite()) {
-              n++
-              sum += x
-            }
-          }
-
-          if (n > 1) {
-            argsValid = true
-            val mean = sum / n
-
-            var variance = 0.0
-            calcData.numberList.forEach { calcLine ->
-              val x1 = calcLine.value
-              if (x1.isFinite()) {
-                val x = x1 - mean
-                variance += x * x
-              }
+            if (context != null && aic == 7) {
+                AlertDialog.Builder(context)
+                    // https://convertcodes.com/unicode-converter-encode-decode-utf/
+                    .setTitle(
+                        "\u0041\u0049\u0020\u003d\u0020\u0041\u006c\u0069\u0065\u006e\u0020\u0049\u006e\u0074\u0065\u006c\u006c\u0069\u0067\u0065\u006e\u0063\u0065"
+                    )
+                    .setMessage(
+                        "\u0057\u0061\u0074\u0063\u0068\u0020\u006f\u0075\u0074\u002e"
+                    )
+                    .setPositiveButton(R.string.ok) { dialog, _ -> dialog.dismiss() }
+                    .show()
             }
 
-            variance /= n
-
-            calcData.numberList.clear()
-            calcData.numberList.add(CalcLine(desc = "σ²=", value = variance))
-          }
-        }
-      }
-      VariableArguments.VALIDATE -> {
-        val size = calcData.numberList.size
-        if (size >= 2) {
-
-          val n = calcData.numberList.removeLast().value.toInt()
-          val errorOp = calcData.numberList.removeLast()
-          if (n > 0 && n <= size - 2) {
-            argsValid = true
-            for (i in 0 until n) {
-              if (!calcData.numberList[size - 3 - i].value.isFinite()) {
-                argsValid = false
-                break
-              }
+            // Validation:
+            // Only one separator char allowed.
+            if (calcData.editline.contains(char)) {
+                return
             }
-          }
-          if (!argsValid) {
-            calcData.numberList.add(errorOp)
-            calcRepository.updateData(calcData)
-            return false
-          }
+        } else {
+            aic = 0
         }
-      }
+
+        calcData.editMode = true
+        calcData.editline += char
+        calcData.errorMsg = ""
+
+        calcRepository.updateData(calcData)
     }
 
-    if (!argsValid) {
-      calcData.errorMsg = context.getString(R.string.calc_invalid_args)
+    fun opVarArg(op: VariableArguments): Boolean {
+        val calcData = submitEditline(calcData.value!!)
+        return opVarArg(calcData, op)
     }
 
-    calcRepository.updateData(calcData)
+    private fun opVarArg(calcData: CalcData, op: VariableArguments): Boolean {
+        var argsValid = false
+        endEdit(calcData)
 
-    return argsValid
-  }
+        when (op) {
+            VariableArguments.PICK -> {
+                var size = calcData.numberList.size
+                if (size > 1) {
 
-  fun opZero(op: ZeroArgument) {
-    val calcData = submitEditline(calcData.value!!)
-    opZero(calcData, op)
-  }
+                    val n = calcData.numberList.removeLast().value.toInt()
+                    size = calcData.numberList.size
+                    if (size - n >= 0 && n > 0) {
+                        argsValid = true
+                        // copy level n to level 1
+                        val nLevelOp = calcData.numberList[size - n]
+                        // Clone nLevelOp
+                        calcData.numberList.add(
+                            CalcLine(
+                                desc = nLevelOp.desc,
+                                value = nLevelOp.value
+                            )
+                        )
+                    }
+                }
+            }
+            VariableArguments.ROLL -> {
+                var size = calcData.numberList.size
+                if (size > 1) {
 
-  private fun opZero(calcData: CalcData, op: ZeroArgument) {
-    endEdit(calcData)
+                    val n = calcData.numberList.removeLast().value.toInt()
+                    size = calcData.numberList.size
+                    if (size - n >= 0 && n > 0) {
+                        argsValid = true
+                        // move level n to level 1
+                        val nLevelOp = calcData.numberList.removeAt(size - n)
+                        // Copy nLevelOp
+                        calcData.numberList.add(nLevelOp)
+                    }
+                }
+            }
+            VariableArguments.SUM -> {
+                var n = 0
+                var sum = 0.0
+                calcData.numberList.forEach { calcLine ->
+                    if (calcLine.value.isFinite()) {
+                        n++
+                        sum += calcLine.value
+                    }
+                }
+                if (n > 1) {
+                    argsValid = true
+                    calcData.numberList.clear()
+                    calcData.numberList.add(CalcLine(desc = "Σ=", value = sum))
+                    calcData.numberList.add(CalcLine(desc = "n=", value = n.toDouble()))
+                }
+            }
+            VariableArguments.VAR -> {
+                val size = calcData.numberList.size
+                if (size > 1) {
+                    var sum = 0.0
+                    var n = 0
+                    calcData.numberList.forEach { calcLine ->
+                        val x = calcLine.value
+                        if (x.isFinite()) {
+                            n++
+                            sum += x
+                        }
+                    }
 
-    when (op) {
-      ZeroArgument.CLEAR -> {
-        calcData.numberList.clear()
-      }
-      ZeroArgument.DEPTH -> {
-        val size = calcData.numberList.size.toDouble()
-        calcData.numberList.add(CalcLine(desc = "", value = size))
-      }
-      ZeroArgument.PI -> {
-        calcData.numberList.add(CalcLine(desc = "", value = Math.PI))
-      }
-      ZeroArgument.E -> {
-        calcData.numberList.add(CalcLine(desc = "", value = Math.E))
-      }
+                    if (n > 1) {
+                        argsValid = true
+                        val mean = sum / n
+
+                        var variance = 0.0
+                        calcData.numberList.forEach { calcLine ->
+                            val x1 = calcLine.value
+                            if (x1.isFinite()) {
+                                val x = x1 - mean
+                                variance += x * x
+                            }
+                        }
+
+                        variance /= n
+
+                        calcData.numberList.clear()
+                        calcData.numberList.add(CalcLine(desc = "σ²=", value = variance))
+                    }
+                }
+            }
+            VariableArguments.VALIDATE -> {
+                val size = calcData.numberList.size
+                if (size >= 2) {
+
+                    val n = calcData.numberList.removeLast().value.toInt()
+                    val errorOp = calcData.numberList.removeLast()
+                    if (n > 0 && n <= size - 2) {
+                        argsValid = true
+                        for (i in 0 until n) {
+                            if (!calcData.numberList[size - 3 - i].value.isFinite()) {
+                                argsValid = false
+                                break
+                            }
+                        }
+                    }
+                    if (!argsValid) {
+                        calcData.numberList.add(errorOp)
+                        calcRepository.updateData(calcData)
+                        return false
+                    }
+                }
+            }
+        }
+
+        if (!argsValid) {
+            calcData.errorMsg = context.getString(R.string.calc_invalid_args)
+        }
+
+        calcRepository.updateData(calcData)
+
+        return argsValid
     }
 
-    calcRepository.updateData(calcData)
-  }
+    fun opZero(op: ZeroArgument) {
+        val calcData = submitEditline(calcData.value!!)
+        opZero(calcData, op)
+    }
 
-  fun opUnary(op: UnaryArgument): Boolean {
-    val calcData = submitEditline(calcData.value!!)
-    return opUnary(calcData, op)
-  }
+    private fun opZero(calcData: CalcData, op: ZeroArgument) {
+        endEdit(calcData)
 
-  private fun opUnary(calcData: CalcData, op: UnaryArgument): Boolean {
-    val argsValid = calcData.numberList.size > 0
+        when (op) {
+            ZeroArgument.CLEAR -> {
+                calcData.numberList.clear()
+            }
+            ZeroArgument.DEPTH -> {
+                val size = calcData.numberList.size.toDouble()
+                calcData.numberList.add(CalcLine(desc = "", value = size))
+            }
+            ZeroArgument.PI -> {
+                calcData.numberList.add(CalcLine(desc = "", value = Math.PI))
+            }
+            ZeroArgument.E -> {
+                calcData.numberList.add(CalcLine(desc = "", value = Math.E))
+            }
+        }
 
-    if (argsValid) {
-      endEdit(calcData)
+        calcRepository.updateData(calcData)
+    }
+
+    fun opUnary(op: UnaryArgument): Boolean {
+        val calcData = submitEditline(calcData.value!!)
+        return opUnary(calcData, op)
+    }
+
+    private fun opUnary(calcData: CalcData, op: UnaryArgument): Boolean {
+        val argsValid = calcData.numberList.size > 0
+
+        if (argsValid) {
+            endEdit(calcData)
 
 //      // Validation
 //      val d = calcData.numberList.last()
@@ -1277,162 +1287,177 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
 //        return
 //      }
 
-      val op1 = calcData.numberList.removeLast()
+            val op1 = calcData.numberList.removeLast()
 
-      when (op) {
-        UnaryArgument.DROP -> {
+            when (op) {
+                UnaryArgument.DROP -> {
+                }
+                UnaryArgument.DUP -> {
+                    calcData.numberList.add(op1)
+                    calcData.numberList.add(op1)
+                }
+                UnaryArgument.SQRT -> {
+                    calcData.numberList.add(CalcLine(desc = "", value = op1.value.pow(0.5)))
+                }
+                UnaryArgument.SQ -> {
+                    calcData.numberList.add(CalcLine(desc = "", value = op1.value.pow(2)))
+                }
+                UnaryArgument.INV -> {
+                    calcData.numberList.add(CalcLine(desc = "", value = 1 / op1.value))
+                }
+                UnaryArgument.ABS -> {
+                    calcData.numberList.add(CalcLine(desc = "", value = op1.value.absoluteValue))
+                }
+                UnaryArgument.SIGN -> {
+                    calcData.numberList.add(CalcLine(desc = "", value = -op1.value))
+                }
+                UnaryArgument.INT -> {
+                    calcData.numberList.add(
+                        CalcLine(
+                            desc = "",
+                            value = op1.value.toInt().toDouble()
+                        )
+                    )
+                }
+                UnaryArgument.ROUND -> {
+                    calcData.numberList.add(
+                        CalcLine(
+                            desc = "",
+                            // roundToLong is not defined for Double.NaN
+                            value = if (op1.value.isFinite()) {
+                                op1.value.roundToLong().toDouble()
+                            } else {
+                                op1.value
+                            }
+                        )
+                    )
+                }
+                UnaryArgument.ROUND2 -> {
+                    calcData.numberList.add(
+                        CalcLine(
+                            desc = "",
+                            // roundToLong is not defined for Double.NaN
+                            value = if (op1.value.isFinite()) {
+                                op1.value.times(100.0).roundToLong().toDouble().div(100.0)
+                            } else {
+                                op1.value
+                            }
+                        )
+                    )
+                }
+                UnaryArgument.ROUND4 -> {
+                    calcData.numberList.add(
+                        CalcLine(
+                            desc = "",
+                            // roundToLong is not defined for Double.NaN
+                            value = if (op1.value.isFinite()) {
+                                op1.value.times(10000.0).roundToLong().toDouble().div(10000.0)
+                            } else {
+                                op1.value
+                            }
+                        )
+                    )
+                }
+                UnaryArgument.FRAC -> {
+                    val fraction = frac(op1.value)
+                    if (fraction.first != null) {
+                        calcData.numberList.add(
+                            CalcLine(
+                                desc = "",
+                                value = fraction.first!!.toDouble()
+                            )
+                        )
+                        calcData.numberList.add(
+                            CalcLine(
+                                desc = "",
+                                value = fraction.second.toDouble()
+                            )
+                        )
+                    } else {
+                        calcData.numberList.add(op1)
+                    }
+                }
+                UnaryArgument.TOSTR -> {
+                    // Convert the value to string.
+                    if (op1.value.isFinite()) {
+                        calcData.numberList.add(
+                            CalcLine(
+                                desc = numberFormat.format(op1.value),
+                                value = Double.NaN
+                            )
+                        )
+                    } else {
+                        calcData.numberList.add(op1)
+                    }
+                }
+                UnaryArgument.SIN -> {
+                    calcData.numberList.add(CalcLine(desc = "", value = sin(op1.value * radian)))
+                }
+                UnaryArgument.SINH -> {
+                    calcData.numberList.add(CalcLine(desc = "", value = sinh(op1.value)))
+                }
+                UnaryArgument.COS -> {
+                    calcData.numberList.add(CalcLine(desc = "", value = cos(op1.value * radian)))
+                }
+                UnaryArgument.COSH -> {
+                    calcData.numberList.add(CalcLine(desc = "", value = cosh(op1.value)))
+                }
+                UnaryArgument.TAN -> {
+                    calcData.numberList.add(CalcLine(desc = "", value = tan(op1.value * radian)))
+                }
+                UnaryArgument.TANH -> {
+                    calcData.numberList.add(CalcLine(desc = "", value = tanh(op1.value)))
+                }
+                UnaryArgument.ARCSIN -> {
+                    calcData.numberList.add(CalcLine(desc = "", value = asin(op1.value) / radian))
+                }
+                UnaryArgument.ARCSINH -> {
+                    calcData.numberList.add(CalcLine(desc = "", value = asinh(op1.value)))
+                }
+                UnaryArgument.ARCCOS -> {
+                    calcData.numberList.add(CalcLine(desc = "", value = acos(op1.value) / radian))
+                }
+                UnaryArgument.ARCCOSH -> {
+                    calcData.numberList.add(CalcLine(desc = "", value = acosh(op1.value)))
+                }
+                UnaryArgument.ARCTAN -> {
+                    calcData.numberList.add(CalcLine(desc = "", value = atan(op1.value) / radian))
+                }
+                UnaryArgument.ARCTANH -> {
+                    calcData.numberList.add(CalcLine(desc = "", value = atanh(op1.value)))
+                }
+                UnaryArgument.LN -> {
+                    calcData.numberList.add(CalcLine(desc = "", value = ln(op1.value)))
+                }
+                UnaryArgument.EX -> {
+                    calcData.numberList.add(CalcLine(desc = "", value = Math.E.pow(op1.value)))
+                }
+                UnaryArgument.LOG -> {
+                    calcData.numberList.add(CalcLine(desc = "", value = log10(op1.value)))
+                }
+                UnaryArgument.ZX -> {
+                    calcData.numberList.add(CalcLine(desc = "", value = 10.0.pow(op1.value)))
+                }
+            }
+        } else {
+            calcData.errorMsg = context.getString(R.string.calc_invalid_args)
         }
-        UnaryArgument.DUP -> {
-          calcData.numberList.add(op1)
-          calcData.numberList.add(op1)
-        }
-        UnaryArgument.SQRT -> {
-          calcData.numberList.add(CalcLine(desc = "", value = op1.value.pow(0.5)))
-        }
-        UnaryArgument.SQ -> {
-          calcData.numberList.add(CalcLine(desc = "", value = op1.value.pow(2)))
-        }
-        UnaryArgument.INV -> {
-          calcData.numberList.add(CalcLine(desc = "", value = 1 / op1.value))
-        }
-        UnaryArgument.ABS -> {
-          calcData.numberList.add(CalcLine(desc = "", value = op1.value.absoluteValue))
-        }
-        UnaryArgument.SIGN -> {
-          calcData.numberList.add(CalcLine(desc = "", value = -op1.value))
-        }
-        UnaryArgument.INT -> {
-          calcData.numberList.add(CalcLine(desc = "", value = op1.value.toInt().toDouble()))
-        }
-        UnaryArgument.ROUND -> {
-          calcData.numberList.add(
-            CalcLine(
-              desc = "",
-              // roundToLong is not defined for Double.NaN
-              value = if (op1.value.isFinite()) {
-                op1.value.roundToLong().toDouble()
-              } else {
-                op1.value
-              }
-            )
-          )
-        }
-        UnaryArgument.ROUND2 -> {
-          calcData.numberList.add(
-            CalcLine(
-              desc = "",
-              // roundToLong is not defined for Double.NaN
-              value = if (op1.value.isFinite()) {
-                op1.value.times(100.0).roundToLong().toDouble().div(100.0)
-              } else {
-                op1.value
-              }
-            )
-          )
-        }
-        UnaryArgument.ROUND4 -> {
-          calcData.numberList.add(
-            CalcLine(
-              desc = "",
-              // roundToLong is not defined for Double.NaN
-              value = if (op1.value.isFinite()) {
-                op1.value.times(10000.0).roundToLong().toDouble().div(10000.0)
-              } else {
-                op1.value
-              }
-            )
-          )
-        }
-        UnaryArgument.FRAC -> {
-          val fraction = frac(op1.value)
-          if (fraction.first != null) {
-            calcData.numberList.add(CalcLine(desc = "", value = fraction.first!!.toDouble()))
-            calcData.numberList.add(CalcLine(desc = "", value = fraction.second.toDouble()))
-          } else {
-            calcData.numberList.add(op1)
-          }
-        }
-        UnaryArgument.TOSTR -> {
-          // Convert the value to string.
-          if (op1.value.isFinite()) {
-            calcData.numberList.add(
-              CalcLine(
-                desc = numberFormat.format(op1.value),
-                value = Double.NaN
-              )
-            )
-          } else {
-            calcData.numberList.add(op1)
-          }
-        }
-        UnaryArgument.SIN -> {
-          calcData.numberList.add(CalcLine(desc = "", value = sin(op1.value * radian)))
-        }
-        UnaryArgument.SINH -> {
-          calcData.numberList.add(CalcLine(desc = "", value = sinh(op1.value)))
-        }
-        UnaryArgument.COS -> {
-          calcData.numberList.add(CalcLine(desc = "", value = cos(op1.value * radian)))
-        }
-        UnaryArgument.COSH -> {
-          calcData.numberList.add(CalcLine(desc = "", value = cosh(op1.value)))
-        }
-        UnaryArgument.TAN -> {
-          calcData.numberList.add(CalcLine(desc = "", value = tan(op1.value * radian)))
-        }
-        UnaryArgument.TANH -> {
-          calcData.numberList.add(CalcLine(desc = "", value = tanh(op1.value)))
-        }
-        UnaryArgument.ARCSIN -> {
-          calcData.numberList.add(CalcLine(desc = "", value = asin(op1.value) / radian))
-        }
-        UnaryArgument.ARCSINH -> {
-          calcData.numberList.add(CalcLine(desc = "", value = asinh(op1.value)))
-        }
-        UnaryArgument.ARCCOS -> {
-          calcData.numberList.add(CalcLine(desc = "", value = acos(op1.value) / radian))
-        }
-        UnaryArgument.ARCCOSH -> {
-          calcData.numberList.add(CalcLine(desc = "", value = acosh(op1.value)))
-        }
-        UnaryArgument.ARCTAN -> {
-          calcData.numberList.add(CalcLine(desc = "", value = atan(op1.value) / radian))
-        }
-        UnaryArgument.ARCTANH -> {
-          calcData.numberList.add(CalcLine(desc = "", value = atanh(op1.value)))
-        }
-        UnaryArgument.LN -> {
-          calcData.numberList.add(CalcLine(desc = "", value = ln(op1.value)))
-        }
-        UnaryArgument.EX -> {
-          calcData.numberList.add(CalcLine(desc = "", value = Math.E.pow(op1.value)))
-        }
-        UnaryArgument.LOG -> {
-          calcData.numberList.add(CalcLine(desc = "", value = log10(op1.value)))
-        }
-        UnaryArgument.ZX -> {
-          calcData.numberList.add(CalcLine(desc = "", value = 10.0.pow(op1.value)))
-        }
-      }
-    } else {
-      calcData.errorMsg = context.getString(R.string.calc_invalid_args)
+
+        calcRepository.updateData(calcData)
+
+        return argsValid
     }
 
-    calcRepository.updateData(calcData)
+    fun opBinary(op: BinaryArgument): Boolean {
+        val calcData = submitEditline(calcData.value!!)
+        return opBinary(calcData, op)
+    }
 
-    return argsValid
-  }
+    private fun opBinary(calcData: CalcData, op: BinaryArgument): Boolean {
 
-  fun opBinary(op: BinaryArgument): Boolean {
-    val calcData = submitEditline(calcData.value!!)
-    return opBinary(calcData, op)
-  }
-
-  private fun opBinary(calcData: CalcData, op: BinaryArgument): Boolean {
-
-    val argsValid = calcData.numberList.size > 1
-    if (argsValid) {
-      endEdit(calcData)
+        val argsValid = calcData.numberList.size > 1
+        if (argsValid) {
+            endEdit(calcData)
 
 //      // Validation
 //      val d = calcData.numberList.last()
@@ -1440,248 +1465,284 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
 //        return
 //      }
 
-      // 2: op2
-      // 1: op1
-      val op1 = calcData.numberList.removeLast()
-      val op2 = calcData.numberList.removeLast()
+            // 2: op2
+            // 1: op1
+            val op1 = calcData.numberList.removeLast()
+            val op2 = calcData.numberList.removeLast()
 
-      when (op) {
-        BinaryArgument.ADD -> {
-          if (op1.value.isNaN() && op2.value.isNaN()) {
-            // add comments if both NaN
-            calcData.numberList.add(CalcLine(desc = op2.desc + op1.desc, value = op2.value))
-          } else {
-            if (op1.value.isNaN() && op1.desc.isNotEmpty()) {
-              // set comment to op2 if exists, same as add comments if both NaN
-              calcData.numberList.add(CalcLine(desc = op2.desc + op1.desc, value = op2.value))
-            } else {
-              // default op, add two numbers
-              calcData.numberList.add(CalcLine(desc = "", value = op2.value + op1.value))
+            when (op) {
+                BinaryArgument.ADD -> {
+                    if (op1.value.isNaN() && op2.value.isNaN()) {
+                        // add comments if both NaN
+                        calcData.numberList.add(
+                            CalcLine(
+                                desc = op2.desc + op1.desc,
+                                value = op2.value
+                            )
+                        )
+                    } else {
+                        if (op1.value.isNaN() && op1.desc.isNotEmpty()) {
+                            // set comment to op2 if exists, same as add comments if both NaN
+                            calcData.numberList.add(
+                                CalcLine(
+                                    desc = op2.desc + op1.desc,
+                                    value = op2.value
+                                )
+                            )
+                        } else {
+                            // default op, add two numbers
+                            calcData.numberList.add(
+                                CalcLine(
+                                    desc = "",
+                                    value = op2.value + op1.value
+                                )
+                            )
+                        }
+                    }
+                }
+                BinaryArgument.SUB -> {
+                    calcData.numberList.add(CalcLine(desc = "", value = op2.value - op1.value))
+                }
+                BinaryArgument.MULT -> {
+                    calcData.numberList.add(CalcLine(desc = "", value = op2.value * op1.value))
+                }
+                BinaryArgument.DIV -> {
+                    calcData.numberList.add(CalcLine(desc = "", value = op2.value / op1.value))
+                }
+                BinaryArgument.POW -> {
+                    calcData.numberList.add(CalcLine(desc = "", value = op2.value.pow(op1.value)))
+                }
+                BinaryArgument.SWAP -> {
+                    calcData.numberList.add(op1)
+                    calcData.numberList.add(op2)
+                }
+                BinaryArgument.MOD -> {
+                    calcData.numberList.add(
+                        CalcLine(
+                            desc = "",
+                            value = op2.value.toLong().rem(op1.value.toLong()).toDouble()
+                        )
+                    )
+                }
+                BinaryArgument.OVER -> {
+                    calcData.numberList.add(op2)
+                    calcData.numberList.add(op1)
+                    // Clone element
+                    calcData.numberList.add(CalcLine(desc = op2.desc, value = op2.value))
+                }
+                // Percent
+                BinaryArgument.PER -> {
+                    calcData.numberList.add(
+                        CalcLine(
+                            desc = "% ",
+                            value = op2.value * op1.value / 100
+                        )
+                    )
+                }
+                // Percent change
+                BinaryArgument.PERC -> {
+                    calcData.numberList.add(
+                        CalcLine(
+                            desc = "∆% ",
+                            value = (op1.value - op2.value) / op2.value * 100
+                        )
+                    )
+                }
             }
-          }
+        } else {
+            calcData.errorMsg = context.getString(R.string.calc_invalid_args)
         }
-        BinaryArgument.SUB -> {
-          calcData.numberList.add(CalcLine(desc = "", value = op2.value - op1.value))
-        }
-        BinaryArgument.MULT -> {
-          calcData.numberList.add(CalcLine(desc = "", value = op2.value * op1.value))
-        }
-        BinaryArgument.DIV -> {
-          calcData.numberList.add(CalcLine(desc = "", value = op2.value / op1.value))
-        }
-        BinaryArgument.POW -> {
-          calcData.numberList.add(CalcLine(desc = "", value = op2.value.pow(op1.value)))
-        }
-        BinaryArgument.SWAP -> {
-          calcData.numberList.add(op1)
-          calcData.numberList.add(op2)
-        }
-        BinaryArgument.MOD -> {
-          calcData.numberList.add(
-            CalcLine(
-              desc = "",
-              value = op2.value.toLong().rem(op1.value.toLong()).toDouble()
-            )
-          )
-        }
-        BinaryArgument.OVER -> {
-          calcData.numberList.add(op2)
-          calcData.numberList.add(op1)
-          // Clone element
-          calcData.numberList.add(CalcLine(desc = op2.desc, value = op2.value))
-        }
-        // Percent
-        BinaryArgument.PER -> {
-          calcData.numberList.add(CalcLine(desc = "% ", value = op2.value * op1.value / 100))
-        }
-        // Percent change
-        BinaryArgument.PERC -> {
-          calcData.numberList.add(
-            CalcLine(
-              desc = "∆% ",
-              value = (op1.value - op2.value) / op2.value * 100
-            )
-          )
-        }
-      }
-    } else {
-      calcData.errorMsg = context.getString(R.string.calc_invalid_args)
+
+        calcRepository.updateData(calcData)
+
+        return argsValid
     }
 
-    calcRepository.updateData(calcData)
-
-    return argsValid
-  }
-
-  fun opTernary(op: TernaryArgument): Boolean {
-    val calcData = submitEditline(calcData.value!!)
-    return opTernary(calcData, op)
-  }
-
-  private fun opTernary(calcData: CalcData, op: TernaryArgument): Boolean {
-    val argsValid = calcData.numberList.size > 2
-
-    if (argsValid) {
-      endEdit(calcData)
-
-      // 3: op3
-      // 2: op2
-      // 1: op1
-      val op1 = calcData.numberList.removeLast()
-      val op2 = calcData.numberList.removeLast()
-      val op3 = calcData.numberList.removeLast()
-
-      when (op) {
-        TernaryArgument.ROT -> {
-          calcData.numberList.add(op2)
-          calcData.numberList.add(op1)
-          calcData.numberList.add(op3)
-        }
-        TernaryArgument.ZinsMonat -> {
-          val K = op3.value // Kapital
-          val P = op2.value // Jahreszins
-          val J = op1.value // Laufzeit in Jahren
-          val p = P / 12.0 / 100.0
-          val M = p * K / (1.0 - (1.0 + p).pow(-J * 12.0))
-          calcData.numberList.add(CalcLine(desc = "Monatsrate=", value = M))
-        }
-      }
-    } else {
-      calcData.errorMsg = context.getString(R.string.calc_invalid_args)
+    fun opTernary(op: TernaryArgument): Boolean {
+        val calcData = submitEditline(calcData.value!!)
+        return opTernary(calcData, op)
     }
 
-    calcRepository.updateData(calcData)
+    private fun opTernary(calcData: CalcData, op: TernaryArgument): Boolean {
+        val argsValid = calcData.numberList.size > 2
 
-    return argsValid
-  }
+        if (argsValid) {
+            endEdit(calcData)
 
-  fun opQuad(op: QuadArgument): Boolean {
-    val calcData = submitEditline(calcData.value!!)
-    return opQuad(calcData, op)
-  }
+            // 3: op3
+            // 2: op2
+            // 1: op1
+            val op1 = calcData.numberList.removeLast()
+            val op2 = calcData.numberList.removeLast()
+            val op3 = calcData.numberList.removeLast()
 
-  private fun opQuad(calcData: CalcData, op: QuadArgument): Boolean {
-    val argsValid = calcData.numberList.size > 3
-
-    if (argsValid) {
-      endEdit(calcData)
-
-      // 4: op4 else part
-      // 3: op3 then part
-      // 2: op2 conditional op
-      // 1: op1 conditional op
-      val op1 = calcData.numberList.removeLast()
-      val op2 = calcData.numberList.removeLast()
-      val op3 = calcData.numberList.removeLast()
-      val op4 = calcData.numberList.removeLast()
-
-      when (op) {
-        QuadArgument.IFEQ -> {
-          val opResult = if (op2.value == op1.value) op3 else op4
-          calcData.numberList.add(opResult)
+            when (op) {
+                TernaryArgument.ROT -> {
+                    calcData.numberList.add(op2)
+                    calcData.numberList.add(op1)
+                    calcData.numberList.add(op3)
+                }
+                TernaryArgument.ZinsMonat -> {
+                    val K = op3.value // Kapital
+                    val P = op2.value // Jahreszins
+                    val J = op1.value // Laufzeit in Jahren
+                    val p = P / 12.0 / 100.0
+                    val M = p * K / (1.0 - (1.0 + p).pow(-J * 12.0))
+                    calcData.numberList.add(CalcLine(desc = "Monatsrate=", value = M))
+                }
+            }
+        } else {
+            calcData.errorMsg = context.getString(R.string.calc_invalid_args)
         }
-        QuadArgument.IFGE -> {
-          val opResult = if (op2.value >= op1.value) op3 else op4
-          calcData.numberList.add(opResult)
-        }
-        QuadArgument.IFGT -> {
-          val opResult = if (op2.value > op1.value) op3 else op4
-          calcData.numberList.add(opResult)
-        }
-        QuadArgument.IFLE -> {
-          val opResult = if (op2.value <= op1.value) op3 else op4
-          calcData.numberList.add(opResult)
-        }
-        QuadArgument.IFLT -> {
-          val opResult = if (op2.value < op1.value) op3 else op4
-          calcData.numberList.add(opResult)
-        }
-      }
-    } else {
-      calcData.errorMsg = context.getString(R.string.calc_invalid_args)
+
+        calcRepository.updateData(calcData)
+
+        return argsValid
     }
 
-    calcRepository.updateData(calcData)
-
-    return argsValid
-  }
-
-  fun drop() {
-    val calcData = calcData.value!!
-
-    if (calcData.editMode) {
-      calcData.editline = calcData.editline.dropLast(1)
-    } else {
-      if (calcData.numberList.size > 0) {
-        calcData.numberList.removeLast()
-      }
+    fun opQuad(op: QuadArgument): Boolean {
+        val calcData = submitEditline(calcData.value!!)
+        return opQuad(calcData, op)
     }
 
-    calcData.errorMsg = ""
-    calcRepository.updateData(calcData)
-  }
+    private fun opQuad(calcData: CalcData, op: QuadArgument): Boolean {
+        val argsValid = calcData.numberList.size > 3
 
-  fun enter() {
-    val calcData1 = calcData.value!!
+        if (argsValid) {
+            endEdit(calcData)
 
-    val calcData = if (calcData1.editMode) {
-      submitEditline(calcData.value!!)
-    } else {
-      if (calcData1.numberList.size > 0) {
-        val op = calcData1.numberList.last()
-        calcData1.numberList.add(op)
-      }
-      calcData1
+            // 4: op4 else part
+            // 3: op3 then part
+            // 2: op2 conditional op
+            // 1: op1 conditional op
+            val op1 = calcData.numberList.removeLast()
+            val op2 = calcData.numberList.removeLast()
+            val op3 = calcData.numberList.removeLast()
+            val op4 = calcData.numberList.removeLast()
+
+            when (op) {
+                QuadArgument.IFEQ -> {
+                    val opResult = if (op2.value == op1.value) op3 else op4
+                    calcData.numberList.add(opResult)
+                }
+                QuadArgument.IFGE -> {
+                    val opResult = if (op2.value >= op1.value) op3 else op4
+                    calcData.numberList.add(opResult)
+                }
+                QuadArgument.IFGT -> {
+                    val opResult = if (op2.value > op1.value) op3 else op4
+                    calcData.numberList.add(opResult)
+                }
+                QuadArgument.IFLE -> {
+                    val opResult = if (op2.value <= op1.value) op3 else op4
+                    calcData.numberList.add(opResult)
+                }
+                QuadArgument.IFLT -> {
+                    val opResult = if (op2.value < op1.value) op3 else op4
+                    calcData.numberList.add(opResult)
+                }
+            }
+        } else {
+            calcData.errorMsg = context.getString(R.string.calc_invalid_args)
+        }
+
+        calcRepository.updateData(calcData)
+
+        return argsValid
     }
 
-    endEdit(calcData)
-    calcRepository.updateData(calcData)
-  }
+    fun drop() {
+        val calcData = calcData.value!!
 
-  fun submitEditline(calcData: CalcData, desc: String = ""): CalcData {
-    if (calcData.editMode) {
+        if (calcData.editMode) {
+            calcData.editline = calcData.editline.dropLast(1)
+        } else {
+            if (calcData.numberList.size > 0) {
+                calcData.numberList.removeLast()
+            }
+        }
 
-      try {
-        val value = numberFormat.parse(calcData.editline)!!
-          .toDouble()
+        calcData.errorMsg = ""
+        calcRepository.updateData(calcData)
+    }
+
+    fun enter(radix: Int) {
+        val calcData1 = calcData.value!!
+
+        val calcData = if (calcData1.editMode) {
+            submitEditline(calcData.value!!, "", radix)
+        } else {
+            if (calcData1.numberList.size > 0) {
+                val op = calcData1.numberList.last()
+                calcData1.numberList.add(op)
+            }
+            calcData1
+        }
 
         endEdit(calcData)
-        calcData.numberList.add(CalcLine(desc = desc, value = value))
-
-        return calcData
-      } catch (e: Exception) {
-      }
+        calcRepository.updateData(calcData)
     }
+
+    fun submitEditline(calcData: CalcData, desc: String = "", radix: Int = 0): CalcData {
+        if (calcData.editMode) {
+
+            try {
+                val value = when (radix) {
+                    2 -> {
+                        calcData.editline.toLong(radix = 2).toDouble()
+                    }
+                    8 -> {
+                        calcData.editline.toLong(radix = 8).toDouble()
+                    }
+                    10 -> {
+                        calcData.editline.toLong(radix = 10).toDouble()
+                    }
+                    16 -> {
+                        calcData.editline.toLong(radix = 16).toDouble()
+                    }
+                    else -> {
+                        numberFormat.parse(calcData.editline)!!
+                            .toDouble()
+                    }
+                }
+
+                endEdit(calcData)
+                calcData.numberList.add(CalcLine(desc = desc, value = value))
+
+                return calcData
+            } catch (e: Exception) {
+            }
+        }
 
 //    // Remove all descriptions.
 //    calcData.numberList.forEach { calcLine ->
 //      calcLine.desc = ""
 //    }
 
-    aic = 0
-    return calcData
-  }
+        aic = 0
+        return calcData
+    }
 
-  private fun endEdit(calcData: CalcData) {
-    calcData.editMode = false
-    calcData.editline = ""
-    calcData.errorMsg = ""
-  }
+    private fun endEdit(calcData: CalcData) {
+        calcData.editMode = false
+        calcData.editline = ""
+        calcData.errorMsg = ""
+    }
 
-  fun getLines(): Int {
-    return calcData.value!!.numberList.size
-  }
+    fun getLines(): Int {
+        return calcData.value!!.numberList.size
+    }
 
-  fun updateData() {
-    calcRepository.updateData()
-  }
+    fun updateData() {
+        calcRepository.updateData()
+    }
 
-  fun updateData(data: CalcData) {
+    fun updateData(data: CalcData) {
 
 //    data.numberList.removeIf { calcLine ->
 //      calcLine.desc.isEmpty() && calcLine.value.isNaN()
 //    }
 
-    calcRepository.updateData(data)
-  }
+        calcRepository.updateData(data)
+    }
 }

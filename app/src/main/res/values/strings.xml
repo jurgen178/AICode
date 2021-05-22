@@ -103,4 +103,5 @@ limitations under the License. -->
   <string name="version">Version</string>
   <string name="email_feedback_summary">Send an email directly to the developers.</string>
   <string name="email_feedback_title">Send email</string>
+  <string name="calc_binary_headline">AI Programming</string>
 </resources>

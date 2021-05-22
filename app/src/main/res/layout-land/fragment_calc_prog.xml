@@ -404,6 +404,14 @@
                 />
 
             <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guidelineTop4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.36"
+                />
+
+            <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/guidelineX1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -471,11 +479,20 @@
                 />
 
             <TextView
+                android:id="@+id/calc_indicator_radix"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/guidelineTop4"
+                app:layout_constraintStart_toEndOf="@id/guidelineTop3"
+                app:layout_constraintBottom_toTopOf="@id/guidelineIndicator"
+                style="@style/calc_indicator_style"
+                />
+
+            <TextView
                 android:id="@+id/calc_indicator_shift"
                 android:textStyle="bold"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/guidelineX0"
-                app:layout_constraintStart_toEndOf="@id/guidelineTop3"
+                app:layout_constraintStart_toEndOf="@id/guidelineTop4"
                 app:layout_constraintBottom_toTopOf="@id/guidelineIndicator"
                 style="@style/calc_indicator_style"
                 />

@@ -30,118 +30,126 @@ import java.util.Locale
 
 open class CalcBaseFragment(val stockSymbol: String) : Fragment() {
 
-  lateinit var calcViewModel: CalcViewModel
-  lateinit var calcAdapter: CalcAdapter
+    lateinit var calcViewModel: CalcViewModel
+    lateinit var calcAdapter: CalcAdapter
 
-  var radian = 1.0
-  var separatorChar = ','
-  var numberFormat: NumberFormat = NumberFormat.getNumberInstance()
+    var radian = 1.0
+    var radix: Int = 10
+    var binaryDisplay = false
+    var separatorChar = ','
+    var numberFormat: NumberFormat = NumberFormat.getNumberInstance()
 
-  fun touchHelper(
-    view: View,
-    event: MotionEvent,
-    colorDown: Int = Color.LTGRAY,
-    colorUp: Int = Color.DKGRAY
-  ) {
-    if (event.action == MotionEvent.ACTION_DOWN) {
-      setBackgroundColor(view, colorDown)
-    } else
-      if (event.action == MotionEvent.ACTION_UP || event.action == MotionEvent.ACTION_CANCEL) {
-        setBackgroundColor(view, colorUp)
-      }
-  }
-
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    setHasOptionsMenu(true)
-  }
-
-  open fun updateCalcAdapter() {
-  }
-
-  open fun updateStockListSpinner(symbol: String) {
-  }
-
-  override fun onViewCreated(
-    view: View,
-    savedInstanceState: Bundle?
-  ) {
-    super.onViewCreated(view, savedInstanceState)
-
-    calcAdapter = CalcAdapter(requireActivity())
-    calcViewModel = ViewModelProvider(requireActivity()).get(CalcViewModel::class.java)
-
-    // Update symbol
-    if (stockSymbol.isNotEmpty()) {
-      calcViewModel.symbol = stockSymbol
+    fun touchHelper(
+        view: View,
+        event: MotionEvent,
+        colorDown: Int = Color.LTGRAY,
+        colorUp: Int = Color.DKGRAY
+    ) {
+        if (event.action == MotionEvent.ACTION_DOWN) {
+            setBackgroundColor(view, colorDown)
+        } else
+            if (event.action == MotionEvent.ACTION_UP || event.action == MotionEvent.ACTION_CANCEL) {
+                setBackgroundColor(view, colorUp)
+            }
     }
 
-    calcViewModel.calcData.observe(viewLifecycleOwner, Observer { data ->
-      if (data != null) {
-
-        calcAdapter.updateData(data, numberFormat)
-
-        updateCalcAdapter()
-      }
-    })
-  }
-
-  override fun onResume() {
-    super.onResume()
-
-    val sharedPreferences =
-      PreferenceManager.getDefaultSharedPreferences(activity /* Activity context */)
-
-    when (sharedPreferences.getString("calc_format_decimal_separator", "0")) {
-      "0" -> {
-        separatorChar = DecimalFormatSymbols.getInstance().decimalSeparator
-        numberFormat = NumberFormat.getNumberInstance()
-      }
-      "1" -> {
-        separatorChar = '.'
-        numberFormat = NumberFormat.getInstance(Locale.ENGLISH)
-      }
-      else -> {
-        separatorChar = ','
-        numberFormat = NumberFormat.getInstance(Locale.GERMAN)
-      }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
     }
 
-    when (sharedPreferences.getString("calc_format_displayed_decimals", "1")) {
-      "0" -> {
-        numberFormat.minimumFractionDigits = 2
-        numberFormat.maximumFractionDigits = 2
-      }
-      "1" -> {
-        numberFormat.minimumFractionDigits = 2
-        numberFormat.maximumFractionDigits = 4
-      }
-      "2" -> {
-        numberFormat.minimumFractionDigits = 0
-        numberFormat.maximumFractionDigits = 8
-      }
-      else -> {
-        // https://developer.android.com/reference/java/text/DecimalFormat#setMaximumFractionDigits(int)
-        numberFormat.minimumFractionDigits = 0
-        numberFormat.maximumFractionDigits = 340
-      }
+    open fun updateCalcAdapter() {
     }
 
-    numberFormat.isGroupingUsed =
-      sharedPreferences.getBoolean("calc_format_display_group_separator", true)
-
-    radian = if (
-      sharedPreferences.getBoolean("calc_format_radian", true)) {
-      1.0
-    } else {
-      Math.PI / 180
+    open fun updateStockListSpinner(symbol: String) {
     }
 
-    calcViewModel.radian = radian
-    calcViewModel.separatorChar = separatorChar
-    calcViewModel.numberFormat = numberFormat
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
+        super.onViewCreated(view, savedInstanceState)
 
-    // Redraw the valued displayed in the adapter with the new number format.
-    calcViewModel.updateData()
-  }
+        calcAdapter = CalcAdapter(requireActivity())
+        calcViewModel = ViewModelProvider(requireActivity()).get(CalcViewModel::class.java)
+
+        // Update symbol
+        if (stockSymbol.isNotEmpty()) {
+            calcViewModel.symbol = stockSymbol
+        }
+
+        calcViewModel.calcData.observe(viewLifecycleOwner, Observer { data ->
+            if (data != null) {
+
+                calcAdapter.updateData(data, numberFormat, radix, binaryDisplay)
+
+                updateCalcAdapter()
+            }
+        })
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val sharedPreferences =
+            PreferenceManager.getDefaultSharedPreferences(activity /* Activity context */)
+
+        when (sharedPreferences.getString("calc_format_decimal_separator", "0")) {
+            "0" -> {
+                separatorChar = DecimalFormatSymbols.getInstance().decimalSeparator
+                numberFormat = NumberFormat.getNumberInstance()
+            }
+            "1" -> {
+                separatorChar = '.'
+                numberFormat = NumberFormat.getInstance(Locale.ENGLISH)
+            }
+            else -> {
+                separatorChar = ','
+                numberFormat = NumberFormat.getInstance(Locale.GERMAN)
+            }
+        }
+
+        when (sharedPreferences.getString("calc_format_displayed_decimals", "1")) {
+            "0" -> {
+                numberFormat.minimumFractionDigits = 2
+                numberFormat.maximumFractionDigits = 2
+            }
+            "1" -> {
+                numberFormat.minimumFractionDigits = 2
+                numberFormat.maximumFractionDigits = 4
+            }
+            "2" -> {
+                numberFormat.minimumFractionDigits = 0
+                numberFormat.maximumFractionDigits = 8
+            }
+            else -> {
+                // https://developer.android.com/reference/java/text/DecimalFormat#setMaximumFractionDigits(int)
+                numberFormat.minimumFractionDigits = 0
+                numberFormat.maximumFractionDigits = 340
+            }
+        }
+
+        numberFormat.isGroupingUsed =
+            sharedPreferences.getBoolean("calc_format_display_group_separator", true)
+
+        radian = if (
+            sharedPreferences.getBoolean("calc_format_radian", true)) {
+            1.0
+        } else {
+            Math.PI / 180
+        }
+
+        radix = sharedPreferences.getInt("calc_format_radix", 10)
+        if (radix != 2 && radix != 8 && radix != 10 && radix != 16) {
+            radix = 10
+        }
+
+        calcViewModel.radian = radian
+        calcViewModel.radix = radix
+        calcViewModel.separatorChar = separatorChar
+        calcViewModel.numberFormat = numberFormat
+
+        // Redraw the valued displayed in the adapter with the new number format.
+        calcViewModel.updateData()
+    }
 }

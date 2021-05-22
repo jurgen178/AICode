@@ -59,6 +59,10 @@ class MainActivity : AppCompatActivity() {
             val instance = CalcProgFragment.newInstance(symbol)
             instance
           }
+          2 -> {
+            val instance = CalcBinaryFragment.newInstance(symbol)
+            instance
+          }
           else -> {
             val instance = CalcFragment.newInstance(symbol)
             instance
@@ -67,7 +71,7 @@ class MainActivity : AppCompatActivity() {
       }
 
       override fun getItemCount(): Int {
-        return 2
+        return 3
       }
     }
 
@@ -77,6 +81,7 @@ class MainActivity : AppCompatActivity() {
       tab.text = when (position) {
         0 -> getString(R.string.calc_headline)
         1 -> getString(R.string.calc_prog_headline)
+        2 -> getString(R.string.calc_binary_headline)
         else -> ""
       }
     }.attach()
