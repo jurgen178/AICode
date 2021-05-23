@@ -19,11 +19,15 @@ package com.thecloudsite.aicode
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
+import android.text.SpannableStringBuilder
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.text.bold
+import androidx.core.text.scale
+import androidx.core.text.superscript
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.thecloudsite.aicode.databinding.FragmentCalcBinaryBinding
@@ -122,16 +126,35 @@ class CalcBinaryFragment(stockSymbol: String = "") : CalcBaseFragment(stockSymbo
         binding.calcBin.setOnClickListener { updateRadix(2) }
 
         binding.calcAND.setOnTouchListener { view, event -> touchHelper(view, event); false }
-        binding.calcAND.setOnClickListener { calcViewModel.opBinary(BinaryArgument.AND) }
+        binding.calcAND.setOnClickListener {
+            calcViewModel.opBinary(BinaryArgument.AND)
+//            if (calcViewModel.shiftLevelBinary == 0) {
+//                calcViewModel.opBinary(BinaryArgument.AND, radix)
+//            } else {
+//                calcViewModel.opBinary(BinaryArgument.AND, radix)
+//            }
+        }
         binding.calcOR.setOnTouchListener { view, event -> touchHelper(view, event); false }
-        binding.calcOR.setOnClickListener { calcViewModel.opBinary(BinaryArgument.OR) }
-        binding.calcXOR.setOnTouchListener { view, event -> touchHelper(view, event); false }
-        binding.calcXOR.setOnClickListener { calcViewModel.opBinary(BinaryArgument.XOR) }
+        binding.calcOR.setOnClickListener {
+            if (calcViewModel.shiftLevelBinary == 0) {
+                calcViewModel.opBinary(BinaryArgument.OR, radix)
+            } else {
+                calcViewModel.opBinary(BinaryArgument.XOR, radix)
+            }
+        }
         binding.calcNOT.setOnTouchListener { view, event -> touchHelper(view, event); false }
-        binding.calcNOT.setOnClickListener { calcViewModel.opUnary(UnaryArgument.NOT) }
+        binding.calcNOT.setOnClickListener {
+            if (calcViewModel.shiftLevelBinary == 0) {
+                calcViewModel.opUnary(UnaryArgument.NOT, radix)
+            } else {
+                calcViewModel.opUnary(UnaryArgument.COMPLEMENT, radix)
+            }
+        }
 
         binding.calcEnter.setOnTouchListener { view, event -> touchHelper(view, event); false }
         binding.calcEnter.setOnClickListener { calcViewModel.enter(radix) }
+        binding.calcDrop.setOnTouchListener { view, event -> touchHelper(view, event); false }
+        binding.calcDrop.setOnClickListener { calcViewModel.drop() }
 
         binding.calcA.setOnTouchListener { view, event -> touchHelper(view, event); false }
         binding.calcA.setOnClickListener { calcViewModel.addNum('a') }
@@ -168,13 +191,18 @@ class CalcBinaryFragment(stockSymbol: String = "") : CalcBaseFragment(stockSymbo
         binding.calc0.setOnClickListener { calcViewModel.addNum('0') }
 
         binding.calcDiv.setOnTouchListener { view, event -> touchHelper(view, event); false }
-        binding.calcDiv.setOnClickListener { calcViewModel.opBinary(BinaryArgument.DIV) }
+        binding.calcDiv.setOnClickListener { calcViewModel.opBinary(BinaryArgument.DIV, radix) }
         binding.calcMult.setOnTouchListener { view, event -> touchHelper(view, event); false }
-        binding.calcMult.setOnClickListener { calcViewModel.opBinary(BinaryArgument.MULT) }
+        binding.calcMult.setOnClickListener { calcViewModel.opBinary(BinaryArgument.MULT, radix) }
         binding.calcSub.setOnTouchListener { view, event -> touchHelper(view, event); false }
-        binding.calcSub.setOnClickListener { calcViewModel.opBinary(BinaryArgument.SUB) }
+        binding.calcSub.setOnClickListener { calcViewModel.opBinary(BinaryArgument.SUB, radix) }
         binding.calcAdd.setOnTouchListener { view, event -> touchHelper(view, event); false }
-        binding.calcAdd.setOnClickListener { calcViewModel.opBinary(BinaryArgument.ADD) }
+        binding.calcAdd.setOnClickListener { calcViewModel.opBinary(BinaryArgument.ADD, radix) }
+
+        binding.calcShift.setOnClickListener {
+            calcViewModel.shiftLevelBinary = (calcViewModel.shiftLevelBinary + 1).rem(2)
+            updateShift()
+        }
 
         updateShift()
     }
@@ -200,6 +228,47 @@ class CalcBinaryFragment(stockSymbol: String = "") : CalcBaseFragment(stockSymbo
         super.onResume()
 
         updateRadix(radix)
+        updateKeys()
+    }
+
+    private fun updateShift() {
+        when (calcViewModel.shiftLevelBinary) {
+            0 -> {
+                binding.calcShift.text = "↱"
+                binding.calcIndicatorShift.text = ""
+            }
+            1 -> {
+                binding.calcShift.text = "↱  ↱"
+                binding.calcIndicatorShift.text = "↱"
+            }
+        }
+
+        updateKeys()
+    }
+
+    private fun mapKey(key: String): String {
+        if (calcViewModel.shiftLevelBinary > 0) {
+
+            if (key == "or") {
+                return "xor"
+            }
+            if (key == "not") {
+                return "cmpl"
+            }
+        }
+        return key
+    }
+
+    private fun updateKeys() {
+
+        val textViewList = listOf(
+            Pair(binding.calcOR, mapKey("or")),
+            Pair(binding.calcNOT, mapKey("not")),
+        )
+
+        textViewList.forEach { pair ->
+            pair.first.text = pair.second
+        }
     }
 
     private fun setBackground(textView: TextView, color: Int) {
@@ -234,34 +303,5 @@ class CalcBinaryFragment(stockSymbol: String = "") : CalcBaseFragment(stockSymbo
 
         // Redraw the valued displayed in the adapter with the new number format.
         calcViewModel.updateData()
-    }
-
-    private fun updateShift() {
-        when (calcViewModel.shiftLevel) {
-            0 -> {
-                binding.calcShift.text = "↱"
-                binding.calcIndicatorShift.text = ""
-            }
-            1 -> {
-                binding.calcShift.text = "↱  ↱"
-                binding.calcIndicatorShift.text = "↱"
-            }
-            2 -> {
-                binding.calcShift.text = "↱  ↱↱"
-                binding.calcIndicatorShift.text = "↱↱"
-            }
-        }
-
-        if (calcViewModel.shiftLevel == 0) {
-//      // set 10^x
-//      binding.calcZx.text = SpannableStringBuilder()
-//        .append("10")
-//        .superscript { superscript { scale(0.7f) { bold { append("x") } } } }
-//    } else {
-//      // set e^x
-//      binding.calcZx.text = SpannableStringBuilder()
-//        .append("e")
-//        .superscript { superscript { scale(0.65f) { bold { append("x") } } } }
-        }
     }
 }

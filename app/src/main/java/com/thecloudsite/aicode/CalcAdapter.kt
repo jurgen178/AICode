@@ -98,7 +98,7 @@ class CalcAdapter internal constructor(
                             line.append(SpannableStringBuilder().color(Color.BLACK) {
                                 append(
                                     if (binaryDisplay) {
-                                        current.value.toLong().toString(radix)
+                                        getDisplayString(current.value.toLong(), radix)
                                     } else {
                                         numberFormat.format(current.value)
                                     }

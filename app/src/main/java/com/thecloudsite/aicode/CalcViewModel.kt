@@ -22,26 +22,10 @@ import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import java.text.NumberFormat
-import java.util.Locale
-import java.util.Stack
-import kotlin.math.absoluteValue
-import kotlin.math.acos
-import kotlin.math.acosh
-import kotlin.math.asin
-import kotlin.math.asinh
-import kotlin.math.atan
-import kotlin.math.atanh
-import kotlin.math.cos
-import kotlin.math.cosh
-import kotlin.math.ln
-import kotlin.math.log10
-import kotlin.math.pow
-import kotlin.math.roundToLong
-import kotlin.math.sin
-import kotlin.math.sinh
-import kotlin.math.tan
-import kotlin.math.tanh
+import java.util.*
+import kotlin.math.*
 import kotlin.text.RegexOption.IGNORE_CASE
+
 
 enum class VariableArguments {
     PICK,
@@ -89,6 +73,7 @@ enum class UnaryArgument {
     LOG,
     ZX,
     NOT,
+    COMPLEMENT,
 }
 
 enum class BinaryArgument {
@@ -149,6 +134,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
     private val varMap: MutableMap<String, CalcLine> = mutableMapOf()
     var symbol: String = ""
     var shiftLevel: Int = 0
+    var shiftLevelBinary: Int = 0
     var calcData: LiveData<CalcData> = calcRepository.calcLiveData
     var radian = 1.0
     var separatorChar = ','
@@ -817,6 +803,9 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 "not" -> {
                     validArgs = opUnary(calcData, UnaryArgument.NOT)
                 }
+                "complement" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.COMPLEMENT)
+                }
 
                 // Stack operations
                 "clear" -> {
@@ -1258,8 +1247,8 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
         return argsValid
     }
 
-    fun opZero(op: ZeroArgument) {
-        val calcData = submitEditline(calcData.value!!)
+    fun opZero(op: ZeroArgument, radix: Int = 0) {
+        val calcData = submitEditline(calcData.value!!, radix)
         opZero(calcData, op)
     }
 
@@ -1285,8 +1274,8 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
         calcRepository.updateData(calcData)
     }
 
-    fun opUnary(op: UnaryArgument): Boolean {
-        val calcData = submitEditline(calcData.value!!)
+    fun opUnary(op: UnaryArgument, radix: Int = 0): Boolean {
+        val calcData = submitEditline(calcData.value!!, radix)
         return opUnary(calcData, op)
     }
 
@@ -1457,6 +1446,24 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     calcData.numberList.add(CalcLine(desc = "", value = 10.0.pow(op1.value)))
                 }
                 UnaryArgument.NOT -> {
+                    //val numberOfBits = (ln(op1.value) / ln(2.0)).toInt() + 1
+                    var value = op1.value.toLong()
+
+                    val blockSize = getBlockSize(value)
+
+                    // Invert the bits
+                    for (i in 0 until blockSize) {
+                        value = value xor ((1 shl i).toLong())
+                    }
+
+                    calcData.numberList.add(
+                        CalcLine(
+                            desc = "",
+                            value = value.toDouble()
+                        )
+                    )
+                }
+                UnaryArgument.COMPLEMENT -> {
                     calcData.numberList.add(
                         CalcLine(
                             desc = "",
@@ -1474,8 +1481,8 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
         return argsValid
     }
 
-    fun opBinary(op: BinaryArgument): Boolean {
-        val calcData = submitEditline(calcData.value!!)
+    fun opBinary(op: BinaryArgument, radix: Int = 0): Boolean {
+        val calcData = submitEditline(calcData.value!!, radix)
         return opBinary(calcData, op)
     }
 
@@ -1608,8 +1615,8 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
         return argsValid
     }
 
-    fun opTernary(op: TernaryArgument): Boolean {
-        val calcData = submitEditline(calcData.value!!)
+    fun opTernary(op: TernaryArgument, radix: Int = 0): Boolean {
+        val calcData = submitEditline(calcData.value!!, radix)
         return opTernary(calcData, op)
     }
 
@@ -1650,8 +1657,8 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
         return argsValid
     }
 
-    fun opQuad(op: QuadArgument): Boolean {
-        val calcData = submitEditline(calcData.value!!)
+    fun opQuad(op: QuadArgument, radix: Int = 0): Boolean {
+        val calcData = submitEditline(calcData.value!!, radix)
         return opQuad(calcData, op)
     }
 
@@ -1720,7 +1727,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
         val calcData1 = calcData.value!!
 
         val calcData = if (calcData1.editMode) {
-            submitEditline(calcData.value!!, "", radix)
+            submitEditline(calcData.value!!, radix)
         } else {
             if (calcData1.numberList.size > 0) {
                 val op = calcData1.numberList.last()
@@ -1733,7 +1740,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
         calcRepository.updateData(calcData)
     }
 
-    fun submitEditline(calcData: CalcData, desc: String = "", radix: Int = 0): CalcData {
+    fun submitEditline(calcData: CalcData, radix: Int = 0, desc: String = ""): CalcData {
         if (calcData.editMode) {
 
             try {

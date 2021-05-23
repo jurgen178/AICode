@@ -25,31 +25,50 @@ import kotlin.math.sqrt
 @RunWith(AndroidJUnit4::class)
 class CalcTest {
 
-  @Test
-  @Throws(Exception::class)
-  fun fracTest() {
+    @Test
+    @Throws(Exception::class)
+    fun fracTest() {
 
-    assertEquals(Pair(5, 19), frac(5.0 / 19.0))
-    assertEquals(Pair(104348, 33215), frac(3.14159265359))
-    assertEquals(Pair(37, 61), frac(0.606557377049))
-    assertEquals(Pair(2, 1), frac(2.0))
-    assertEquals(Pair(1, 3), frac(0.33333333))
+        assertEquals(Pair(5, 19), frac(5.0 / 19.0))
+        assertEquals(Pair(104348, 33215), frac(3.14159265359))
+        assertEquals(Pair(37, 61), frac(0.606557377049))
+        assertEquals(Pair(2, 1), frac(2.0))
+        assertEquals(Pair(1, 3), frac(0.33333333))
 
-    assertEquals(Pair(0, 1), frac(0.0))
+        assertEquals(Pair(0, 1), frac(0.0))
 
-    assertEquals(Pair(-2, 1), frac(-2.0))
-    assertEquals(Pair(-5, 19), frac(-5.0 / 19.0))
-    assertEquals(Pair(-104348, 33215), frac(-3.14159265359))
-    assertEquals(Pair(-37, 61), frac(-0.606557377049))
-    assertEquals(Pair(-1, 3), frac(-0.33333333))
+        assertEquals(Pair(-2, 1), frac(-2.0))
+        assertEquals(Pair(-5, 19), frac(-5.0 / 19.0))
+        assertEquals(Pair(-104348, 33215), frac(-3.14159265359))
+        assertEquals(Pair(-37, 61), frac(-0.606557377049))
+        assertEquals(Pair(-1, 3), frac(-0.33333333))
 
-    // null result
+        // null result
 
-    // infinity
-    assertEquals(Pair(null, 1), frac(1 / 0.0))
-    // NaN
-    assertEquals(Pair(null, 1), frac(sqrt(-1.0)))
-    // large number
-    assertEquals(Pair(null, 1), frac(100000000000000.0))
-  }
+        // infinity
+        assertEquals(Pair(null, 1), frac(1 / 0.0))
+        // NaN
+        assertEquals(Pair(null, 1), frac(sqrt(-1.0)))
+        // large number
+        assertEquals(Pair(null, 1), frac(100000000000000.0))
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun bitTest() {
+
+        assertEquals(16, getBlockSize(32767))
+        assertEquals(16, getBlockSize(-32767))
+
+        assertEquals(16, getBlockSize(32768))
+        assertEquals(16, getBlockSize(-32768))
+
+        assertEquals(16, getBlockSize(65535))
+        assertEquals(32, getBlockSize(-65535))
+
+        assertEquals(32, getBlockSize(65536))
+        assertEquals(32, getBlockSize(-65536))
+
+    }
+
 }
