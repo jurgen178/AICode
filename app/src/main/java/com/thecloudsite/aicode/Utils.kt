@@ -129,11 +129,14 @@ fun frac(x: Double): Pair<Int?, Int> {
 
 fun getBits(value: Long): Int {
     var numberOfBits = 0
+
     var x = if (value < 0L) {
-        -(value - 1)
+        numberOfBits++
+        -(value + 1)
     } else {
         value
     }
+
     while (x != 0L) {
         numberOfBits++
         x = x ushr 1

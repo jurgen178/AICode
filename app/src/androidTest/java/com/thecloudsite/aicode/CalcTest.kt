@@ -57,6 +57,11 @@ class CalcTest {
     @Throws(Exception::class)
     fun bitTest() {
 
+        assertEquals(8, getBlockSize(248))
+        assertEquals(8, getBlockSize(127))
+        assertEquals(8, getBlockSize(-128))
+        assertEquals(16, getBlockSize(-248))
+
         assertEquals(16, getBlockSize(32767))
         assertEquals(16, getBlockSize(-32767))
 
