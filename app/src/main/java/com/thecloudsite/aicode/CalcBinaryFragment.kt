@@ -19,15 +19,11 @@ package com.thecloudsite.aicode
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
-import android.text.SpannableStringBuilder
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.core.text.bold
-import androidx.core.text.scale
-import androidx.core.text.superscript
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.thecloudsite.aicode.databinding.FragmentCalcBinaryBinding
