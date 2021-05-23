@@ -165,6 +165,17 @@ fun getBlockSize(value: Long): Int {
     }
 }
 
+fun invertBits(value: Long, blockSize: Int):Long
+{
+    var valueInverted = value
+
+    for (i in 0 until blockSize) {
+        valueInverted = valueInverted xor ((1 shl i).toLong())
+    }
+
+    return valueInverted
+}
+
 fun getDisplayString(value: Long, radix: Int): String {
 
     if (radix != 2) {

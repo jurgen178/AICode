@@ -76,4 +76,30 @@ class CalcTest {
 
     }
 
+    @Test
+    @Throws(Exception::class)
+    fun displayStringTest() {
+
+        val valueA = 1L
+        val s1 = getDisplayString(valueA, 2)
+        assertEquals("00000001", s1)
+
+        val blockSizeA = getBlockSize(valueA)
+        val valueInvertedA = invertBits(valueA, blockSizeA)
+
+        val s2 = getDisplayString(valueInvertedA, 2)
+        assertEquals("11111110", s2)
+
+        val valueB = 3735928559L
+        val s3 = getDisplayString(valueB, 2)
+        assertEquals("11011110101011011011111011101111", s1)
+
+        val blockSizeB = getBlockSize(valueB)
+        val valueInvertedB = invertBits(valueB, blockSizeB)
+
+        val s4 = getDisplayString(valueInvertedB, 2)
+        assertEquals("1111111111111111111111111111111100100001010100100100000100010000", s4)
+
+    }
+
 }

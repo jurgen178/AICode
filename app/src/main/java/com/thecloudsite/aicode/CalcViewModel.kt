@@ -1447,19 +1447,17 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 UnaryArgument.NOT -> {
                     //val numberOfBits = (ln(op1.value) / ln(2.0)).toInt() + 1
-                    var value = op1.value.toLong()
+                    val value = op1.value.toLong()
 
                     val blockSize = getBlockSize(value)
 
                     // Invert the bits
-                    for (i in 0 until blockSize) {
-                        value = value xor ((1 shl i).toLong())
-                    }
+                    val valueInverted = invertBits(value, blockSize)
 
                     calcData.numberList.add(
                         CalcLine(
                             desc = "",
-                            value = value.toDouble()
+                            value = valueInverted.toDouble()
                         )
                     )
                 }
