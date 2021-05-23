@@ -102,4 +102,20 @@ class CalcTest {
 
     }
 
+    @Test
+    @Throws(Exception::class)
+    fun binaryNotTest() {
+
+        val valueA = -2882390955L
+        val blockSizeA = getBlockSize(valueA)
+        val s1 = getDisplayString(valueA, 2)
+        assertEquals("1111111111111111111111111111111101010100001100100011010001010101", s1)
+
+        val valueInvertedA = invertBits(valueA, blockSizeA)
+
+        val s2 = getDisplayString(valueInvertedA, 2)
+        assertEquals("10101011110011011100101110101010", s2)
+
+    }
+
 }

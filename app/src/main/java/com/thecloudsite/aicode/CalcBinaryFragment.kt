@@ -189,6 +189,8 @@ class CalcBinaryFragment(stockSymbol: String = "") : CalcBaseFragment(stockSymbo
         binding.calc9.setOnClickListener { calcViewModel.addNum('9') }
         binding.calc0.setOnTouchListener { view, event -> touchHelper(view, event); false }
         binding.calc0.setOnClickListener { calcViewModel.addNum('0') }
+        binding.calcSign.setOnTouchListener { view, event -> touchHelper(view, event); false }
+        binding.calcSign.setOnClickListener { calcViewModel.opUnary(UnaryArgument.SIGN) }
 
         binding.calcDiv.setOnTouchListener { view, event -> touchHelper(view, event); false }
         binding.calcDiv.setOnClickListener { calcViewModel.opBinary(BinaryArgument.DIV, radix) }
