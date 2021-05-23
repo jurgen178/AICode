@@ -281,6 +281,10 @@ class CalcBinaryFragment(stockSymbol: String = "") : CalcBaseFragment(stockSymbo
     }
 
     private fun updateRadix(base: Int) {
+
+        // run submitEditline on not submitted data using the current radix
+        calcViewModel.updateData(radix)
+
         radix = base
 
         val defaultColor = 0xff444444.toInt()
@@ -304,6 +308,6 @@ class CalcBinaryFragment(stockSymbol: String = "") : CalcBaseFragment(stockSymbo
         binding.calcIndicatorRadix.text = radix.toString()
 
         // Redraw the valued displayed in the adapter with the new number format.
-        calcViewModel.updateData()
+        calcViewModel.updateData(radix)
     }
 }

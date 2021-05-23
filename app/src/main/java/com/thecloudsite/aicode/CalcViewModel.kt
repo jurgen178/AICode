@@ -1788,8 +1788,13 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
         return calcData.value!!.numberList.size
     }
 
-    fun updateData() {
-        calcRepository.updateData()
+    fun updateData(radix: Int = 0) {
+        if (calcData.value != null) {
+            val calcData = submitEditline(calcData.value!!, radix)
+            calcRepository.updateData(calcData)
+        } else {
+            calcRepository.updateData()
+        }
     }
 
     fun updateData(data: CalcData) {
