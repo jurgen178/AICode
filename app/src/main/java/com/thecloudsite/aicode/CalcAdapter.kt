@@ -97,11 +97,22 @@ class CalcAdapter internal constructor(
                         if (!(current.desc.isNotEmpty() && current.value.isNaN())) {
                             line.append(SpannableStringBuilder().color(Color.BLACK) {
                                 append(
-                                    if (binaryDisplay) {
-                                        getDisplayString(current.value.toLong(), radix)
-                                    } else {
-                                        numberFormat.format(current.value)
-                                    }
+                                    if (current.vector != null) {
+                                        current.vector!!.joinToString(
+                                            prefix = "[",
+                                            separator = " ",
+                                            postfix = "]",
+                                        ) {
+                                            numberFormat.format(
+                                                it
+                                            )
+                                        }
+                                    } else
+                                        if (binaryDisplay) {
+                                            getDisplayString(current.value.toLong(), radix)
+                                        } else {
+                                            numberFormat.format(current.value)
+                                        }
                                 )
                             })
                         }
