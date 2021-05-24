@@ -93,22 +93,24 @@ class CalcAdapter internal constructor(
                                     )
                                 }
                             }
+
                         // No value displayed for Double.NaN if desc is used.
-                        if (!(current.desc.isNotEmpty() && current.value.isNaN())) {
+                        if (!(current.desc.isNotEmpty() && current.value.isNaN() && current.vector == null && current.matrix == null)) {
                             line.append(SpannableStringBuilder().color(Color.BLACK) {
                                 append(
-                                    if (current.vector != null) {
-                                        current.vector!!.joinToString(
-                                            prefix = "[",
-                                            separator = " ",
-                                            postfix = "]",
-                                        ) {
-                                            numberFormat.format(
-                                                it
-                                            )
+                                    when {
+                                        current.vector != null -> {
+                                            current.vector!!.joinToString(
+                                                prefix = "[",
+                                                separator = " ",
+                                                postfix = "]",
+                                            ) {
+                                                numberFormat.format(
+                                                    it
+                                                )
+                                            }
                                         }
-                                    } else
-                                        if (current.matrix != null) {
+                                        current.matrix != null -> {
                                             // [ [ 1 2 3 ]
                                             //   [ 4 5 6 ]
                                             //   [ 7 8 9 ] ]
@@ -128,12 +130,16 @@ class CalcAdapter internal constructor(
                                                 separator = "  \n",
                                                 postfix = " ]",
                                             )
-                                        } else
-                                            if (binaryDisplay) {
-                                                getDisplayString(current.value.toLong(), radix)
-                                            } else {
-                                                numberFormat.format(current.value)
-                                            }
+                                        }
+
+                                        binaryDisplay -> {
+                                            getDisplayString(current.value.toLong(), radix)
+                                        }
+
+                                        else -> {
+                                            numberFormat.format(current.value)
+                                        }
+                                    }
                                 )
                             })
                         }
