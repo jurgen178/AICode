@@ -31,32 +31,86 @@ data class CalcLine
 
     ) {
     operator fun plus(op: CalcLine): CalcLine {
-        return when {
+        val result = CalcLine()
 
+        when {
+            // [Matrix] + [Matrix]
+            matrix != null && op.matrix != null -> {
+                val rowsA = matrix!!.size
+                val rowsB = op.matrix!!.size
+
+                if (rowsA > 0 && rowsB > 0) {
+                    val colsA = matrix!![0].size
+                    val colsB = op.matrix!![0].size
+
+                    if (rowsA == colsA && rowsB == colsB) {
+                        result.matrix =
+                            Array(rowsA) { r -> DoubleArray(colsB) { 0.0 } }
+
+                        for (row in 0 until rowsA) {
+                            for (col in 0 until colsB) {
+                                result.matrix!![row][col] += matrix!![row][col] + op.matrix!![row][col]
+                            }
+                        }
+                    }
+                }
+            }
+
+            // [Vector] + [Vector]
+            vector != null && op.vector != null -> {
+                result.value = 0.0
+
+                if (vector!!.size == op.vector!!.size) {
+                    vector!!.forEachIndexed { index, a ->
+                        result.value += a + op.vector!![index]
+                    }
+                }
+            }
+
+            // double + [Vector]
+            value.isFinite() && op.vector != null -> {
+                result.vector = DoubleArray(op.vector!!.size) { 0.0 }
+
+                op.vector!!.forEachIndexed { index, a ->
+                    result.vector!![index] = a + value
+                }
+            }
+
+            // double + [Matrix]
+            value.isFinite() && op.matrix != null -> {
+                val rows = op.matrix!!.size
+
+                if (rows > 0) {
+                    val cols = op.matrix!![0].size
+                    result.matrix =
+                        Array(op.matrix!!.size) { r -> DoubleArray(cols) { 0.0 } }
+
+                    op.matrix?.forEachIndexed { row, doubles ->
+                        doubles.forEachIndexed { col, a ->
+                            result.matrix!![row][col] = a + value
+                        }
+                    }
+                }
+            }
+
+            // add comments if both NaN
             op.value.isNaN() && value.isNaN() -> {
-                // add comments if both NaN
-                CalcLine(
-                    desc = desc + op.desc,
-                    value = value
-                )
+                result.desc = desc + op.desc
+                result.value = value
             }
 
+            // set comment to op2 if exists, same as add comments if both NaN
             op.value.isNaN() && op.desc.isNotEmpty() -> {
-                // set comment to op2 if exists, same as add comments if both NaN
-                CalcLine(
-                    desc = desc + op.desc,
-                    value = value
-                )
+                result.desc = desc + op.desc
+                result.value = value
             }
-
+            // default op, add two numbers
             else -> {
-                // default op, add two numbers
-                CalcLine(
-                    desc = "",
-                    value = value + op.value
-                )
+                result.value = value * op.value
             }
         }
+
+        return result
     }
 
     operator fun times(op: CalcLine): CalcLine {
@@ -102,12 +156,23 @@ data class CalcLine
                 }
             }
 
+            // [Vector] * [Vector]
+            vector != null && op.vector != null -> {
+                result.value = 0.0
+
+                if (vector!!.size == op.vector!!.size) {
+                    vector!!.forEachIndexed { index, a ->
+                        result.value += a * op.vector!![index]
+                    }
+                }
+            }
+
             // double * [Vector]
             value.isFinite() && op.vector != null -> {
                 result.vector = DoubleArray(op.vector!!.size) { 0.0 }
 
                 op.vector!!.forEachIndexed { index, a ->
-                    result.vector!![index] = op.vector!![index] * value
+                    result.vector!![index] = a * value
                 }
             }
 
@@ -121,8 +186,8 @@ data class CalcLine
                         Array(op.matrix!!.size) { r -> DoubleArray(cols) { 0.0 } }
 
                     op.matrix?.forEachIndexed { row, doubles ->
-                        doubles.forEachIndexed { col, value ->
-                            result.matrix!![row][col] = op.matrix!![row][col] * value
+                        doubles.forEachIndexed { col, a ->
+                            result.matrix!![row][col] = a * value
                         }
                     }
                 }
@@ -135,6 +200,7 @@ data class CalcLine
 
         return result
     }
+
 }
 
 data class CalcData
