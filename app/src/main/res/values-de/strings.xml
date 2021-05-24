@@ -102,4 +102,5 @@ limitations under the License. -->
   <string name="email_feedback_summary">Eine E-Mail direkt an die Entwickler.</string>
   <string name="email_feedback_title">E-Mail senden</string>
   <string name="calc_binary_headline">AI Programming</string>
+  <string name="calc_error_missing_closing_vector_bracket">Fehlende schließende \']\' für Vektor.</string>
 </resources>

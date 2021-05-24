@@ -118,4 +118,119 @@ class CalcTest {
 
     }
 
+    data class CalcLine
+        (
+        var desc: String = "",
+        var value: Double = 0.0,
+        var lambda: Int = -1,
+        var definition: String = "",
+        var vector: DoubleArray? = null,
+        var matrix: Array<DoubleArray>? = null,
+
+        ) {
+        operator fun plus(op: CalcLine): CalcLine {
+            val result = CalcLine()
+
+            return if (op.value.isNaN() && value.isNaN()) {
+                // add comments if both NaN
+                CalcLine(
+                    desc = desc + op.desc,
+                    value = value
+                )
+            } else {
+                if (op.value.isNaN() && op.desc.isNotEmpty()) {
+                    // set comment to op2 if exists, same as add comments if both NaN
+                    CalcLine(
+                        desc = desc + op.desc,
+                        value = value
+                    )
+                } else {
+                    // default op, add two numbers
+                    CalcLine(
+                        desc = "",
+                        value = value + op.value
+                    )
+                }
+            }
+
+            return result
+        }
+
+        operator fun times(op: CalcLine): CalcLine {
+            val result = CalcLine()
+
+            if (matrix != null && op.vector != null) {
+                val rows = matrix!!.size
+
+                if (rows > 0 && matrix!![0].size == op.vector!!.size) {
+                    result.vector = DoubleArray(rows) { 0.0 }
+
+                    matrix?.forEachIndexed { row, doubles ->
+                        doubles.forEachIndexed { col, value ->
+                            result.vector!![row] += op.vector!![col] * value
+                        }
+                    }
+                }
+            } else {
+                return CalcLine(
+                    desc = "",
+                    value = value * op.value
+                )
+            }
+
+            return result
+        }
+    }
+
+
+    @Test
+    @Throws(Exception::class)
+    fun matrixTest() {
+
+        val rows = 2
+        val cols = 3
+
+        val matrix: Array<DoubleArray>
+        matrix = Array(rows) { r -> DoubleArray(cols) { c -> (r * cols + c).toDouble() } }
+
+        val vector: DoubleArray
+        vector = DoubleArray(cols) { c -> c.toDouble() }
+
+        val vectorResult: DoubleArray
+        vectorResult = DoubleArray(rows) { 0.0 }
+
+        matrix.forEachIndexed { row, doubles ->
+            doubles.forEachIndexed { col, value ->
+                vectorResult[row] += vector[col] * value
+            }
+        }
+
+        vectorResult.forEachIndexed { index, d ->
+            val result = d
+        }
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun matrixTest2() {
+
+        val rows = 2
+        val cols = 3
+
+        val c1 = CalcLine()
+        c1.matrix = Array(rows) { r -> DoubleArray(cols) { c -> (r * cols + c).toDouble() } }
+
+        val c2 = CalcLine()
+        c2.vector = DoubleArray(cols) { c -> c.toDouble() }
+
+        var c3 = CalcLine()
+        c3.vector = DoubleArray(rows) { 0.0 }
+
+        c3 = c1 * c2
+
+        c3.vector!!.forEachIndexed { index, d ->
+            val result = d
+        }
+    }
+
 }

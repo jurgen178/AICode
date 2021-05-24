@@ -674,6 +674,54 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
 
+            // Vector/Matrix
+            if (word == "[") {
+                loopCounter++
+
+                val doubleList: MutableList<Double> = mutableListOf()
+                while (i < words.size) {
+                    val nextWord = words[i++]
+                    if (nextWord == "]") {
+                        calcData.numberList.add(
+                            CalcLine(
+                                value = Double.NaN,
+                                vector = DoubleArray(doubleList.size) { v -> doubleList[v] }
+                            )
+                        )
+
+                        break
+                    }
+
+                    if (nextWord.isNotEmpty()) {
+                        try {
+                            val value = numberFormat.parse(nextWord)!!
+                                .toDouble()
+
+                            doubleList.add(value)
+                        } catch (e: Exception) {
+                            // Error
+                            calcData.errorMsg =
+                                context.getString(R.string.calc_error_parsing_msg, nextWord)
+                            calcRepository.updateData(calcData)
+
+                            // invalid number missing
+                            return
+                        }
+                    }
+                }
+
+                if (i == words.size && words[i - 1] != "]") {
+                    calcData.errorMsg =
+                        context.getString(R.string.calc_error_missing_closing_vector_bracket)
+                    calcRepository.updateData(calcData)
+
+                    // invalid number missing
+                    return
+                }
+
+                continue
+            }
+
             // skip definition declarations :..;
             if (word == ":") {
                 loopCounter++
@@ -745,10 +793,10 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     validArgs = opUnary(calcData, UnaryArgument.LOG)
                 }
                 "sq" -> {
-                    success = opUnary(calcData, UnaryArgument.SQ)
+                    validArgs = opUnary(calcData, UnaryArgument.SQ)
                 }
                 "sqrt" -> {
-                    success = opUnary(calcData, UnaryArgument.SQRT)
+                    validArgs = opUnary(calcData, UnaryArgument.SQRT)
                 }
                 "inv" -> {
                     validArgs = opUnary(calcData, UnaryArgument.INV)
@@ -1496,77 +1544,79 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
 //        return
 //      }
 
-            // 2: op2
-            // 1: op1
-            val op1 = calcData.numberList.removeLast()
+            // 2: op1
+            // 1: op2
             val op2 = calcData.numberList.removeLast()
+            val op1 = calcData.numberList.removeLast()
 
             when (op) {
                 BinaryArgument.ADD -> {
-                    if (op1.value.isNaN() && op2.value.isNaN()) {
-                        // add comments if both NaN
-                        calcData.numberList.add(
-                            CalcLine(
-                                desc = op2.desc + op1.desc,
-                                value = op2.value
-                            )
-                        )
-                    } else {
-                        if (op1.value.isNaN() && op1.desc.isNotEmpty()) {
-                            // set comment to op2 if exists, same as add comments if both NaN
-                            calcData.numberList.add(
-                                CalcLine(
-                                    desc = op2.desc + op1.desc,
-                                    value = op2.value
-                                )
-                            )
-                        } else {
-                            // default op, add two numbers
-                            calcData.numberList.add(
-                                CalcLine(
-                                    desc = "",
-                                    value = op2.value + op1.value
-                                )
-                            )
-                        }
-                    }
+                    calcData.numberList.add(op1 + op2)
+
+//                    if (op1.value.isNaN() && op2.value.isNaN()) {
+//                        // add comments if both NaN
+//                        calcData.numberList.add(
+//                            CalcLine(
+//                                desc = op2.desc + op1.desc,
+//                                value = op2.value
+//                            )
+//                        )
+//                    } else {
+//                        if (op1.value.isNaN() && op1.desc.isNotEmpty()) {
+//                            // set comment to op2 if exists, same as add comments if both NaN
+//                            calcData.numberList.add(
+//                                CalcLine(
+//                                    desc = op2.desc + op1.desc,
+//                                    value = op2.value
+//                                )
+//                            )
+//                        } else {
+//                            // default op, add two numbers
+//                            calcData.numberList.add(
+//                                CalcLine(
+//                                    desc = "",
+//                                    value = op2.value + op1.value
+//                                )
+//                            )
+//                        }
+//                    }
                 }
                 BinaryArgument.SUB -> {
-                    calcData.numberList.add(CalcLine(desc = "", value = op2.value - op1.value))
+                    calcData.numberList.add(CalcLine(desc = "", value = op1.value - op2.value))
                 }
                 BinaryArgument.MULT -> {
-                    calcData.numberList.add(CalcLine(desc = "", value = op2.value * op1.value))
+                    calcData.numberList.add(op1 * op2)
                 }
                 BinaryArgument.DIV -> {
-                    calcData.numberList.add(CalcLine(desc = "", value = op2.value / op1.value))
+                    calcData.numberList.add(CalcLine(desc = "", value = op1.value / op2.value))
                 }
                 BinaryArgument.POW -> {
-                    calcData.numberList.add(CalcLine(desc = "", value = op2.value.pow(op1.value)))
+                    calcData.numberList.add(CalcLine(desc = "", value = op1.value.pow(op2.value)))
                 }
                 BinaryArgument.SWAP -> {
-                    calcData.numberList.add(op1)
                     calcData.numberList.add(op2)
+                    calcData.numberList.add(op1)
                 }
                 BinaryArgument.MOD -> {
                     calcData.numberList.add(
                         CalcLine(
                             desc = "",
-                            value = op2.value.toLong().rem(op1.value.toLong()).toDouble()
+                            value = op1.value.toLong().rem(op2.value.toLong()).toDouble()
                         )
                     )
                 }
                 BinaryArgument.OVER -> {
-                    calcData.numberList.add(op2)
                     calcData.numberList.add(op1)
+                    calcData.numberList.add(op2)
                     // Clone element
-                    calcData.numberList.add(CalcLine(desc = op2.desc, value = op2.value))
+                    calcData.numberList.add(CalcLine(desc = op1.desc, value = op1.value))
                 }
                 // Percent
                 BinaryArgument.PER -> {
                     calcData.numberList.add(
                         CalcLine(
                             desc = "% ",
-                            value = op2.value * op1.value / 100
+                            value = op1.value * op2.value / 100
                         )
                     )
                 }
@@ -1575,7 +1625,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     calcData.numberList.add(
                         CalcLine(
                             desc = "∆% ",
-                            value = (op1.value - op2.value) / op2.value * 100
+                            value = (op2.value - op1.value) / op1.value * 100
                         )
                     )
                 }
@@ -1583,7 +1633,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     calcData.numberList.add(
                         CalcLine(
                             desc = "",
-                            value = op2.value.toLong().and(op1.value.toLong()).toDouble()
+                            value = op1.value.toLong().and(op2.value.toLong()).toDouble()
                         )
                     )
                 }
@@ -1591,7 +1641,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     calcData.numberList.add(
                         CalcLine(
                             desc = "",
-                            value = op2.value.toLong().or(op1.value.toLong()).toDouble()
+                            value = op1.value.toLong().or(op2.value.toLong()).toDouble()
                         )
                     )
                 }
@@ -1599,7 +1649,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     calcData.numberList.add(
                         CalcLine(
                             desc = "",
-                            value = op2.value.toLong().xor(op1.value.toLong()).toDouble()
+                            value = op1.value.toLong().xor(op2.value.toLong()).toDouble()
                         )
                     )
                 }
