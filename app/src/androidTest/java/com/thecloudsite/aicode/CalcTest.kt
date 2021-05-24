@@ -20,6 +20,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.text.NumberFormat
 import kotlin.math.sqrt
 
 @RunWith(AndroidJUnit4::class)
@@ -231,6 +232,106 @@ class CalcTest {
         c3.vector!!.forEachIndexed { index, d ->
             val result = d
         }
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun parseMatrixTest() {
+
+//        val words: List<String> = listOf(
+//            "1", "2", "3", "]"
+//        )
+        val words: List<String> = listOf(
+            "[", "1", "2", "3", "]",
+            "[", "4", "5", "6", "]",
+            "]",
+        )
+        val calcData: MutableList<CalcLine> = mutableListOf()
+        val numberFormat: NumberFormat = NumberFormat.getNumberInstance()
+
+        var i: Int = 0
+
+        if(i+1 < words.size && words[i+1] == "[")
+        {
+            // Matrix
+            i++
+
+            val rowList: MutableList<MutableList<Double>> = mutableListOf()
+            val doubleList: MutableList<Double> = mutableListOf()
+
+            while (i < words.size) {
+                val nextWord = words[i++]
+                if (nextWord == "]") {
+                    rowList.add(doubleList)
+                    
+                    break
+                }
+
+                if (nextWord.isNotEmpty()) {
+                    try {
+                        val value = numberFormat.parse(nextWord)!!
+                            .toDouble()
+
+                        doubleList.add(value)
+                    } catch (e: Exception) {
+                        // Error
+//                    calcData.errorMsg =
+//                        context.getString(R.string.calc_error_parsing_msg, nextWord)
+//                    calcRepository.updateData(calcData)
+
+                        // invalid number missing
+                        return
+                    }
+                }
+            }
+        }
+        else {
+            // Vector
+
+            val doubleList: MutableList<Double> = mutableListOf()
+            while (i < words.size) {
+                val nextWord = words[i++]
+                if (nextWord == "]") {
+                    calcData.add(
+                        CalcLine(
+                            value = Double.NaN,
+                            vector = DoubleArray(doubleList.size) { v -> doubleList[v] }
+                        )
+                    )
+
+                    break
+                }
+
+                if (nextWord.isNotEmpty()) {
+                    try {
+                        val value = numberFormat.parse(nextWord)!!
+                            .toDouble()
+
+                        doubleList.add(value)
+                    } catch (e: Exception) {
+                        // Error
+//                    calcData.errorMsg =
+//                        context.getString(R.string.calc_error_parsing_msg, nextWord)
+//                    calcRepository.updateData(calcData)
+
+                        // invalid number missing
+                        return
+                    }
+                }
+            }
+
+            if (i == words.size && words[i - 1] != "]") {
+                //            calcData.errorMsg =
+                //                context.getString(R.string.calc_error_missing_closing_vector_bracket)
+                //            calcRepository.updateData(calcData)
+
+                // invalid number missing
+                return
+            }
+        }
+
+        assertEquals(3, doubleList.size)
+        assertEquals(3, calcData[0].vector?.size)
     }
 
 }
