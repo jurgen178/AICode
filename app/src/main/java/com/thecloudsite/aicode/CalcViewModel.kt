@@ -1622,34 +1622,6 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
             when (op) {
                 BinaryArgument.ADD -> {
                     calcData.numberList.add(op1 + op2)
-
-//                    if (op1.value.isNaN() && op2.value.isNaN()) {
-//                        // add comments if both NaN
-//                        calcData.numberList.add(
-//                            CalcLine(
-//                                desc = op2.desc + op1.desc,
-//                                value = op2.value
-//                            )
-//                        )
-//                    } else {
-//                        if (op1.value.isNaN() && op1.desc.isNotEmpty()) {
-//                            // set comment to op2 if exists, same as add comments if both NaN
-//                            calcData.numberList.add(
-//                                CalcLine(
-//                                    desc = op2.desc + op1.desc,
-//                                    value = op2.value
-//                                )
-//                            )
-//                        } else {
-//                            // default op, add two numbers
-//                            calcData.numberList.add(
-//                                CalcLine(
-//                                    desc = "",
-//                                    value = op2.value + op1.value
-//                                )
-//                            )
-//                        }
-//                    }
                 }
                 BinaryArgument.SUB -> {
                     calcData.numberList.add(op1 - op2)
@@ -1679,7 +1651,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     calcData.numberList.add(op1)
                     calcData.numberList.add(op2)
                     // Clone element
-                    calcData.numberList.add(CalcLine(desc = op1.desc, value = op1.value))
+                    calcData.numberList.add(clone(op1))
                 }
                 // Percent
                 BinaryArgument.PER -> {

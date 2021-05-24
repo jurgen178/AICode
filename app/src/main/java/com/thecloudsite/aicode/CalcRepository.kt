@@ -30,6 +30,7 @@ data class CalcLine
     var matrix: Array<DoubleArray>? = null,
 
     ) {
+
     operator fun plus(op: CalcLine): CalcLine {
         val result = CalcLine(value = Double.NaN)
 
@@ -39,11 +40,11 @@ data class CalcLine
                 val rowsA = matrix!!.size
                 val rowsB = op.matrix!!.size
 
-                if (rowsA > 0 && rowsB > 0) {
+                if (rowsA > 0 && rowsA == rowsB) {
                     val colsA = matrix!![0].size
                     val colsB = op.matrix!![0].size
 
-                    if (colsA == colsB && rowsA == rowsB) {
+                    if (colsA == colsB) {
                         result.matrix =
                             Array(rowsA) { r -> DoubleArray(colsB) { 0.0 } }
 
@@ -136,11 +137,11 @@ data class CalcLine
                 val rowsA = matrix!!.size
                 val rowsB = op.matrix!!.size
 
-                if (rowsA > 0 && rowsB > 0) {
+                if (rowsA > 0 && rowsA == rowsB) {
                     val colsA = matrix!![0].size
                     val colsB = op.matrix!![0].size
 
-                    if (colsA == colsB && rowsA == rowsB) {
+                    if (colsA == colsB) {
                         result.matrix =
                             Array(rowsA) { r -> DoubleArray(colsB) { 0.0 } }
 
@@ -342,11 +343,11 @@ data class CalcLine
                 val rowsA = matrix!!.size
                 val rowsB = op.matrix!!.size
 
-                if (rowsA > 0 && rowsB > 0) {
+                if (rowsA > 0 && rowsA == rowsB) {
                     val colsA = matrix!![0].size
                     val colsB = op.matrix!![0].size
 
-                    if (colsA == colsB && rowsA == rowsB) {
+                    if (colsA == colsB) {
                         result.matrix =
                             Array(rowsA) { r -> DoubleArray(colsB) { 0.0 } }
 
@@ -408,6 +409,32 @@ data class CalcLine
         return result
     }
 
+}
+
+fun clone(op: CalcLine): CalcLine {
+
+    var matrix: Array<DoubleArray>? = null
+    if (op.matrix != null) {
+        val rows = op.matrix!!.size
+
+        if (rows > 0) {
+            val cols = op.matrix!![0].size
+            matrix = Array(rows) { r -> DoubleArray(cols) { c -> op.matrix!![r][c] } }
+        }
+    }
+
+    var vector: DoubleArray? = null
+    if (op.vector != null) {
+        vector = DoubleArray(vector!!.size) { c -> op.vector!![c] }
+    }
+
+    return CalcLine(
+        desc = op.desc,
+        value = op.value,
+        lambda = op.lambda,
+        matrix = matrix,
+        vector = vector,
+    )
 }
 
 data class CalcData
