@@ -1652,13 +1652,13 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
 //                    }
                 }
                 BinaryArgument.SUB -> {
-                    calcData.numberList.add(CalcLine(desc = "", value = op1.value - op2.value))
+                    calcData.numberList.add(op1 - op2)
                 }
                 BinaryArgument.MULT -> {
                     calcData.numberList.add(op1 * op2)
                 }
                 BinaryArgument.DIV -> {
-                    calcData.numberList.add(CalcLine(desc = "", value = op1.value / op2.value))
+                    calcData.numberList.add(op1 / op2)
                 }
                 BinaryArgument.POW -> {
                     calcData.numberList.add(CalcLine(desc = "", value = op1.value.pow(op2.value)))

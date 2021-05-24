@@ -43,7 +43,7 @@ data class CalcLine
                     val colsA = matrix!![0].size
                     val colsB = op.matrix!![0].size
 
-                    if (rowsA == colsA && rowsB == colsB) {
+                    if (colsA == colsB && rowsA == rowsB) {
                         result.matrix =
                             Array(rowsA) { r -> DoubleArray(colsB) { 0.0 } }
 
@@ -150,6 +150,112 @@ data class CalcLine
         return result
     }
 
+    operator fun minus(op: CalcLine): CalcLine {
+        val result = CalcLine(value = Double.NaN)
+
+        when {
+            // [Matrix] - [Matrix]
+            matrix != null && op.matrix != null -> {
+                val rowsA = matrix!!.size
+                val rowsB = op.matrix!!.size
+
+                if (rowsA > 0 && rowsB > 0) {
+                    val colsA = matrix!![0].size
+                    val colsB = op.matrix!![0].size
+
+                    if (colsA == colsB && rowsA == rowsB) {
+                        result.matrix =
+                            Array(rowsA) { r -> DoubleArray(colsB) { 0.0 } }
+
+                        for (row in 0 until rowsA) {
+                            for (col in 0 until colsB) {
+                                result.matrix!![row][col] += matrix!![row][col] - op.matrix!![row][col]
+                            }
+                        }
+                    }
+                }
+            }
+
+            // [Vector] - [Vector]
+            vector != null && op.vector != null -> {
+                result.vector = vector
+
+                if (vector!!.size == op.vector!!.size) {
+                    op.vector!!.forEachIndexed { index, a ->
+                        result.vector!![index] -= a
+                    }
+                }
+            }
+
+//            // [Matrix] - [Vector]
+//            matrix != null && op.vector != null-> {
+//            }
+//
+//            // [Vector] - [Matrix]
+//            vector != null && op.matrix != null-> {
+//            }
+
+            // double - [Vector]
+            value.isFinite() && op.vector != null -> {
+                result.vector = DoubleArray(op.vector!!.size) { 0.0 }
+
+                op.vector!!.forEachIndexed { index, a ->
+                    result.vector!![index] = a - value
+                }
+            }
+
+            // [Vector] - double
+            vector != null && op.value.isFinite() -> {
+                result.vector = DoubleArray(vector!!.size) { 0.0 }
+
+                vector!!.forEachIndexed { index, a ->
+                    result.vector!![index] = a - op.value
+                }
+            }
+
+            // double - [Matrix]
+            value.isFinite() && op.matrix != null -> {
+                val rows = op.matrix!!.size
+
+                if (rows > 0) {
+                    val cols = op.matrix!![0].size
+                    result.matrix =
+                        Array(op.matrix!!.size) { r -> DoubleArray(cols) { 0.0 } }
+
+                    op.matrix?.forEachIndexed { row, doubles ->
+                        doubles.forEachIndexed { col, a ->
+                            result.matrix!![row][col] = a - value
+                        }
+                    }
+                }
+            }
+
+            // [Matrix] - double
+            matrix != null && op.value.isFinite() -> {
+                val rows = matrix!!.size
+
+                if (rows > 0) {
+                    val cols = matrix!![0].size
+                    result.matrix =
+                        Array(matrix!!.size) { r -> DoubleArray(cols) { 0.0 } }
+
+                    matrix?.forEachIndexed { row, doubles ->
+                        doubles.forEachIndexed { col, a ->
+                            result.matrix!![row][col] = a - op.value
+                        }
+                    }
+                }
+            }
+
+            // default op, subtract two numbers
+            else -> {
+                result.value = value - op.value
+            }
+        }
+
+        return result
+    }
+
     operator fun times(op: CalcLine): CalcLine {
         val result = CalcLine(value = Double.NaN)
 
@@ -186,8 +292,8 @@ data class CalcLine
                     result.vector = DoubleArray(rows) { 0.0 }
 
                     matrix?.forEachIndexed { row, doubles ->
-                        doubles.forEachIndexed { col, value ->
-                            result.vector!![row] += op.vector!![col] * value
+                        doubles.forEachIndexed { col, a ->
+                            result.vector!![row] += op.vector!![col] * a
                         }
                     }
                 }
@@ -209,7 +315,7 @@ data class CalcLine
                 result.vector = DoubleArray(op.vector!!.size) { 0.0 }
 
                 op.vector!!.forEachIndexed { index, a ->
-                    result.vector!![index] = a * value
+                    result.vector!![index] = value * a
                 }
             }
 
@@ -240,7 +346,7 @@ data class CalcLine
             }
 
             // [Matrix] * double
-            matrix != null && value.isFinite() -> {
+            matrix != null && op.value.isFinite() -> {
                 val rows = matrix!!.size
 
                 if (rows > 0) {
@@ -259,6 +365,104 @@ data class CalcLine
             // default op, multiply two numbers
             else -> {
                 result.value = value * op.value
+            }
+        }
+
+        return result
+    }
+
+    operator fun div(op: CalcLine): CalcLine {
+        val result = CalcLine(value = Double.NaN)
+
+        when {
+            // [Matrix] / [Matrix]
+            matrix != null && op.matrix != null -> {
+                val rowsA = matrix!!.size
+                val rowsB = op.matrix!!.size
+
+                if (rowsA > 0 && rowsB > 0) {
+                    val colsA = matrix!![0].size
+                    val colsB = op.matrix!![0].size
+
+                    if (colsA == colsB && rowsA == rowsB) {
+                        result.matrix =
+                            Array(rowsA) { r -> DoubleArray(colsB) { 0.0 } }
+
+                        for (row in 0 until rowsA) {
+                            for (col in 0 until colsB) {
+                                result.matrix!![row][col] += matrix!![row][col] / op.matrix!![row][col]
+                            }
+                        }
+                    }
+                }
+            }
+
+            // [Vector] / [Vector]
+            vector != null && op.vector != null -> {
+                result.vector = vector
+
+                if (vector!!.size == op.vector!!.size) {
+                    op.vector!!.forEachIndexed { index, a ->
+                        result.vector!![index] /= a
+                    }
+                }
+            }
+
+            // double / [Vector]
+            value.isFinite() && op.vector != null -> {
+                result.vector = DoubleArray(op.vector!!.size) { 0.0 }
+
+                op.vector!!.forEachIndexed { index, a ->
+                    result.vector!![index] = value / a
+                }
+            }
+
+            // [Vector] / double
+            vector != null && op.value.isFinite() -> {
+                result.vector = DoubleArray(vector!!.size) { 0.0 }
+
+                vector!!.forEachIndexed { index, a ->
+                    result.vector!![index] = a / op.value
+                }
+            }
+
+            // double / [Matrix]
+            value.isFinite() && op.matrix != null -> {
+                val rows = op.matrix!!.size
+
+                if (rows > 0) {
+                    val cols = op.matrix!![0].size
+                    result.matrix =
+                        Array(op.matrix!!.size) { r -> DoubleArray(cols) { 0.0 } }
+
+                    op.matrix?.forEachIndexed { row, doubles ->
+                        doubles.forEachIndexed { col, a ->
+                            result.matrix!![row][col] = value / a
+                        }
+                    }
+                }
+            }
+
+            // [Matrix] / double
+            matrix != null && op.value.isFinite() -> {
+                val rows = matrix!!.size
+
+                if (rows > 0) {
+                    val cols = matrix!![0].size
+                    result.matrix =
+                        Array(matrix!!.size) { r -> DoubleArray(cols) { 0.0 } }
+
+                    matrix?.forEachIndexed { row, doubles ->
+                        doubles.forEachIndexed { col, a ->
+                            result.matrix!![row][col] = a / op.value
+                        }
+                    }
+                }
+            }
+
+            // default op, divide two numbers
+            else -> {
+                result.value = value / op.value
             }
         }
 
