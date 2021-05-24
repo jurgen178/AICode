@@ -234,18 +234,8 @@ class CalcTest {
         }
     }
 
-    @Test
-    @Throws(Exception::class)
-    fun parseMatrixTest() {
+    fun parseMatrixTest(words: List<String>):MutableList<CalcLine>? {
 
-//        val words: List<String> = listOf(
-//            "1", "2", "3", "]"
-//        )
-        val words: List<String> = listOf(
-            "[", "1", "2", "3", "]",
-            "[", "4", "5", "6", "]",
-            "]",
-        )
         val calcData: MutableList<CalcLine> = mutableListOf()
         val numberFormat: NumberFormat = NumberFormat.getNumberInstance()
 
@@ -286,7 +276,7 @@ class CalcTest {
 //                    calcRepository.updateData(calcData)
 
                             // invalid number missing
-                            return
+                            return null
                         }
 
                     rowList.add(doubleList.toMutableList())
@@ -315,7 +305,7 @@ class CalcTest {
 //                    calcRepository.updateData(calcData)
 
                         // invalid number missing
-                        return
+                        return null
                     }
                 }
             }
@@ -349,7 +339,7 @@ class CalcTest {
 //                    calcRepository.updateData(calcData)
 
                         // invalid number missing
-                        return
+                        return null
                     }
                 }
             }
@@ -360,11 +350,46 @@ class CalcTest {
                 //            calcRepository.updateData(calcData)
 
                 // invalid number missing
-                return
+                return null
             }
         }
 
-        assertEquals(3, calcData[0].vector?.size)
+        return calcData
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun parseMatrixVector()
+    {
+        val wordsVector1: List<String> = listOf(
+            "]"
+        )
+        val vector1 = parseMatrixTest(wordsVector1)
+        assertEquals(0, vector1!![0].vector?.size)
+
+        val wordsMatrix1: List<String> = listOf(
+            "[", "]",
+            "]",
+        )
+        val matrix1 = parseMatrixTest(wordsMatrix1)
+        assertEquals(1, matrix1!![0].matrix?.size)
+        assertEquals(0, matrix1[0].matrix?.get(0)?.size)
+
+        val wordsVector2: List<String> = listOf(
+            "1", "2", "3", "]"
+        )
+        val vector2 = parseMatrixTest(wordsVector2)
+        assertEquals(3, vector2!![0].vector?.size)
+
+        val wordsMatrix2: List<String> = listOf(
+            "[", "1", "2", "3", "]",
+            "[", "4", "5", "6", "]",
+            "]",
+        )
+        val matrix2 = parseMatrixTest(wordsMatrix2)
+        assertEquals(2, matrix2!![0].matrix?.size)
+        assertEquals(3, matrix2[0].matrix?.get(0)?.size)
+
     }
 
 }

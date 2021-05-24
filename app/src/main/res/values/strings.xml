@@ -105,4 +105,5 @@ limitations under the License. -->
   <string name="email_feedback_title">Send email</string>
   <string name="calc_binary_headline">AI Programming</string>
   <string name="calc_error_missing_closing_vector_bracket">Missing closing \']\' for vector.</string>
+  <string name="calc_error_matrix_different_row_length">Matrix rows must be same size.</string>
 </resources>

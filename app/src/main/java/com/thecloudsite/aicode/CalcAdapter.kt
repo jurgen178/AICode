@@ -108,11 +108,32 @@ class CalcAdapter internal constructor(
                                             )
                                         }
                                     } else
-                                        if (binaryDisplay) {
-                                            getDisplayString(current.value.toLong(), radix)
-                                        } else {
-                                            numberFormat.format(current.value)
-                                        }
+                                        if (current.matrix != null) {
+                                            // [ [ 1 2 3 ]
+                                            //   [ 4 5 6 ]
+                                            //   [ 7 8 9 ] ]
+                                            current.matrix!!.map { row ->
+
+                                                row.joinToString(
+                                                    prefix = "[",
+                                                    separator = " ",
+                                                    postfix = "]",
+                                                ) {
+                                                    numberFormat.format(
+                                                        it
+                                                    )
+                                                }
+                                            }.joinToString(
+                                                prefix = "[ ",
+                                                separator = "  \n",
+                                                postfix = " ]",
+                                            )
+                                        } else
+                                            if (binaryDisplay) {
+                                                getDisplayString(current.value.toLong(), radix)
+                                            } else {
+                                                numberFormat.format(current.value)
+                                            }
                                 )
                             })
                         }

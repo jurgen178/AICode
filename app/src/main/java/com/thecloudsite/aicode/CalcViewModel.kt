@@ -678,45 +678,115 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
             if (word == "[") {
                 loopCounter++
 
-                val doubleList: MutableList<Double> = mutableListOf()
-                while (i < words.size) {
-                    val nextWord = words[i++]
-                    if (nextWord == "]") {
-                        calcData.numberList.add(
-                            CalcLine(
-                                value = Double.NaN,
-                                vector = DoubleArray(doubleList.size) { v -> doubleList[v] }
+                if (i < words.size && words[i] == "[") {
+                    // Matrix
+                    i++
+
+                    var columnSize = 0
+                    val rowList: MutableList<MutableList<Double>> = mutableListOf()
+                    val doubleList: MutableList<Double> = mutableListOf()
+
+                    var inVector = true
+
+                    while (i < words.size) {
+                        val nextWord = words[i++]
+                        if (!inVector && nextWord == "]") {
+
+                            calcData.numberList.add(
+                                CalcLine(
+                                    value = Double.NaN,
+                                    matrix = Array(rowList.size) { r -> DoubleArray(rowList[0].size) { c -> rowList[r][c] } }
+                                )
                             )
-                        )
 
-                        break
-                    }
+                            break
+                        }
 
-                    if (nextWord.isNotEmpty()) {
-                        try {
-                            val value = numberFormat.parse(nextWord)!!
-                                .toDouble()
+                        if (inVector && nextWord == "]") {
+                            if (columnSize == 0) {
+                                columnSize = doubleList.size
+                            } else
+                                if (columnSize != doubleList.size) {
+                                    // Error
+                                    calcData.errorMsg =
+                                        context.getString(R.string.calc_error_matrix_different_row_length)
+                                    calcRepository.updateData(calcData)
 
-                            doubleList.add(value)
-                        } catch (e: Exception) {
-                            // Error
-                            calcData.errorMsg =
-                                context.getString(R.string.calc_error_parsing_msg, nextWord)
-                            calcRepository.updateData(calcData)
+                                    return
+                                }
 
-                            // invalid number missing
-                            return
+                            rowList.add(doubleList.toMutableList())
+                            doubleList.clear()
+
+                            inVector = false
+                            continue
+                        }
+
+                        if (!inVector && nextWord == "[") {
+
+                            inVector = true
+                            continue
+                        }
+
+                        if (inVector && nextWord.isNotEmpty()) {
+                            try {
+                                val value = numberFormat.parse(nextWord)!!
+                                    .toDouble()
+
+                                doubleList.add(value)
+                            } catch (e: Exception) {
+                                // Error
+                                calcData.errorMsg =
+                                    context.getString(R.string.calc_error_parsing_msg, nextWord)
+                                calcRepository.updateData(calcData)
+
+                                // invalid number missing
+                                return
+                            }
                         }
                     }
-                }
+                } else {
+                    // Vector
 
-                if (i == words.size && words[i - 1] != "]") {
-                    calcData.errorMsg =
-                        context.getString(R.string.calc_error_missing_closing_vector_bracket)
-                    calcRepository.updateData(calcData)
+                    val doubleList: MutableList<Double> = mutableListOf()
+                    while (i < words.size) {
+                        val nextWord = words[i++]
+                        if (nextWord == "]") {
+                            calcData.numberList.add(
+                                CalcLine(
+                                    value = Double.NaN,
+                                    vector = DoubleArray(doubleList.size) { v -> doubleList[v] }
+                                )
+                            )
 
-                    // invalid number missing
-                    return
+                            break
+                        }
+
+                        if (nextWord.isNotEmpty()) {
+                            try {
+                                val value = numberFormat.parse(nextWord)!!
+                                    .toDouble()
+
+                                doubleList.add(value)
+                            } catch (e: Exception) {
+                                // Error
+                                calcData.errorMsg =
+                                    context.getString(R.string.calc_error_parsing_msg, nextWord)
+                                calcRepository.updateData(calcData)
+
+                                // invalid number missing
+                                return
+                            }
+                        }
+                    }
+
+                    if (i == words.size && words[i - 1] != "]") {
+                        calcData.errorMsg =
+                            context.getString(R.string.calc_error_missing_closing_vector_bracket)
+                        calcRepository.updateData(calcData)
+
+                        return
+                    }
                 }
 
                 continue

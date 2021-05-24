@@ -31,22 +31,25 @@ data class CalcLine
 
     ) {
     operator fun plus(op: CalcLine): CalcLine {
-        val result = CalcLine()
+        return when {
 
-        return if (op.value.isNaN() && value.isNaN()) {
-            // add comments if both NaN
-            CalcLine(
-                desc = desc + op.desc,
-                value = value
-            )
-        } else {
-            if (op.value.isNaN() && op.desc.isNotEmpty()) {
+            op.value.isNaN() && value.isNaN() -> {
+                // add comments if both NaN
+                CalcLine(
+                    desc = desc + op.desc,
+                    value = value
+                )
+            }
+
+            op.value.isNaN() && op.desc.isNotEmpty() -> {
                 // set comment to op2 if exists, same as add comments if both NaN
                 CalcLine(
                     desc = desc + op.desc,
                     value = value
                 )
-            } else {
+            }
+
+            else -> {
                 // default op, add two numbers
                 CalcLine(
                     desc = "",
@@ -54,30 +57,80 @@ data class CalcLine
                 )
             }
         }
-
-        return result
     }
 
     operator fun times(op: CalcLine): CalcLine {
         val result = CalcLine()
 
-        if (matrix != null && op.vector != null) {
-            val rows = matrix!!.size
+        when {
+            // [Matrix] * [Matrix]
+            matrix != null && op.matrix != null -> {
+                val rowsA = matrix!!.size
+                val rowsB = op.matrix!!.size
 
-            if (rows > 0 && matrix!![0].size == op.vector!!.size) {
-                result.vector = DoubleArray(rows) { 0.0 }
+                if (rowsA > 0 && rowsB > 0) {
+                    val colsA = matrix!![0].size
+                    val colsB = op.matrix!![0].size
 
-                matrix?.forEachIndexed { row, doubles ->
-                    doubles.forEachIndexed { col, value ->
-                        result.vector!![row] += op.vector!![col] * value
+                    if (rowsB == colsA) {
+                        result.matrix =
+                            Array(rowsA) { r -> DoubleArray(colsB) { 0.0 } }
+
+                        for (row in 0 until rowsA) {
+                            for (col in 0 until colsB) {
+                                for (j in 0 until colsA) {
+                                    result.matrix!![row][col] += matrix!![row][j] * op.matrix!![j][col]
+                                }
+                            }
+                        }
                     }
                 }
             }
-        } else {
-            return CalcLine(
-                desc = "",
-                value = value * op.value
-            )
+
+            // [Matrix] * [Vector]
+            matrix != null && op.vector != null -> {
+                val rows = matrix!!.size
+
+                if (rows > 0 && matrix!![0].size == op.vector!!.size) {
+                    result.vector = DoubleArray(rows) { 0.0 }
+
+                    matrix?.forEachIndexed { row, doubles ->
+                        doubles.forEachIndexed { col, value ->
+                            result.vector!![row] += op.vector!![col] * value
+                        }
+                    }
+                }
+            }
+
+            // double * [Vector]
+            value.isFinite() && op.vector != null -> {
+                result.vector = DoubleArray(op.vector!!.size) { 0.0 }
+
+                op.vector!!.forEachIndexed { index, a ->
+                    result.vector!![index] = op.vector!![index] * value
+                }
+            }
+
+            // double * [Matrix]
+            value.isFinite() && op.matrix != null -> {
+                val rows = op.matrix!!.size
+
+                if (rows > 0) {
+                    val cols = op.matrix!![0].size
+                    result.matrix =
+                        Array(op.matrix!!.size) { r -> DoubleArray(cols) { 0.0 } }
+
+                    op.matrix?.forEachIndexed { row, doubles ->
+                        doubles.forEachIndexed { col, value ->
+                            result.matrix!![row][col] = op.matrix!![row][col] * value
+                        }
+                    }
+                }
+            }
+
+            else -> {
+                result.value = value * op.value
+            }
         }
 
         return result
