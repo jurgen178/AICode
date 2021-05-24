@@ -34,7 +34,7 @@ data class CalcLine
         val result = CalcLine(value = Double.NaN)
 
         when {
-            // [Matrix] + [Matrix]
+            // [[Matrix]] + [[Matrix]]
             matrix != null && op.matrix != null -> {
                 val rowsA = matrix!!.size
                 val rowsB = op.matrix!!.size
@@ -58,72 +58,49 @@ data class CalcLine
 
             // [Vector] + [Vector]
             vector != null && op.vector != null -> {
-                result.vector = vector
-
                 if (vector!!.size == op.vector!!.size) {
-                    op.vector!!.forEachIndexed { index, a ->
-                        result.vector!![index] += a
-                    }
+                    result.vector =
+                        DoubleArray(vector!!.size) { c -> vector!![c] + op.vector!![c] }
                 }
             }
 
-//            // [Matrix] + [Vector]
+//            // [[Matrix]] + [Vector]
 //            matrix != null && op.vector != null-> {
 //            }
 //
-//            // [Vector] + [Matrix]
+//            // [Vector] + [[Matrix]]
 //            vector != null && op.matrix != null-> {
 //            }
 
             // double + [Vector]
             value.isFinite() && op.vector != null -> {
-                result.vector = DoubleArray(op.vector!!.size) { 0.0 }
-
-                op.vector!!.forEachIndexed { index, a ->
-                    result.vector!![index] = a + value
-                }
+                result.vector = DoubleArray(op.vector!!.size) { c -> value + op.vector!![c] }
             }
 
             // [Vector] + double
             vector != null && op.value.isFinite() -> {
-                result.vector = DoubleArray(vector!!.size) { 0.0 }
-
-                vector!!.forEachIndexed { index, a ->
-                    result.vector!![index] = a + op.value
-                }
+                result.vector = DoubleArray(vector!!.size) { c -> vector!![c] + op.value }
             }
 
-            // double + [Matrix]
+            // double + [[Matrix]]
             value.isFinite() && op.matrix != null -> {
                 val rows = op.matrix!!.size
 
                 if (rows > 0) {
                     val cols = op.matrix!![0].size
                     result.matrix =
-                        Array(op.matrix!!.size) { r -> DoubleArray(cols) { 0.0 } }
-
-                    op.matrix?.forEachIndexed { row, doubles ->
-                        doubles.forEachIndexed { col, a ->
-                            result.matrix!![row][col] = a + value
-                        }
-                    }
+                        Array(rows) { r -> DoubleArray(cols) { c -> value + op.matrix!![r][c] } }
                 }
             }
 
-            // [Matrix] + double
+            // [[Matrix]] + double
             matrix != null && op.value.isFinite() -> {
                 val rows = matrix!!.size
 
                 if (rows > 0) {
                     val cols = matrix!![0].size
                     result.matrix =
-                        Array(matrix!!.size) { r -> DoubleArray(cols) { 0.0 } }
-
-                    matrix?.forEachIndexed { row, doubles ->
-                        doubles.forEachIndexed { col, a ->
-                            result.matrix!![row][col] = a + op.value
-                        }
-                    }
+                        Array(rows) { r -> DoubleArray(cols) { c -> matrix!![r][c] + op.value } }
                 }
             }
 
@@ -154,7 +131,7 @@ data class CalcLine
         val result = CalcLine(value = Double.NaN)
 
         when {
-            // [Matrix] - [Matrix]
+            // [[Matrix]] - [[Matrix]]
             matrix != null && op.matrix != null -> {
                 val rowsA = matrix!!.size
                 val rowsB = op.matrix!!.size
@@ -178,72 +155,49 @@ data class CalcLine
 
             // [Vector] - [Vector]
             vector != null && op.vector != null -> {
-                result.vector = vector
-
                 if (vector!!.size == op.vector!!.size) {
-                    op.vector!!.forEachIndexed { index, a ->
-                        result.vector!![index] -= a
-                    }
+                    result.vector =
+                        DoubleArray(vector!!.size) { c -> vector!![c] - op.vector!![c] }
                 }
             }
 
-//            // [Matrix] - [Vector]
+//            // [[Matrix]] - [Vector]
 //            matrix != null && op.vector != null-> {
 //            }
 //
-//            // [Vector] - [Matrix]
+//            // [Vector] - [[Matrix]]
 //            vector != null && op.matrix != null-> {
 //            }
 
             // double - [Vector]
             value.isFinite() && op.vector != null -> {
-                result.vector = DoubleArray(op.vector!!.size) { 0.0 }
-
-                op.vector!!.forEachIndexed { index, a ->
-                    result.vector!![index] = a - value
-                }
+                result.vector = DoubleArray(op.vector!!.size) { c -> value - op.vector!![c] }
             }
 
             // [Vector] - double
             vector != null && op.value.isFinite() -> {
-                result.vector = DoubleArray(vector!!.size) { 0.0 }
-
-                vector!!.forEachIndexed { index, a ->
-                    result.vector!![index] = a - op.value
-                }
+                result.vector = DoubleArray(vector!!.size) { c -> vector!![c] - op.value }
             }
 
-            // double - [Matrix]
+            // double - [[Matrix]]
             value.isFinite() && op.matrix != null -> {
                 val rows = op.matrix!!.size
 
                 if (rows > 0) {
                     val cols = op.matrix!![0].size
                     result.matrix =
-                        Array(op.matrix!!.size) { r -> DoubleArray(cols) { 0.0 } }
-
-                    op.matrix?.forEachIndexed { row, doubles ->
-                        doubles.forEachIndexed { col, a ->
-                            result.matrix!![row][col] = a - value
-                        }
-                    }
+                        Array(rows) { r -> DoubleArray(cols) { c -> value - op.matrix!![r][c] } }
                 }
             }
 
-            // [Matrix] - double
+            // [[Matrix]] - double
             matrix != null && op.value.isFinite() -> {
                 val rows = matrix!!.size
 
                 if (rows > 0) {
                     val cols = matrix!![0].size
                     result.matrix =
-                        Array(matrix!!.size) { r -> DoubleArray(cols) { 0.0 } }
-
-                    matrix?.forEachIndexed { row, doubles ->
-                        doubles.forEachIndexed { col, a ->
-                            result.matrix!![row][col] = a - op.value
-                        }
-                    }
+                        Array(rows) { r -> DoubleArray(cols) { c -> matrix!![r][c] - op.value } }
                 }
             }
 
@@ -256,11 +210,39 @@ data class CalcLine
         return result
     }
 
+    operator fun unaryMinus(): CalcLine {
+        val result = CalcLine(value = Double.NaN)
+
+        when {
+            // -[[Matrix]]
+            matrix != null -> {
+                val rows = matrix!!.size
+
+                if (rows > 0) {
+                    val cols = matrix!![0].size
+                    result.matrix = Array(rows) { r -> DoubleArray(cols) { c -> -matrix!![r][c] } }
+                }
+            }
+
+            // -[Vector]
+            vector != null -> {
+                result.vector = DoubleArray(vector!!.size) { c -> -vector!![c] }
+            }
+
+            // default op
+            else -> {
+                result.value = -value
+            }
+        }
+
+        return result
+    }
+
     operator fun times(op: CalcLine): CalcLine {
         val result = CalcLine(value = Double.NaN)
 
         when {
-            // [Matrix] * [Matrix]
+            // [[Matrix]] * [[Matrix]]
             matrix != null && op.matrix != null -> {
                 val rowsA = matrix!!.size
                 val rowsB = op.matrix!!.size
@@ -284,7 +266,7 @@ data class CalcLine
                 }
             }
 
-            // [Matrix] * [Vector]
+            // [[Matrix]] * [Vector]
             matrix != null && op.vector != null -> {
                 val rows = matrix!!.size
 
@@ -312,53 +294,33 @@ data class CalcLine
 
             // double * [Vector]
             value.isFinite() && op.vector != null -> {
-                result.vector = DoubleArray(op.vector!!.size) { 0.0 }
-
-                op.vector!!.forEachIndexed { index, a ->
-                    result.vector!![index] = value * a
-                }
+                result.vector = DoubleArray(op.vector!!.size) { c -> value * op.vector!![c] }
             }
 
             // [Vector] * double
             vector != null && op.value.isFinite() -> {
-                result.vector = DoubleArray(vector!!.size) { 0.0 }
-
-                vector!!.forEachIndexed { index, a ->
-                    result.vector!![index] = a * op.value
-                }
+                result.vector = DoubleArray(vector!!.size) { c -> vector!![c] * op.value }
             }
 
-            // double * [Matrix]
+            // double * [[Matrix]]
             value.isFinite() && op.matrix != null -> {
                 val rows = op.matrix!!.size
 
                 if (rows > 0) {
                     val cols = op.matrix!![0].size
                     result.matrix =
-                        Array(op.matrix!!.size) { r -> DoubleArray(cols) { 0.0 } }
-
-                    op.matrix?.forEachIndexed { row, doubles ->
-                        doubles.forEachIndexed { col, a ->
-                            result.matrix!![row][col] = a * value
-                        }
-                    }
+                        Array(rows) { r -> DoubleArray(cols) { c -> value * op.matrix!![r][c] } }
                 }
             }
 
-            // [Matrix] * double
+            // [[Matrix]] * double
             matrix != null && op.value.isFinite() -> {
                 val rows = matrix!!.size
 
                 if (rows > 0) {
                     val cols = matrix!![0].size
                     result.matrix =
-                        Array(matrix!!.size) { r -> DoubleArray(cols) { 0.0 } }
-
-                    matrix?.forEachIndexed { row, doubles ->
-                        doubles.forEachIndexed { col, a ->
-                            result.matrix!![row][col] = a * op.value
-                        }
-                    }
+                        Array(rows) { r -> DoubleArray(cols) { c -> matrix!![r][c] * op.value } }
                 }
             }
 
@@ -375,7 +337,7 @@ data class CalcLine
         val result = CalcLine(value = Double.NaN)
 
         when {
-            // [Matrix] / [Matrix]
+            // [[Matrix]] / [[Matrix]]
             matrix != null && op.matrix != null -> {
                 val rowsA = matrix!!.size
                 val rowsB = op.matrix!!.size
@@ -399,64 +361,41 @@ data class CalcLine
 
             // [Vector] / [Vector]
             vector != null && op.vector != null -> {
-                result.vector = vector
-
                 if (vector!!.size == op.vector!!.size) {
-                    op.vector!!.forEachIndexed { index, a ->
-                        result.vector!![index] /= a
-                    }
+                    result.vector =
+                        DoubleArray(vector!!.size) { c -> vector!![c] / op.vector!![c] }
                 }
             }
 
             // double / [Vector]
             value.isFinite() && op.vector != null -> {
-                result.vector = DoubleArray(op.vector!!.size) { 0.0 }
-
-                op.vector!!.forEachIndexed { index, a ->
-                    result.vector!![index] = value / a
-                }
+                result.vector = DoubleArray(op.vector!!.size) { c -> value / op.vector!![c] }
             }
 
             // [Vector] / double
             vector != null && op.value.isFinite() -> {
-                result.vector = DoubleArray(vector!!.size) { 0.0 }
-
-                vector!!.forEachIndexed { index, a ->
-                    result.vector!![index] = a / op.value
-                }
+                result.vector = DoubleArray(vector!!.size) { c -> vector!![c] / op.value }
             }
 
-            // double / [Matrix]
+            // double / [[Matrix]]
             value.isFinite() && op.matrix != null -> {
                 val rows = op.matrix!!.size
 
                 if (rows > 0) {
                     val cols = op.matrix!![0].size
                     result.matrix =
-                        Array(op.matrix!!.size) { r -> DoubleArray(cols) { 0.0 } }
-
-                    op.matrix?.forEachIndexed { row, doubles ->
-                        doubles.forEachIndexed { col, a ->
-                            result.matrix!![row][col] = value / a
-                        }
-                    }
+                        Array(rows) { r -> DoubleArray(cols) { c -> value / op.matrix!![r][c] } }
                 }
             }
 
-            // [Matrix] / double
+            // [[Matrix]] / double
             matrix != null && op.value.isFinite() -> {
                 val rows = matrix!!.size
 
                 if (rows > 0) {
                     val cols = matrix!![0].size
                     result.matrix =
-                        Array(matrix!!.size) { r -> DoubleArray(cols) { 0.0 } }
-
-                    matrix?.forEachIndexed { row, doubles ->
-                        doubles.forEachIndexed { col, a ->
-                            result.matrix!![row][col] = a / op.value
-                        }
-                    }
+                        Array(rows) { r -> DoubleArray(cols) { c -> matrix!![r][c] / op.value } }
                 }
             }
 

@@ -1434,7 +1434,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     calcData.numberList.add(CalcLine(desc = "", value = op1.value.absoluteValue))
                 }
                 UnaryArgument.SIGN -> {
-                    calcData.numberList.add(CalcLine(desc = "", value = -op1.value))
+                    calcData.numberList.add(-op1)
                 }
                 UnaryArgument.INT -> {
                     calcData.numberList.add(
