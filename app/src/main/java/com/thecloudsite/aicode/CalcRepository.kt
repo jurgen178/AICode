@@ -425,7 +425,7 @@ fun clone(op: CalcLine): CalcLine {
 
     var vector: DoubleArray? = null
     if (op.vector != null) {
-        vector = DoubleArray(vector!!.size) { c -> op.vector!![c] }
+        vector = DoubleArray(op.vector!!.size) { c -> op.vector!![c] }
     }
 
     return CalcLine(
