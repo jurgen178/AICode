@@ -251,23 +251,58 @@ class CalcTest {
 
         var i: Int = 0
 
-        if(i+1 < words.size && words[i+1] == "[")
-        {
+        if (i < words.size && words[i] == "[") {
             // Matrix
             i++
 
+            var columnSize = 0
             val rowList: MutableList<MutableList<Double>> = mutableListOf()
             val doubleList: MutableList<Double> = mutableListOf()
 
+            var inVector = true
+
             while (i < words.size) {
                 val nextWord = words[i++]
-                if (nextWord == "]") {
-                    rowList.add(doubleList)
-                    
+                if (!inVector && nextWord == "]") {
+
+                    calcData.add(
+                        CalcLine(
+                            value = Double.NaN,
+                            matrix = Array(rowList.size) { r -> DoubleArray(rowList[0].size) { c -> rowList[r][c] } }
+                        )
+                    )
+
                     break
                 }
 
-                if (nextWord.isNotEmpty()) {
+                if (inVector && nextWord == "]") {
+                    if (columnSize == 0) {
+                        columnSize = doubleList.size
+                    } else
+                        if (columnSize != doubleList.size) {
+                            // Error
+//                    calcData.errorMsg =
+//                        context.getString(R.string.calc_error_parsing_msg, nextWord)
+//                    calcRepository.updateData(calcData)
+
+                            // invalid number missing
+                            return
+                        }
+
+                    rowList.add(doubleList.toMutableList())
+                    doubleList.clear()
+
+                    inVector = false
+                    continue
+                }
+
+                if (!inVector && nextWord == "[") {
+
+                    inVector = true
+                    continue
+                }
+
+                if (inVector && nextWord.isNotEmpty()) {
                     try {
                         val value = numberFormat.parse(nextWord)!!
                             .toDouble()
@@ -284,8 +319,7 @@ class CalcTest {
                     }
                 }
             }
-        }
-        else {
+        } else {
             // Vector
 
             val doubleList: MutableList<Double> = mutableListOf()
@@ -330,7 +364,6 @@ class CalcTest {
             }
         }
 
-        assertEquals(3, doubleList.size)
         assertEquals(3, calcData[0].vector?.size)
     }
 
