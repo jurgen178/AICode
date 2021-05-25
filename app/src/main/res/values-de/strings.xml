@@ -104,4 +104,5 @@ limitations under the License. -->
   <string name="calc_binary_headline">AI Programming</string>
   <string name="calc_error_missing_closing_vector_bracket">Fehlende schließende \']\' für Vektor.</string>
   <string name="calc_error_matrix_different_row_length">Matrixzeilen müssen gleich groß sein.</string>
+  <string name="calc_error_parsing_matrix">Unerwarteter Wert \'%1$s\'</string>
 </resources>

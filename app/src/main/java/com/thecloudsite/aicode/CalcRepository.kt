@@ -411,6 +411,51 @@ data class CalcLine
 
 }
 
+fun solve(op1: CalcLine, op2: CalcLine): CalcLine {
+
+    var x: DoubleArray? = null
+
+    if (op1.matrix != null && op2.vector != null) {
+        val rows = op1.matrix!!.size
+        if (rows > 0) {
+            val cols = op1.matrix!![0].size
+            val v = op2.vector!!.size
+            if (cols == rows && cols == v) {
+                // Copy of matrix
+                val n = cols
+                val matrix =
+                    Array(n) { r -> DoubleArray(n + 1) { c -> if (c > n - 1) op2.vector!![r] else op1.matrix!![r][c] } }
+
+                // Dreiecksmatrix
+                for (i in 0 until n - 1) {
+                    for (j in i + 1 until n) {
+                        val a = matrix[j][i] / matrix[i][i]
+                        for (col in i..n) {
+                            matrix[j][col] -= a * matrix[i][col]
+                        }
+                    }
+                }
+
+                x = DoubleArray(n) { 0.0 }
+
+                // Rückwärtseinsetzen
+                for (r in n - 1 downTo 0) {
+                    var sum = matrix[r][n]
+                    for (s in r + 1 until n) {
+                        sum -= matrix[r][s] * x[s]
+                    }
+                    x[r] = sum / matrix[r][r]
+                }
+            }
+        }
+    }
+
+    return CalcLine(
+        value = Double.NaN,
+        vector = x,
+    )
+}
+
 fun clone(op: CalcLine): CalcLine {
 
     var matrix: Array<DoubleArray>? = null

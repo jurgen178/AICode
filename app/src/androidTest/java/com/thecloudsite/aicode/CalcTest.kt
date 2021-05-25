@@ -234,7 +234,7 @@ class CalcTest {
         }
     }
 
-    fun parseMatrixTest(words: List<String>):MutableList<CalcLine>? {
+    fun parseMatrixTest(words: List<String>): MutableList<CalcLine>? {
 
         val calcData: MutableList<CalcLine> = mutableListOf()
         val numberFormat: NumberFormat = NumberFormat.getNumberInstance()
@@ -359,8 +359,7 @@ class CalcTest {
 
     @Test
     @Throws(Exception::class)
-    fun parseMatrixVector()
-    {
+    fun parseMatrixVector() {
         val wordsVector1: List<String> = listOf(
             "]"
         )
@@ -389,6 +388,56 @@ class CalcTest {
         val matrix2 = parseMatrixTest(wordsMatrix2)
         assertEquals(2, matrix2!![0].matrix?.size)
         assertEquals(3, matrix2[0].matrix?.get(0)?.size)
+
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun linSysVector() {
+        val words_A: List<String> = listOf(
+            "[", "1", "2", "3", "]",
+            "[", "1", "1", "1", "]",
+            "[", "3", "3", "1", "]",
+            "]",
+        )
+        val words_b: List<String> = listOf(
+            "2", "2", "0", "]"
+        )
+        val b = parseMatrixTest(words_b)!![0].vector!!
+        assertEquals(3, b.size)
+
+        val A = parseMatrixTest(words_A)!![0].matrix!!
+        assertEquals(3, A.size)
+        assertEquals(3, A[0].size)
+
+        // Copy of A
+        val n = A.size
+        val matrix = Array(n) { r -> DoubleArray(n + 1) { c -> if (c > n - 1) b[r] else A[r][c] } }
+
+        // Dreiecksmatrix
+        for (i in 0 until n - 1) {
+            for (j in i + 1 until n) {
+                val a = matrix[j][i] / matrix[i][i]
+                for (col in i..n) {
+                    matrix[j][col] -= a * matrix[i][col]
+                }
+            }
+        }
+
+        val x = DoubleArray(n) { 0.0 }
+
+        // Rückwärtseinsetzen
+        for (r in n - 1 downTo 0) {
+            var sum = matrix[r][n]
+            for (s in r + 1 until n) {
+                sum -= matrix[r][s] * x[s]
+            }
+            x[r] = sum / matrix[r][r]
+        }
+
+        assertEquals(5.0, x[0], 0.0000001)
+        assertEquals(-6.0, x[1], 0.0000001)
+        assertEquals(3.0, x[2], 0.0000001)
 
     }
 

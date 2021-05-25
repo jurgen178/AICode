@@ -90,6 +90,7 @@ enum class BinaryArgument {
     AND,
     OR,
     XOR,
+    SOLVE,
 }
 
 enum class TernaryArgument {
@@ -744,6 +745,16 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                                 return
                             }
                         }
+                        else
+                        {
+                            // Error
+                            calcData.errorMsg =
+                                context.getString(R.string.calc_error_parsing_matrix, nextWord)
+                            calcRepository.updateData(calcData)
+
+                            // invalid entry
+                            return
+                        }
                     }
                 } else {
                     // Vector
@@ -952,6 +963,11 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 "roll" -> {
                     validArgs = opVarArg(calcData, VariableArguments.ROLL)
+                }
+
+                // Solve
+                "solve" -> {
+                    validArgs = opBinary(calcData, BinaryArgument.SOLVE)
                 }
 
                 // Conditional operations
@@ -1694,6 +1710,10 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                             value = op1.value.toLong().xor(op2.value.toLong()).toDouble()
                         )
                     )
+                }
+                // Lineares Gleichungsssystem.
+                BinaryArgument.SOLVE -> {
+                    calcData.numberList.add(solve(op1, op2))
                 }
             }
         } else {
