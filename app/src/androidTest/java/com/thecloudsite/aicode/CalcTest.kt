@@ -119,71 +119,6 @@ class CalcTest {
 
     }
 
-    data class CalcLine
-        (
-        var desc: String = "",
-        var value: Double = 0.0,
-        var lambda: Int = -1,
-        var definition: String = "",
-        var vector: DoubleArray? = null,
-        var matrix: Array<DoubleArray>? = null,
-
-        ) {
-        operator fun plus(op: CalcLine): CalcLine {
-            val result = CalcLine()
-
-            return if (op.value.isNaN() && value.isNaN()) {
-                // add comments if both NaN
-                CalcLine(
-                    desc = desc + op.desc,
-                    value = value
-                )
-            } else {
-                if (op.value.isNaN() && op.desc.isNotEmpty()) {
-                    // set comment to op2 if exists, same as add comments if both NaN
-                    CalcLine(
-                        desc = desc + op.desc,
-                        value = value
-                    )
-                } else {
-                    // default op, add two numbers
-                    CalcLine(
-                        desc = "",
-                        value = value + op.value
-                    )
-                }
-            }
-
-            return result
-        }
-
-        operator fun times(op: CalcLine): CalcLine {
-            val result = CalcLine()
-
-            if (matrix != null && op.vector != null) {
-                val rows = matrix!!.size
-
-                if (rows > 0 && matrix!![0].size == op.vector!!.size) {
-                    result.vector = DoubleArray(rows) { 0.0 }
-
-                    matrix?.forEachIndexed { row, doubles ->
-                        doubles.forEachIndexed { col, value ->
-                            result.vector!![row] += op.vector!![col] * value
-                        }
-                    }
-                }
-            } else {
-                return CalcLine(
-                    desc = "",
-                    value = value * op.value
-                )
-            }
-
-            return result
-        }
-    }
-
-
     @Test
     @Throws(Exception::class)
     fun matrixTest() {
@@ -439,6 +374,13 @@ class CalcTest {
         assertEquals(-6.0, x[1], 0.0000001)
         assertEquals(3.0, x[2], 0.0000001)
 
+        val A2 = parseMatrixTest(words_A)?.get(0)!!
+        val b2 = parseMatrixTest(words_b)?.get(0)!!
+
+        val x2 = solve(A2, b2).vector!!
+        assertEquals(5.0, x2[0], 0.0000001)
+        assertEquals(-6.0, x2[1], 0.0000001)
+        assertEquals(3.0, x2[2], 0.0000001)
     }
 
 }
