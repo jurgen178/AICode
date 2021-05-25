@@ -328,7 +328,7 @@ class CalcTest {
 
     @Test
     @Throws(Exception::class)
-    fun linSysVector() {
+    fun linSysMatrix() {
         val words_A: List<String> = listOf(
             "[", "1", "2", "3", "]",
             "[", "1", "1", "1", "]",
@@ -381,6 +381,27 @@ class CalcTest {
         assertEquals(5.0, x2[0], 0.0000001)
         assertEquals(-6.0, x2[1], 0.0000001)
         assertEquals(3.0, x2[2], 0.0000001)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun inversMatrix() {
+
+        val words_A: List<String> = listOf(
+            "[", "1", "2", "0", "]",
+            "[", "2", "4", "1", "]",
+            "[", "2", "1", "0", "]",
+            "]",
+        )
+
+        val A = parseMatrixTest(words_A)?.get(0)!!
+
+        val AI = matrixInvers(A).matrix!!
+
+        // -0.33 0 0.66
+        // 0.66 0 -0.33
+        // -2 1 0
+
     }
 
 }

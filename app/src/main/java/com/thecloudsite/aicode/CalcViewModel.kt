@@ -744,9 +744,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                                 // invalid number missing
                                 return
                             }
-                        }
-                        else
-                        {
+                        } else {
                             // Error
                             calcData.errorMsg =
                                 context.getString(R.string.calc_error_parsing_matrix, nextWord)
@@ -1444,7 +1442,13 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     calcData.numberList.add(CalcLine(desc = "", value = op1.value.pow(2)))
                 }
                 UnaryArgument.INV -> {
-                    calcData.numberList.add(CalcLine(desc = "", value = 1 / op1.value))
+                    calcData.numberList.add(
+                        if (op1.matrix != null) {
+                            matrixInvers(op1)
+                        } else {
+                            CalcLine(desc = "", value = 1 / op1.value)
+                        }
+                    )
                 }
                 UnaryArgument.ABS -> {
                     calcData.numberList.add(CalcLine(desc = "", value = op1.value.absoluteValue))

@@ -408,7 +408,6 @@ data class CalcLine
 
         return result
     }
-
 }
 
 fun solve(op1: CalcLine, op2: CalcLine): CalcLine {
@@ -454,6 +453,85 @@ fun solve(op1: CalcLine, op2: CalcLine): CalcLine {
         value = Double.NaN,
         vector = x,
     )
+}
+
+fun matrixInvers(op: CalcLine): CalcLine {
+
+    if (op.matrix != null) {
+        val rows = op.matrix!!.size
+
+        if (rows > 0) {
+            val n = op.matrix!![0].size
+            if (rows == n) {
+                val matrix =
+                    Array(n) { r ->
+                        DoubleArray(2 * n) { c ->
+                            if (c >= n) {
+                                if (r == c - n) {
+                                    1.0
+                                } else {
+                                    0.0
+                                }
+                            } else {
+                                op.matrix!![r][c]
+                            }
+                        }
+                    }
+
+                // https://rosettacode.org/wiki/Gauss-Jordan_matrix_inversion#Kotlin
+
+                var lead = 0
+                val rowCount = matrix.size
+                val colCount = matrix[0].size
+                for (r in 0 until rowCount) {
+                    if (colCount <= lead) {
+                        return CalcLine(value = Double.NaN)
+                    }
+                    var i = r
+
+                    while (matrix[i][lead] == 0.0) {
+                        i++
+                        if (rowCount == i) {
+                            i = r
+                            lead++
+                            if (colCount == lead) {
+                                return CalcLine(value = Double.NaN)
+                            }
+                        }
+                    }
+
+                    val temp = matrix[i]
+                    matrix[i] = matrix[r]
+                    matrix[r] = temp
+
+                    if (matrix[r][lead] != 0.0) {
+                        val div = matrix[r][lead]
+                        for (j in 0 until colCount) {
+                            matrix[r][j] /= div
+                        }
+                    }
+
+                    for (k in 0 until rowCount) {
+                        if (k != r) {
+                            val mult = matrix[k][lead]
+                            for (j in 0 until colCount) {
+                                matrix[k][j] -= matrix[r][j] * mult
+                            }
+                        }
+                    }
+
+                    lead++
+                }
+
+                return CalcLine(
+                    value = Double.NaN,
+                    matrix = Array(n) { r -> DoubleArray(n) { c -> matrix[r][c + n] } }
+                )
+            }
+        }
+    }
+
+    return CalcLine(value = Double.NaN)
 }
 
 fun clone(op: CalcLine): CalcLine {
