@@ -402,6 +402,17 @@ class CalcTest {
         // 0.66 0 -0.33
         // -2 1 0
 
+        assertEquals(-0.33, AI[0][0], 0.01)
+        assertEquals(0.0, AI[0][1], 0.01)
+        assertEquals(0.66, AI[0][2], 0.01)
+
+        assertEquals(0.66, AI[1][0], 0.01)
+        assertEquals(0.0, AI[1][1], 0.01)
+        assertEquals(-0.33, AI[1][2], 0.01)
+
+        assertEquals(-2.0, AI[2][0], 0.01)
+        assertEquals(1.0, AI[2][1], 0.01)
+        assertEquals(0.0, AI[2][2], 0.01)
     }
 
 }

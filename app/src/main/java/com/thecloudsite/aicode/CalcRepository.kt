@@ -338,36 +338,6 @@ data class CalcLine
         val result = CalcLine(value = Double.NaN)
 
         when {
-            // [[Matrix]] / [[Matrix]]
-            matrix != null && op.matrix != null -> {
-                val rowsA = matrix!!.size
-                val rowsB = op.matrix!!.size
-
-                if (rowsA > 0 && rowsA == rowsB) {
-                    val colsA = matrix!![0].size
-                    val colsB = op.matrix!![0].size
-
-                    if (colsA == colsB) {
-                        result.matrix =
-                            Array(rowsA) { r -> DoubleArray(colsB) { 0.0 } }
-
-                        for (row in 0 until rowsA) {
-                            for (col in 0 until colsB) {
-                                result.matrix!![row][col] += matrix!![row][col] / op.matrix!![row][col]
-                            }
-                        }
-                    }
-                }
-            }
-
-            // [Vector] / [Vector]
-            vector != null && op.vector != null -> {
-                if (vector!!.size == op.vector!!.size) {
-                    result.vector =
-                        DoubleArray(vector!!.size) { c -> vector!![c] / op.vector!![c] }
-                }
-            }
-
             // double / [Vector]
             value.isFinite() && op.vector != null -> {
                 result.vector = DoubleArray(op.vector!!.size) { c -> value / op.vector!![c] }
