@@ -207,7 +207,11 @@ fun factorial(n: Int): Long {
     }
 }
 
-fun binom(n: Int, k: Int): Long {
+fun binomUsingFactorial(n: Int, k: Int): Long {
+    return factorial(n) / (factorial(k) * factorial(n - k))
+}
+
+fun binomRecursive(n: Int, k: Int): Long {
 
 //    (n)   (n)
 //    (0) = (n) = 1
@@ -223,9 +227,27 @@ fun binom(n: Int, k: Int): Long {
             0
         }
         else -> {
-            binom(n - 1, k - 1) + binom(n - 1, k)
+            binomRecursive(n - 1, k - 1) + binomRecursive(n - 1, k)
         }
     }
-    //return factorial(n) / (factorial(k) * factorial(n - k))
 
 }
+
+// Using product rule.
+fun binom(n: Int, k: Int): Long {
+    var result = 1L
+
+    val kMin = if (2 * k > n) {
+        n - k
+    } else {
+        k
+    }
+    for (i in 1..kMin) {
+        result =
+            result * (n + 1 - i) / i // do not use result *= (n + 1 - i) / i, as it gets a wrong result
+    }
+
+    return result
+}
+
+
