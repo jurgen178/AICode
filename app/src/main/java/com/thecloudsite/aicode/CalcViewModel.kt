@@ -67,6 +67,7 @@ enum class UnaryArgument {
     ROUND2, // Round to two digits
     ROUND4, // Round to four digits
     FRAC,
+    FACTORIAL,
     TOSTR,  // toStr
     LN,
     EX,
@@ -91,6 +92,7 @@ enum class BinaryArgument {
     OR,
     XOR,
     SOLVE,
+    BINOM,
 }
 
 enum class TernaryArgument {
@@ -106,8 +108,6 @@ enum class QuadArgument {
     IFLT, // if less then
 }
 
-//val wordListRegex =
-//  "\"|\'|[+]|-|[*]|/|^|:|;|:loop|do|goto|if|rcl|sto|while|validate|clear|depth|drop|dup|over|swap|rot|pick|roll|sin|cos|tan|arcsin|arccos|arctan|sinh|cosh|tanh|arcsinh|arccosh|arctanh|ln|log|sq|sqrt|pow|per|perc|inv|abs|int|round|round2|round4|frac|tostr|sum|var|pi|p|e".toRegex()
 // List of chars that cannot be used as definitions.
 val wordListRegex = "[\"':;(){}\\[\\]]".toRegex()
 
@@ -295,7 +295,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
             val labelMatch = getRegexOneGroup(word, labelRegex)
             // is label?
             if (labelMatch != null) {
-                val label = labelMatch.toLowerCase(Locale.ROOT)
+                val label = labelMatch.lowercase(Locale.ROOT)
 
                 if (labelMap.containsKey(label)) {
                     calcData.errorMsg = context.getString(R.string.calc_duplicate_label, labelMatch)
@@ -308,7 +308,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     labelMap[label] = index
                 }
             } else {
-                when (word.toLowerCase(Locale.ROOT)) {
+                when (word.lowercase(Locale.ROOT)) {
                     // disable loop check
                     ":loop" -> {
                         checkLoop = false
@@ -327,7 +327,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 val isWhile = whileIfMatch.first.equals("while", true)
                 val compare = whileIfMatch.second
                 val labelStr = whileIfMatch.third
-                val label = labelStr.toLowerCase(Locale.ROOT)
+                val label = labelStr.lowercase(Locale.ROOT)
 
                 if (!compare.matches("eq|le|lt|ge|gt".toRegex())) {
                     calcData.errorMsg = if (isWhile) {
@@ -478,7 +478,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 val isWhile = whileIfMatch.first.equals("while", true)
                 val compare = whileIfMatch.second
                 val labelStr = whileIfMatch.third
-                val label = labelStr.toLowerCase(Locale.ROOT)
+                val label = labelStr.lowercase(Locale.ROOT)
 
                 // already checked in validation, kept as runtime test-case
                 if (!labelMap.containsKey(label)) {
@@ -501,7 +501,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     val op1 = calcData.numberList.removeLast()
                     val op2 = calcData.numberList.removeLast()
 
-                    when (compare.toLowerCase(Locale.ROOT)) {
+                    when (compare.lowercase(Locale.ROOT)) {
 
                         "ge" -> {
                             if (op2.value >= op1.value) {
@@ -569,7 +569,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 getRegexOneGroup(word, gotoRegex)
             if (gotoMatch != null) {
                 loopCounter++
-                val label = gotoMatch.toLowerCase(Locale.ROOT)
+                val label = gotoMatch.lowercase(Locale.ROOT)
 
                 if (!labelMap.containsKey(label)) {
                     calcData.errorMsg = context.getString(R.string.calc_missing_label, gotoMatch)
@@ -621,7 +621,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             // definition function?
-            val wordLwr = word.toLowerCase(Locale.ROOT)
+            val wordLwr = word.lowercase(Locale.ROOT)
             if (definitionMap.containsKey(wordLwr)) {
                 loopCounter++
 
@@ -638,7 +638,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
             if (definitionMatch != null) {
                 loopCounter++
 
-                val definition = definitionMatch.toLowerCase(Locale.ROOT)
+                val definition = definitionMatch.lowercase(Locale.ROOT)
                 if (definitionMap.containsKey(definition)) {
                     loopCounter++
 
@@ -901,6 +901,9 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 "frac" -> {
                     validArgs = opUnary(calcData, UnaryArgument.FRAC)
                 }
+                "factorial", "!" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.FACTORIAL)
+                }
                 "tostr" -> {
                     validArgs = opUnary(calcData, UnaryArgument.TOSTR)
                 }
@@ -915,6 +918,9 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 "perc" -> {
                     validArgs = opBinary(calcData, BinaryArgument.PERC)
+                }
+                "binom" -> {
+                    validArgs = opBinary(calcData, BinaryArgument.BINOM)
                 }
 
                 // logic operations
@@ -1522,6 +1528,14 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                         calcData.numberList.add(op1)
                     }
                 }
+                UnaryArgument.FACTORIAL -> {
+                    calcData.numberList.add(
+                        CalcLine(
+                            desc = "",
+                            value = factorial(op1.value.toInt()).toDouble()
+                        )
+                    )
+                }
                 UnaryArgument.TOSTR -> {
                     // Convert the value to string.
                     if (op1.value.isFinite()) {
@@ -1688,6 +1702,15 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                         CalcLine(
                             desc = "∆% ",
                             value = (op2.value - op1.value) / op1.value * 100
+                        )
+                    )
+                }
+                // Binomial coefficient
+                BinaryArgument.BINOM -> {
+                    calcData.numberList.add(
+                        CalcLine(
+                            desc = "",
+                            value = binom(op1.value.toInt(), op2.value.toInt()).toDouble()
                         )
                     )
                 }

@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
     setContentView(view)
 
     val symbolString = intent.getStringExtra("symbol")
-    symbol = symbolString?.toUpperCase(Locale.ROOT) ?: ""
+    symbol = symbolString?.uppercase(Locale.ROOT) ?: ""
 
     supportActionBar?.setDisplayHomeAsUpEnabled(true)
 

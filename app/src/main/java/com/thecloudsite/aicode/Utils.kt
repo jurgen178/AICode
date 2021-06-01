@@ -198,3 +198,34 @@ fun getDisplayString(value: Long, radix: Int): String {
         separator = "",
     )
 }
+
+fun factorial(n: Int): Long {
+    return if (n <= 0) {
+        1
+    } else {
+        n * factorial(n - 1)
+    }
+}
+
+fun binom(n: Int, k: Int): Long {
+
+//    (n)   (n)
+//    (0) = (n) = 1
+//
+//    (n+1)   (n)   ( n )
+//    (k+1) = (k) + (k+1)
+
+    return when {
+        k <= 0 -> {
+            1
+        }
+        n <= 0 -> {
+            0
+        }
+        else -> {
+            binom(n - 1, k - 1) + binom(n - 1, k)
+        }
+    }
+    //return factorial(n) / (factorial(k) * factorial(n - k))
+
+}

@@ -54,6 +54,27 @@ class CalcTest {
         assertEquals(Pair(null, 1), frac(100000000000000.0))
     }
 
+    fun binomReference(n: Int, k: Int): Long {
+        return factorial(n) / (factorial(k) * factorial(n - k))
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun binomTest() {
+
+        assertEquals(120, factorial(5))
+
+        assertEquals(1, binom(0, 0))
+        assertEquals(6, binom(4, 2))
+        assertEquals(10, binom(5, 2))
+
+        for (n in 0..10) {
+            for (k in 0..n) {
+                assertEquals(binomReference(n, k), binom(n, k))
+            }
+        }
+    }
+
     @Test
     @Throws(Exception::class)
     fun bitTest() {
