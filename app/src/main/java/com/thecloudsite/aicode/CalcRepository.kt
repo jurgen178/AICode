@@ -111,12 +111,20 @@ data class CalcLine
                 result.value = value
             }
 
-            // set comment to op if exists, same as add comments if both NaN
+            // add comment to value
             op.value.isNaN() && op.desc.isNotEmpty() -> {
                 result.desc = desc + op.desc
                 result.value = value
                 result.vector = vector
                 result.matrix = matrix
+            }
+
+            // add value to comment
+            value.isNaN() && desc.isNotEmpty() -> {
+                result.desc = desc + op.desc
+                result.value = op.value
+                result.vector = op.vector
+                result.matrix = op.matrix
             }
 
             // default op, add two numbers

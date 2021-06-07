@@ -1710,7 +1710,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     calcData.numberList.add(
                         CalcLine(
                             desc = "",
-                            value = binom(op1.value.toInt(), op2.value.toInt()).toDouble()
+                            value = binom(op1.value.toInt(), op2.value.toInt())
                         )
                     )
                 }

@@ -234,8 +234,25 @@ fun binomRecursive(n: Int, k: Int): Long {
 }
 
 // Using product rule.
-fun binom(n: Int, k: Int): Long {
+fun binomLong(n: Int, k: Int): Long {
     var result = 1L
+
+    val kMin = if (2 * k > n) {
+        n - k
+    } else {
+        k
+    }
+    for (i in 1..kMin) {
+        result =
+            result * (n + 1 - i) / i // do not use result *= (n + 1 - i) / i, as it gets a wrong result
+    }
+
+    return result
+}
+
+// Using product rule.
+fun binom(n: Int, k: Int): Double {
+    var result = 1.0
 
     val kMin = if (2 * k > n) {
         n - k

@@ -60,16 +60,18 @@ class CalcTest {
 
         assertEquals(120, factorial(5))
 
-        assertEquals(1, binom(0, 0))
-        assertEquals(6, binom(4, 2))
-        assertEquals(10, binom(5, 2))
+        val delta = 0.00000001
+        assertEquals(1.0, binom(0, 0), delta)
+        assertEquals(6.0, binom(4, 2), delta)
+        assertEquals(10.0, binom(5, 2), delta)
 
         // Test for large numbers
-        assertEquals(118264581564861424, binom(60, 30))
+        assertEquals(118264581564861424.0, binom(60, 30), delta)
+        assertEquals(6.144847121413617E28, binom(100, 55), delta)
 
         for (n in 0..10) {
             for (k in 0..n) {
-                assertEquals(binomUsingFactorial(n, k), binom(n, k))
+                assertEquals(binomUsingFactorial(n, k).toDouble(), binom(n, k), delta)
             }
         }
     }
