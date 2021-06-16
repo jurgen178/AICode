@@ -25,9 +25,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.PreferenceManager
 import java.io.FileOutputStream
-import kotlin.math.absoluteValue
-import kotlin.math.roundToInt
-import kotlin.math.sign
+import kotlin.math.*
 
 fun setBackgroundColor(
     view: View,
@@ -267,4 +265,41 @@ fun binom(n: Int, k: Int): Double {
     return result
 }
 
+fun tau(x: Double): Double {
 
+    // https://de.wikipedia.org/wiki/Fehlerfunktion#Numerische_Berechnung
+
+    val t = 1 / (1 + 0.5 * x.absoluteValue)
+
+    return t * exp(
+        -x * x - 1.26551223 + 1.00002368 * t + 0.37409196 * t * t + 0.09678418 * t * t * t
+                - 0.18628806 * t * t * t * t + 0.27886807 * t * t * t * t * t
+                - 1.13520398 * t * t * t * t * t * t + 1.48851587 * t * t * t * t * t * t * t
+                - 0.82215223 * t * t * t * t * t * t * t * t + 0.17087277 * t * t * t * t * t * t * t * t * t
+    )
+}
+
+fun erf(x: Double): Double {
+
+    // https://de.wikipedia.org/wiki/Fehlerfunktion#Numerische_Berechnung
+
+    return if (x >= 0) {
+        1 - tau(x)
+    } else {
+        tau(-x) - 1
+    }
+}
+
+// P(X<x)
+fun normal(x: Double, mean: Double, sigma: Double): Double {
+
+    // https://de.wikipedia.org/wiki/Normalverteilung#Verteilungsfunktion
+
+    return 0.5 * (1 + erf((x - mean) / sigma / sqrt(2.0)))
+}
+
+// P(a<X<b)=P(X<b)-P(X<a)
+fun normalcdf(a: Double, b: Double, mean: Double, sigma: Double): Double {
+
+    return normal(b, mean, sigma) - normal(a, mean, sigma)
+}

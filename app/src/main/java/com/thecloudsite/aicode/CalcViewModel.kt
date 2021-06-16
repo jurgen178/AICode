@@ -75,6 +75,7 @@ enum class UnaryArgument {
     ZX,
     NOT,
     COMPLEMENT,
+    ERF,
 }
 
 enum class BinaryArgument {
@@ -922,6 +923,9 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 "binom" -> {
                     validArgs = opBinary(calcData, BinaryArgument.BINOM)
                 }
+                "erf" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.ERF)
+                }
 
                 // logic operations
                 "and" -> {
@@ -1620,6 +1624,9 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                             value = op1.value.toLong().inv().toDouble()
                         )
                     )
+                }
+                UnaryArgument.ERF -> {
+                    calcData.numberList.add(CalcLine(desc = "", value = erf(op1.value)))
                 }
             }
         } else {

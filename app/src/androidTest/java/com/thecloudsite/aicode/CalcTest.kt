@@ -26,6 +26,8 @@ import kotlin.math.sqrt
 @RunWith(AndroidJUnit4::class)
 class CalcTest {
 
+    val delta = 0.00000001
+
     @Test
     @Throws(Exception::class)
     fun fracTest() {
@@ -60,7 +62,6 @@ class CalcTest {
 
         assertEquals(120, factorial(5))
 
-        val delta = 0.00000001
         assertEquals(1.0, binom(0, 0), delta)
         assertEquals(6.0, binom(4, 2), delta)
         assertEquals(10.0, binom(5, 2), delta)
@@ -89,6 +90,21 @@ class CalcTest {
                 assertEquals(binomUsingFactorial(n, k), binomRecursive(n, k))
             }
         }
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun normalDistTest() {
+
+        // P(37<X<48)
+        assertEquals(0.40605601685011977, normalcdf(37.0, 48.0, 40.0, 10.0), delta)
+
+        // P(X>45)
+        assertEquals(0.30853751691860176, 1 - normal(45.0, 40.0, 10.0), delta)
+
+        // P(X<26)
+        assertEquals(0.08075666217906186, normal(26.0, 40.0, 10.0), delta)
+
     }
 
     @Test
