@@ -1262,6 +1262,43 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
         calcRepository.updateData(calcData)
     }
 
+    fun addEEX() {
+        val calcData = calcData.value!!
+
+        // Add 'E' if not already there and at least one digit is available.
+        if ("\\d+".toRegex().containsMatchIn(calcData.editline) && !calcData.editline.contains('E')) {
+            addNum('E')
+        }
+    }
+
+    fun sign() {
+        val calcData = calcData.value!!
+
+        // Add/change '-' if in edit mode for 'E'
+        // 1E-3
+        if (calcData.editMode && calcData.editline.contains('E')) {
+
+            calcData.editline = when {
+                calcData.editline.contains("E-") -> {
+                    calcData.editline.replace("E-", "E+")
+                }
+                calcData.editline.contains("E+") -> {
+                    calcData.editline.replace("E+", "E-")
+                }
+                else -> {
+                    calcData.editline.replace("E", "E-")
+                }
+            }
+
+            calcRepository.updateData(calcData)
+
+        } else {
+
+            opUnary(UnaryArgument.SIGN)
+
+        }
+    }
+
     fun opVarArg(op: VariableArguments): Boolean {
         val calcData = submitEditline(calcData.value!!)
         return opVarArg(calcData, op)
@@ -1461,7 +1498,12 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     )
                 }
                 UnaryArgument.ABS -> {
-                    calcData.numberList.add(CalcLine(desc = "", value = op1.value.absoluteValue))
+                    calcData.numberList.add(
+                        CalcLine(
+                            desc = "",
+                            value = op1.value.absoluteValue
+                        )
+                    )
                 }
                 UnaryArgument.SIGN -> {
                     calcData.numberList.add(-op1)
@@ -1554,37 +1596,67 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     }
                 }
                 UnaryArgument.SIN -> {
-                    calcData.numberList.add(CalcLine(desc = "", value = sin(op1.value * radian)))
+                    calcData.numberList.add(
+                        CalcLine(
+                            desc = "",
+                            value = sin(op1.value * radian)
+                        )
+                    )
                 }
                 UnaryArgument.SINH -> {
                     calcData.numberList.add(CalcLine(desc = "", value = sinh(op1.value)))
                 }
                 UnaryArgument.COS -> {
-                    calcData.numberList.add(CalcLine(desc = "", value = cos(op1.value * radian)))
+                    calcData.numberList.add(
+                        CalcLine(
+                            desc = "",
+                            value = cos(op1.value * radian)
+                        )
+                    )
                 }
                 UnaryArgument.COSH -> {
                     calcData.numberList.add(CalcLine(desc = "", value = cosh(op1.value)))
                 }
                 UnaryArgument.TAN -> {
-                    calcData.numberList.add(CalcLine(desc = "", value = tan(op1.value * radian)))
+                    calcData.numberList.add(
+                        CalcLine(
+                            desc = "",
+                            value = tan(op1.value * radian)
+                        )
+                    )
                 }
                 UnaryArgument.TANH -> {
                     calcData.numberList.add(CalcLine(desc = "", value = tanh(op1.value)))
                 }
                 UnaryArgument.ARCSIN -> {
-                    calcData.numberList.add(CalcLine(desc = "", value = asin(op1.value) / radian))
+                    calcData.numberList.add(
+                        CalcLine(
+                            desc = "",
+                            value = asin(op1.value) / radian
+                        )
+                    )
                 }
                 UnaryArgument.ARCSINH -> {
                     calcData.numberList.add(CalcLine(desc = "", value = asinh(op1.value)))
                 }
                 UnaryArgument.ARCCOS -> {
-                    calcData.numberList.add(CalcLine(desc = "", value = acos(op1.value) / radian))
+                    calcData.numberList.add(
+                        CalcLine(
+                            desc = "",
+                            value = acos(op1.value) / radian
+                        )
+                    )
                 }
                 UnaryArgument.ARCCOSH -> {
                     calcData.numberList.add(CalcLine(desc = "", value = acosh(op1.value)))
                 }
                 UnaryArgument.ARCTAN -> {
-                    calcData.numberList.add(CalcLine(desc = "", value = atan(op1.value) / radian))
+                    calcData.numberList.add(
+                        CalcLine(
+                            desc = "",
+                            value = atan(op1.value) / radian
+                        )
+                    )
                 }
                 UnaryArgument.ARCTANH -> {
                     calcData.numberList.add(CalcLine(desc = "", value = atanh(op1.value)))
@@ -1674,7 +1746,12 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     calcData.numberList.add(op1 / op2)
                 }
                 BinaryArgument.POW -> {
-                    calcData.numberList.add(CalcLine(desc = "", value = op1.value.pow(op2.value)))
+                    calcData.numberList.add(
+                        CalcLine(
+                            desc = "",
+                            value = op1.value.pow(op2.value)
+                        )
+                    )
                 }
                 BinaryArgument.SWAP -> {
                     calcData.numberList.add(op2)

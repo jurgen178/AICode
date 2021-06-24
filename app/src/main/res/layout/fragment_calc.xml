@@ -132,6 +132,16 @@
         />
 
     <TextView
+        android:id="@+id/calc_eex"
+        android:text="EEX"
+        app:layout_constraintBottom_toTopOf="@id/guideline789"
+        app:layout_constraintEnd_toStartOf="@id/guidelineX4"
+        app:layout_constraintStart_toEndOf="@id/guidelineX3"
+        app:layout_constraintTop_toBottomOf="@+id/guidelineEnter"
+        style="@style/calc_style"
+        />
+
+    <TextView
         android:id="@+id/calc_7"
         android:text="7"
         app:layout_constraintBottom_toTopOf="@id/guideline456"
