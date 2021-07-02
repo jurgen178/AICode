@@ -26,7 +26,7 @@ import kotlin.math.sqrt
 @RunWith(AndroidJUnit4::class)
 class CalcTest {
 
-    val delta = 0.00000001
+    private val delta = 0.00000001
 
     @Test
     @Throws(Exception::class)
