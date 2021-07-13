@@ -222,7 +222,7 @@ class CalcTest {
         }
     }
 
-    fun parseMatrixTest(words: List<String>): MutableList<CalcLine>? {
+    private fun parseMatrixTest(words: List<String>): MutableList<CalcLine>? {
 
         val calcData: MutableList<CalcLine> = mutableListOf()
         val numberFormat: NumberFormat = NumberFormat.getNumberInstance()
