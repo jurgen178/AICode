@@ -362,7 +362,7 @@ class CalcProgFragment(stockSymbol: String = "") : CalcBaseFragment(stockSymbol)
 
     if (codeMapStr.isEmpty()) {
 
-      // Default only for the first 16 entries.
+      // Default only for the first 17 entries.
       val resList = listOf(
         Triple("F1", R.string.calc_F1_code, R.string.calc_F1_desc),
         Triple("F2", R.string.calc_F2_code, R.string.calc_F2_desc),
@@ -380,6 +380,7 @@ class CalcProgFragment(stockSymbol: String = "") : CalcBaseFragment(stockSymbol)
         Triple("F14", R.string.calc_F14_code, R.string.calc_F14_desc),
         Triple("F15", R.string.calc_F15_code, R.string.calc_F15_desc),
         Triple("F16", R.string.calc_F16_code, R.string.calc_F16_desc),
+        Triple("F17", R.string.calc_F17_code, R.string.calc_F17_desc),
       )
 
       resList.forEach { entry ->
