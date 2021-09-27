@@ -1266,7 +1266,9 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
         val calcData = calcData.value!!
 
         // Add 'E' if not already there and at least one digit is available.
-        if ("\\d+".toRegex().containsMatchIn(calcData.editline) && !calcData.editline.contains('E')) {
+        if ("\\d+".toRegex()
+                .containsMatchIn(calcData.editline) && !calcData.editline.contains('E')
+        ) {
             addNum('E')
         }
     }
