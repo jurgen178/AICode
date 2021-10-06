@@ -23,8 +23,8 @@ android {
     applicationId 'com.thecloudsite.aicode'
     minSdkVersion 29
     targetSdkVersion 30
-    versionCode 3
-    versionName "3"
+    versionCode 4
+    versionName "4"
     testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
   }
   buildTypes {
@@ -73,11 +73,11 @@ dependencies {
 
   // Add the Firebase SDK for Google Analytics.
   implementation 'com.google.firebase:firebase-config-ktx:21.0.1'
-  implementation 'com.google.firebase:firebase-analytics-ktx:19.0.1'
+  implementation 'com.google.firebase:firebase-analytics-ktx:19.0.2'
   // Add the Firebase Crashlytics SDK.
-  implementation 'com.google.firebase:firebase-crashlytics-ktx:18.2.1'
+  implementation 'com.google.firebase:firebase-crashlytics-ktx:18.2.3'
   // Add the dependency for the Performance Monitoring library
-  implementation 'com.google.firebase:firebase-perf:20.0.2'
+  implementation 'com.google.firebase:firebase-perf:20.0.3'
   // Add the Realtime Database SDK
   implementation 'com.google.firebase:firebase-database-ktx:20.0.2'
   implementation 'androidx.cardview:cardview:1.0.0'
