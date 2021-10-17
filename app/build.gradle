@@ -115,7 +115,7 @@ dependencies {
   implementation 'com.google.code.gson:gson:2.8.6'
 
   // Testing
-  testImplementation 'junit:junit:4.13'
+  testImplementation 'junit:junit:4.13.1'
   androidTestImplementation "androidx.arch.core:core-testing:$rootProject.coreTestingVersion"
   androidTestImplementation('androidx.test.espresso:espresso-core:3.2.0', {
     exclude group: 'com.android.support', module: 'support-annotations'
