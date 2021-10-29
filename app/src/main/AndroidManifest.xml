@@ -15,7 +15,7 @@
     <activity
         android:name=".MainActivity"
         android:label="@string/calc_title"
-        >
+        android:exported="true">
     <!--
             android:theme="@style/AppTheme.Launcher"
     -->

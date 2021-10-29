@@ -18,11 +18,11 @@ android {
       v2SigningEnabled true
     }
   }
-  compileSdkVersion 30
+  compileSdkVersion 31
   defaultConfig {
     applicationId 'com.thecloudsite.aicode'
-    minSdkVersion 29
-    targetSdkVersion 30
+    minSdkVersion 31
+    targetSdkVersion 31
     versionCode 4
     versionName "4"
     testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -69,7 +69,7 @@ dependencies {
   implementation 'com.google.android.material:material:1.4.0'
   implementation 'androidx.preference:preference-ktx:1.1.1'
   implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-  implementation "androidx.core:core-ktx:1.6.0"
+  implementation "androidx.core:core-ktx:1.7.0"
 
   // Add the Firebase SDK for Google Analytics.
   implementation 'com.google.firebase:firebase-config-ktx:21.0.1'
