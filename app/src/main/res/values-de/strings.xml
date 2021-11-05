@@ -15,8 +15,6 @@ limitations under the License. -->
 <resources>
   <string name="import_error">Die ausgewählte Datei konnte nicht geladen werden.\n%1$s</string>
   <string name="export_error">Ein Fehler beim Speichern ist aufgetreten:\n%1$s</string>
-  <string name="export_select_file">Wählen Sie eine Datei aus</string>
-  <string name="import_select_file">Wählen Sie eine Datei aus</string>
   <string name="app_theme">Farbdesign</string>
   <string name="calc_title">AI code</string>
   <string name="calc_copy">Kopieren</string>

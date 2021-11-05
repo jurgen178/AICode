@@ -74,18 +74,6 @@ class CalcBinaryFragment(stockSymbol: String = "") : CalcBaseFragment(stockSymbo
         _binding = null
     }
 
-    private fun touchHelperFunction(
-        view: View,
-        event: MotionEvent
-    ) {
-        return touchHelper(
-            view,
-            event,
-            requireContext().getColor(R.color.calcFunctionPressed),
-            requireContext().getColor(R.color.calcFunction)
-        )
-    }
-
     override fun onViewCreated(
         view: View,
         savedInstanceState: Bundle?

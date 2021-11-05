@@ -17,8 +17,6 @@ limitations under the License. -->
 
   <string name="import_error">The selected file could not be imported.\n%1$s</string>
   <string name="export_error">An error occurred while exporting the data:\n%1$s</string>
-  <string name="export_select_file">Select a file</string>
-  <string name="import_select_file">Select a file</string>
   <string name="app_theme">App Theme</string>
   <string name="calc_title">AI code</string>
   <string name="calc_copy">Copy</string>

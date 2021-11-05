@@ -28,7 +28,7 @@ import java.text.DecimalFormatSymbols
 import java.text.NumberFormat
 import java.util.Locale
 
-open class CalcBaseFragment(val stockSymbol: String) : Fragment() {
+open class CalcBaseFragment(private val stockSymbol: String) : Fragment() {
 
     lateinit var calcViewModel: CalcViewModel
     lateinit var calcAdapter: CalcAdapter
@@ -37,7 +37,7 @@ open class CalcBaseFragment(val stockSymbol: String) : Fragment() {
     var radix: Int = 10
     var binaryDisplay = false
     var separatorChar = ','
-    var numberFormat: NumberFormat = NumberFormat.getNumberInstance()
+    private var numberFormat: NumberFormat = NumberFormat.getNumberInstance()
 
     fun touchHelper(
         view: View,
@@ -59,9 +59,6 @@ open class CalcBaseFragment(val stockSymbol: String) : Fragment() {
     }
 
     open fun updateCalcAdapter() {
-    }
-
-    open fun updateStockListSpinner(symbol: String) {
     }
 
     override fun onViewCreated(

@@ -1963,7 +1963,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
         calcRepository.updateData(calcData)
     }
 
-    fun submitEditline(calcData: CalcData, radix: Int = 0, desc: String = ""): CalcData {
+    private fun submitEditline(calcData: CalcData, radix: Int = 0, desc: String = ""): CalcData {
         if (calcData.editMode) {
 
             try {

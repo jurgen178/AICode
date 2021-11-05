@@ -179,14 +179,11 @@ class CalcTest {
         val rows = 2
         val cols = 3
 
-        val matrix: Array<DoubleArray>
-        matrix = Array(rows) { r -> DoubleArray(cols) { c -> (r * cols + c).toDouble() } }
+        val matrix: Array<DoubleArray> = Array(rows) { r -> DoubleArray(cols) { c -> (r * cols + c).toDouble() } }
 
-        val vector: DoubleArray
-        vector = DoubleArray(cols) { c -> c.toDouble() }
+        val vector: DoubleArray = DoubleArray(cols) { c -> c.toDouble() }
 
-        val vectorResult: DoubleArray
-        vectorResult = DoubleArray(rows) { 0.0 }
+        val vectorResult: DoubleArray = DoubleArray(rows) { 0.0 }
 
         matrix.forEachIndexed { row, doubles ->
             doubles.forEachIndexed { col, value ->
