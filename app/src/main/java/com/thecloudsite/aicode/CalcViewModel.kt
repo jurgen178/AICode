@@ -141,7 +141,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
     var radian = 1.0
     var separatorChar = ','
     var numberFormat: NumberFormat = NumberFormat.getNumberInstance()
-
+    var sciFormat = false
     val codeMap: MutableMap<String, CodeType> = mutableMapOf()
 
     init {
@@ -1270,6 +1270,9 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 .containsMatchIn(calcData.editline) && !calcData.editline.contains('E')
         ) {
             addNum('E')
+        } else {
+            sciFormat = !sciFormat
+            updateData()
         }
     }
 

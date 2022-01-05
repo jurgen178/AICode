@@ -27,6 +27,7 @@ import androidx.core.text.scale
 import androidx.recyclerview.widget.RecyclerView
 import com.thecloudsite.aicode.CalcAdapter.CalcViewHolder
 import com.thecloudsite.aicode.databinding.CalcItemBinding
+import java.text.DecimalFormatSymbols
 import java.text.NumberFormat
 
 class CalcAdapter internal constructor(
@@ -38,6 +39,8 @@ class CalcAdapter internal constructor(
     private var numberFormat: NumberFormat = NumberFormat.getNumberInstance()
     private var radix = 10
     private var binaryDisplay = false
+    private var separatorChar = DecimalFormatSymbols.getInstance().decimalSeparator
+    private var sciFormat: Boolean = false
 
     class CalcViewHolder(
         val binding: CalcItemBinding
@@ -105,7 +108,7 @@ class CalcAdapter internal constructor(
                                                 separator = " ",
                                                 postfix = "]",
                                             ) {
-                                                numberFormat.format(
+                                                displayValue(
                                                     it
                                                 )
                                             }
@@ -121,7 +124,7 @@ class CalcAdapter internal constructor(
                                                     separator = " ",
                                                     postfix = "]",
                                                 ) {
-                                                    numberFormat.format(
+                                                    displayValue(
                                                         it
                                                     )
                                                 }
@@ -137,7 +140,7 @@ class CalcAdapter internal constructor(
                                         }
 
                                         else -> {
-                                            numberFormat.format(current.value)
+                                            displayValue(current.value)
                                         }
                                     }
                                 )
@@ -168,11 +171,21 @@ class CalcAdapter internal constructor(
             }
     }
 
+    private fun displayValue(value: Double): String {
+        return if (sciFormat) {
+            value.toString().replace('.', separatorChar)
+        } else {
+            numberFormat.format(value)
+        }
+    }
+
     fun updateData(
         calcData: CalcData,
         numberFormat: NumberFormat,
         radix: Int,
-        binaryDisplay: Boolean
+        binaryDisplay: Boolean,
+        separatorChar: Char,
+        sciFormat: Boolean
     ) {
 
         // add a copy of the data
@@ -188,6 +201,8 @@ class CalcAdapter internal constructor(
         this.calcData.editline = calcData.editline
         this.radix = radix
         this.binaryDisplay = binaryDisplay
+        this.sciFormat = sciFormat
+        this.separatorChar = separatorChar
         this.numberFormat = if (binaryDisplay) {
             val n: NumberFormat = numberFormat.clone() as NumberFormat
             n.minimumFractionDigits = 0

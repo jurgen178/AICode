@@ -78,7 +78,7 @@ open class CalcBaseFragment(private val stockSymbol: String) : Fragment() {
         calcViewModel.calcData.observe(viewLifecycleOwner, Observer { data ->
             if (data != null) {
 
-                calcAdapter.updateData(data, numberFormat, radix, binaryDisplay)
+                calcAdapter.updateData(data, numberFormat, radix, binaryDisplay, separatorChar, calcViewModel.sciFormat)
 
                 updateCalcAdapter()
             }

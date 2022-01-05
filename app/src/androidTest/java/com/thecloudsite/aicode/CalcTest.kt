@@ -20,6 +20,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.text.DecimalFormatSymbols
 import java.text.NumberFormat
 import kotlin.math.sqrt
 
@@ -49,11 +50,37 @@ class CalcTest {
         // null result
 
         // infinity
-        assertEquals(Pair(null, 1), frac(1 / 0.0))
+        assertEquals(Pair(null, 0), frac(1 / 0.0))
         // NaN
-        assertEquals(Pair(null, 1), frac(sqrt(-1.0)))
+        assertEquals(Pair(null, 0), frac(sqrt(-1.0)))
         // large number
-        assertEquals(Pair(null, 1), frac(100000000000000.0))
+        assertEquals(Pair(null, 0), frac(100000000000000.0))
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun numberDisplayTest() {
+
+        val numberFormat: NumberFormat = NumberFormat.getNumberInstance()
+        //numberFormat.minimumFractionDigits = 0
+        //numberFormat.maximumFractionDigits = 340
+
+        val numA = 123.4
+        val numB = 12345678901234567890.1
+
+        val separatorChar = DecimalFormatSymbols.getInstance().decimalSeparator
+
+        val disp1A = numA.toString()
+        val disp1Ar = numA.toString().replace('.', separatorChar)
+        val disp1B = numB.toString()
+        val disp2A = numberFormat.format(numA)
+        val disp2B = numberFormat.format(numB)
+
+        assertEquals("123.4", disp1A)
+        assertEquals("123,4", disp1Ar)
+        assertEquals("1.2345678901234567E19", disp1B)
+        assertEquals("123,4", disp2A)
+        assertEquals("12.345.678.901.234.567.000", disp2B)
     }
 
     @Test
@@ -146,14 +173,13 @@ class CalcTest {
 
         val valueB = 3735928559L
         val s3 = getDisplayString(valueB, 2)
-        assertEquals("11011110101011011011111011101111", s1)
+        assertEquals("11011110101011011011111011101111", s3)
 
         val blockSizeB = getBlockSize(valueB)
         val valueInvertedB = invertBits(valueB, blockSizeB)
 
         val s4 = getDisplayString(valueInvertedB, 2)
-        assertEquals("1111111111111111111111111111111100100001010100100100000100010000", s4)
-
+        assertEquals("00100001010100100100000100010000", s4)
     }
 
     @Test
