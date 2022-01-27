@@ -1271,6 +1271,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
         ) {
             addNum('E')
         } else {
+            // Toggle scientific format display when EEX is clicked outside of a number.
             sciFormat = !sciFormat
             updateData()
         }

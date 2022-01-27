@@ -89,7 +89,7 @@ open class CalcBaseFragment(private val stockSymbol: String) : Fragment() {
         super.onResume()
 
         val sharedPreferences =
-            PreferenceManager.getDefaultSharedPreferences(activity /* Activity context */)
+            PreferenceManager.getDefaultSharedPreferences(requireContext() /* Activity context */)
 
         when (sharedPreferences.getString("calc_format_decimal_separator", "0")) {
             "0" -> {

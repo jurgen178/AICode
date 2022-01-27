@@ -197,7 +197,7 @@ class CalcBinaryFragment(stockSymbol: String = "") : CalcBaseFragment(stockSymbo
         super.onPause()
 
         val sharedPreferences =
-            PreferenceManager.getDefaultSharedPreferences(activity /* Activity context */)
+            PreferenceManager.getDefaultSharedPreferences(requireContext() /* Activity context */)
 
         sharedPreferences
             .edit()
