@@ -18,11 +18,11 @@ android {
       v2SigningEnabled true
     }
   }
-  compileSdkVersion 31
+  compileSdkVersion 32
   defaultConfig {
     applicationId 'com.thecloudsite.aicode'
     minSdkVersion 31
-    targetSdkVersion 31
+    targetSdkVersion 32
     versionCode 4
     versionName "4"
     testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -38,10 +38,12 @@ android {
       }
     }
   }
-
   packagingOptions {
-    exclude 'META-INF/atomicfu.kotlin_module'
+    resources {
+      excludes += ['META-INF/atomicfu.kotlin_module']
+    }
   }
+
 
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_8
