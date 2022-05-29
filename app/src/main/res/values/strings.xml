@@ -17,8 +17,6 @@ limitations under the License. -->
 
   <string name="import_error">The selected file could not be imported.\n%1$s</string>
   <string name="export_error">An error occurred while exporting the data:\n%1$s</string>
-  <string name="export_select_file">Select a file</string>
-  <string name="import_select_file">Select a file</string>
   <string name="app_theme">App Theme</string>
   <string name="calc_title">AI code</string>
   <string name="calc_copy">Copy</string>
@@ -71,14 +69,16 @@ limitations under the License. -->
   <string name="calc_F11_desc">∫f(x)dx\nf(x)\u003d0</string>
   <string name="calc_F12_code">// Weekday using Gauss\n// 3: day\n// 2: month\n// 1: year\n\nswap\n\n// correction for Jan and Feb\ndup 2\n if.gt.endif\n  // month+12\n  // year-1\n  12 + swap 1 - swap\n .endif\n\n// y\nrot rot dup 100 / int swap 100 mod 5 * 4 / int\n// c\nswap dup 4 / int swap 2 * - 1 -\n// m \n4 roll 1 + 26 * 10 / int \n// y+c+m+d\n+ + + 77 + 7 mod 1 +\n\n\"Saturday\"\n\"Friday\"\n\"Thursday\"\n\"Wednesday\"\n\"Tuesday\"\n\"Monday\"\n\"Sunday\"\n// Sunday is 1, ...\n// move result to the top\n8 roll\n// select text\nroll\n// remove the other text\nsd2 sd2 sd2\n\"Is a \" swap +\n\n: sd swap drop ;\n: sd2 sd sd ;\n</string>
   <string name="calc_F12_desc">Weekday</string>
-  <string name="calc_F13_code"></string>
-  <string name="calc_F13_desc"></string>
-  <string name="calc_F14_code"></string>
-  <string name="calc_F14_desc"></string>
+  <string name="calc_F13_code">import.\"mathlib\"\n\n// Binominalkoeffizient\n\"(4 2)\u003d\" 4 2 binom +\n\n// Fakultät\n\"5!\u003d\" 5 factorial +\n\"6!\u003d\" 6 ! +\n\n// Mittelwert (mean) X\n// μ\u003dn•p\n\n// Varianz\n// σ²\u003dn•p•(1-p)\n\n// Standardabweichung\n// σ\u003d√(n•p•(1-p))\n\n// Binominalwahrscheinlichkeit\n// n p x\n\"P(X\u003d3)\u003d\" 5 0,72 3 binompdf +\n\"P(X≤2)\u003d\" 5 0,72 2 binomcdf +\n\ndup 1 swap - \"P(X≥3)\u003d1-P(X≤2)\u003d\" +\n\n100 0,5 55 binomcdf\n100 0,5 44 binomcdf\n\n// Tabelle P(X\u003dx)\n6 sto.binompdf.n\n0,2 sto.binompdf.p\n\n0 sto.binompdf.x\n\ndo.binom.tab\n\n \"P(X\u003d\" rcl.binompdf.x toStr + \")\u003d\" +\n rcl.binompdf.n\n rcl.binompdf.p\n rcl.binompdf.x\n binompdf +\n\n rcl.binompdf.x 1 +\n sto.binompdf.x\n\n rcl.binompdf.x\n rcl.binompdf.n\nwhile.le.binom.tab\n;\n\n25 0,2 5 binomcdf\n\n\n// Normalverteilung\n\n// Error Function\n0,7 erf\n\n// P(37\u003cX\u003c48), X~N(40,10²)\n// Mittelwert μ\u003d40, Standardabweichung σ\u003d10\n\"P(37\u003cX\u003c48)\u003d\" 37 48 40 10 normalcdf +\n\n// P(a\u003cX\u003cb)\u003dP(X\u003cb)-P(X\u003ca)\n48 40 10 normal\n37 40 10 normal -\n\"P(X\u003c48)-P(X\u003c37)\u003d\" +\n\n\"P(X\u003e45)\u003d\" 1 45 40 10 normal - +\n\"P(X\u003c26)\u003d\" 26 40 10 normal +\n</string>
+  <string name="calc_F13_desc">Statistik</string>
+  <string name="calc_F14_code">\n// Vektor, Matrix in variable\n[ 1 2 3 ] \"Vektor \" +\nsto.v1\n[ [ 3 2 1 ]\n  [ 1 0 2 ] ] \"Matrix \" +\nsto.m1\n\nrcl.v1\nrcl.m1\n\n\n// Matrixmultiplikation\n[ [ 1 2 ]\n  [ 0 1 ]\n  [ 4 0 ] ]\n\n[ [ 3 2 1 ]\n  [ 1 0 4 ] ]\n\n*\n\n\n// Gleichungssystem lösen\n[ [ 1 2 3 ]\n  [ 1 1 1 ]\n  [ 3 3 1 ] ] \"A\u003d\" +\n\n[ 2 2 0 ] \"b\u003d\" +\nover over\nsolve\n\"Ax\u003db, x\u003d\" +\n\n[ [ 1 2 3 ]\n[ 1 1 1 ]\n[ 3 3 1 ] ]\n\n[ 2 2 0 ]\n\nsolve\n\n\n// Matrix invertieren\n[ [ 1 2 0 ]\n  [ 2 4 1 ]\n  [ 2 1 0 ] ] \n\ninv\n</string>
+  <string name="calc_F14_desc">Matrix</string>
   <string name="calc_F15_code">import.\"mathlib\"\n\n// Math calculus test\n:radian\n\n// -e^(x-2)\n{ 2 - e swap ^ -1 * } sto.fx1\n\n0 // start\n2 // end\n0,001 // precision\nrcl.fx1 // f(x) als lambda\nintegral\n\n// x^3+x^2-4x-4\n{ sto.x rcl.x dup dup * * rcl.x dup * + rcl.x 4 * - 4 - } sto.fx2\n\n-3 // start\nrcl.fx2\nnullstelle\n\n0 // start\nrcl.fx2\nnullstelle\n\n3 // start\nrcl.fx2\nnullstelle\n\n// Tabelle -3..3\n\"-----------------\"\n\"f(x) -3..3\"\n\"-----------------\"\n-3 sto.x1\n3 sto.x2\n1 sto.?x\ndo.Tabelle\n\n rcl.x1\n rcl.fx2 ()\n // \"f(x)\u003d\"\n \"f(\" rcl.x1 toStr + \")\u003d\" + +\n\n // x1+\u003d?x\n rcl.x1 rcl.?x + sto.x1\n\n // x1 \u003c\u003d x2 ?\n rcl.x1\n rcl.x2\nwhile.le.Tabelle\n\"-----------------\"\n\n// abs(x^3+x^2-4x-4)\n{ sto.x rcl.x dup dup * * rcl.x dup * + rcl.x 4 * - 4 - abs } sto.fx3\n\n-2 // start\n2 // end\n0,001 // precision\nrcl.fx3 // f(x) als lambda\nintegral\n</string>
   <string name="calc_F15_desc">Math 1</string>
   <string name="calc_F16_code">import.\"mathlib\"\n\n// Math calculus final\n:radian\n\n// 4•x•e^(-x) - 1\n{ dup -1 * e swap ^ 4 * * 1 - } sto.fx1\n\n0 // start\nrcl.fx1\nnullstelle\n\n2 // start\nrcl.fx1\nnullstelle\n\nover over\n\n0,001 // precision\nrcl.fx1 // f(x) als lambda\nintegral\n\n// vx•sin(x•p/2)\n{ dup sqrt swap pi * 2 / sin * } sto.fx\n\n0 // start\n2 // end\n0,001 // precision\nrcl.fx // f(x) als lambda\nintegral\n\n2 // start\n4 // end\n0,001 // precision\nrcl.fx // f(x) als lambda\nintegral\nabs \n\n4 // start\n6 // end\n0,001 // precision\nrcl.fx // f(x) als lambda\nintegral\n\n6 // start\n8 // end\n0,001 // precision\nrcl.fx // f(x) als lambda\nintegral\nabs\n\n0 // start\n8 // end\n0,001 // precision\n// abs(vx•sin(x•p/2))\n{ dup sqrt swap pi * 2 / sin * abs } // f(x) als lambda\nintegral\n</string>
   <string name="calc_F16_desc">Math 2</string>
+  <string name="calc_F17_code">// Fahrenheit in Celsius\n// Celsius in Fahrenheit\n// 1: Temperatur\n\nsto.temp\n\nrcl.temp 32 - 5 * 9 / round2 rcl.temp tostr \"°F\u003d\" + over tostr + \"°C \" + +\n\nrcl.temp 9 * 5 / 32 + round2\nrcl.temp tostr \"°C\u003d\" + over tostr + \"°F \" + +</string>
+  <string name="calc_F17_desc">°F - °C</string>
   <string name="calc_endless_loop">Possible endless loop. Task stopped.</string>
   <string name="calc_missing_label">Missing label \'.%1$s\'.</string>
   <string name="calc_missing_while_label">Missing while-label \'do.%1$s\'.</string>
@@ -103,4 +103,8 @@ limitations under the License. -->
   <string name="version">Version</string>
   <string name="email_feedback_summary">Send an email directly to the developers.</string>
   <string name="email_feedback_title">Send email</string>
+  <string name="calc_binary_headline">AI Programming</string>
+  <string name="calc_error_missing_closing_vector_bracket">Missing closing \']\' for vector.</string>
+  <string name="calc_error_matrix_different_row_length">Matrix rows must be same size.</string>
+  <string name="calc_error_parsing_matrix">Unexpected value \'%1$s\'</string>
 </resources>

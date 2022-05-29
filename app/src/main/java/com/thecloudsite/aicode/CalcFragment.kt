@@ -130,10 +130,11 @@ class CalcFragment(stockSymbol: String = "") : CalcBaseFragment(stockSymbol) {
 
     binding.calcEnter.setOnTouchListener { view, event -> touchHelper(view, event); false }
     binding.calcEnter.setOnClickListener { calcViewModel.enter() }
-    binding.calcSign.setOnTouchListener { view, event -> touchHelper(view, event); false }
-    binding.calcSign.setOnClickListener { calcViewModel.opUnary(UnaryArgument.SIGN) }
     binding.calcDrop.setOnTouchListener { view, event -> touchHelper(view, event); false }
     binding.calcDrop.setOnClickListener { calcViewModel.drop() }
+
+    binding.calcEex.setOnTouchListener { view, event -> touchHelper(view, event); false }
+    binding.calcEex.setOnClickListener { calcViewModel.addEEX() }
 
     binding.calc1.setOnTouchListener { view, event -> touchHelper(view, event); false }
     binding.calc1.setOnClickListener { calcViewModel.addNum('1') }
@@ -157,13 +158,15 @@ class CalcFragment(stockSymbol: String = "") : CalcBaseFragment(stockSymbol) {
     binding.calc0.setOnClickListener { calcViewModel.addNum('0') }
     binding.calcDot.setOnTouchListener { view, event -> touchHelper(view, event); false }
     binding.calcDot.setOnClickListener { calcViewModel.addNum(separatorChar, context) }
+    binding.calcSign.setOnTouchListener { view, event -> touchHelper(view, event); false }
+    binding.calcSign.setOnClickListener { calcViewModel.sign() }
 
     binding.calcDiv.setOnTouchListener { view, event -> touchHelper(view, event); false }
     binding.calcDiv.setOnClickListener { calcViewModel.opBinary(BinaryArgument.DIV) }
     binding.calcMult.setOnTouchListener { view, event -> touchHelper(view, event); false }
     binding.calcMult.setOnClickListener { calcViewModel.opBinary(BinaryArgument.MULT) }
     binding.calcSub.setOnTouchListener { view, event -> touchHelper(view, event); false }
-    binding.calcSub.setOnClickListener { calcViewModel.opBinary(BinaryArgument.SUB) }
+    binding.calcSub.setOnClickListener { calcViewModel.opBinary(BinaryArgument.SUB)}
     binding.calcAdd.setOnTouchListener { view, event -> touchHelper(view, event); false }
     binding.calcAdd.setOnClickListener { calcViewModel.opBinary(BinaryArgument.ADD) }
   }

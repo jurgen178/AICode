@@ -108,7 +108,7 @@ class CalcProgFragment(stockSymbol: String = "") : CalcBaseFragment(stockSymbol)
       ),
       // math op
       SyntaxHighlightRule(
-        "(?i)((\\s|^)(sin|cos|tan|arcsin|arccos|arctan|sinh|cosh|tanh|arcsinh|arccosh|arctanh|ln|log|sq|sqrt|pow|per|perc|inv|abs|mod|int|round|round2|round4|frac|tostr|sum|var|pi|π|e))+(\\s|$)",
+        "(?i)((\\s|^)(sin|cos|tan|arcsin|arccos|arctan|sinh|cosh|tanh|arcsinh|arccosh|arctanh|ln|log|sq|sqrt|pow|per|perc|binom|erf|inv|abs|mod|int|round|round2|round4|frac|tostr|sum|var|pi|π|e|and|or|xor|not|solve|factorial|[!]))+(\\s|$)",
         "#B50000"
       ),
       // ()
@@ -338,7 +338,7 @@ class CalcProgFragment(stockSymbol: String = "") : CalcBaseFragment(stockSymbol)
     super.onPause()
 
     val sharedPreferences =
-      PreferenceManager.getDefaultSharedPreferences(activity /* Activity context */)
+      PreferenceManager.getDefaultSharedPreferences(requireContext() /* Activity context */)
 
     val codeMapStr = getSerializedStr()
     sharedPreferences
@@ -356,13 +356,13 @@ class CalcProgFragment(stockSymbol: String = "") : CalcBaseFragment(stockSymbol)
     super.onResume()
 
     val sharedPreferences =
-      PreferenceManager.getDefaultSharedPreferences(activity /* Activity context */)
+      PreferenceManager.getDefaultSharedPreferences(requireContext() /* Activity context */)
 
     val codeMapStr = sharedPreferences.getString("calcCodeMap", "").toString()
 
     if (codeMapStr.isEmpty()) {
 
-      // Default only for the first 16 entries.
+      // Default only for the first 17 entries.
       val resList = listOf(
         Triple("F1", R.string.calc_F1_code, R.string.calc_F1_desc),
         Triple("F2", R.string.calc_F2_code, R.string.calc_F2_desc),
@@ -380,6 +380,7 @@ class CalcProgFragment(stockSymbol: String = "") : CalcBaseFragment(stockSymbol)
         Triple("F14", R.string.calc_F14_code, R.string.calc_F14_desc),
         Triple("F15", R.string.calc_F15_code, R.string.calc_F15_desc),
         Triple("F16", R.string.calc_F16_code, R.string.calc_F16_desc),
+        Triple("F17", R.string.calc_F17_code, R.string.calc_F17_desc),
       )
 
       resList.forEach { entry ->
