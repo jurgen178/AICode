@@ -5,7 +5,7 @@ Introduction
 ------------
 
 AI code is a programmable calculator for Android.
-It is also available within the StockRoom App to support financial calculations.
+It is also available within the [StockRoom App](https://github.com/jurgen178/StockRoom) to support financial calculations.
 
 AI code supports Forth-style definitions, variables and lamda expressions. As an engineer, I have been using a HP calculator since University and this is how I imagine a modern programmable calculator. The app comes preloaded with lots of example code to try out.
 Use *:clearcode* to remove all examples, and *:defaultcode* to restore all examples.
