@@ -156,23 +156,62 @@ class CalcProgFragment(stockSymbol: String = "") : CalcBaseFragment(stockSymbol)
             val calcData = calcViewModel.calcData
             val size: Int = calcData.value?.numberList?.size ?: 0
 
+            fun displayValue(value: Double): String {
+                return if (calcViewModel.sciFormat) {
+                    value.toString().replace('.', separatorChar)
+                } else {
+                    calcViewModel.numberFormat.format(value)
+                }
+            }
+
             if (size > 0) {
                 val data = calcData.value?.numberList?.get(size - 1)
 
                 if (data != null) {
-                    val text =
-                        if (!data.value.isNaN()) {
-                            val value = data.value.toString().replace('.', separatorChar)
-                            if (data.desc.isNotEmpty())
-                                "\"${data.desc}\" $value +"
-                            else
-                                value
-                        } else
-                            if (data.desc.isNotEmpty())
-                                "\"${data.desc}\""
-                            else
-                                ""
 
+                    val value = if (!data.value.isNaN()) {
+                        displayValue(data.value)
+                    } else
+                        if (data.vector != null) {
+                            data.vector!!.joinToString(
+                                prefix = "[ ",
+                                separator = " ",
+                                postfix = " ]",
+                            ) {
+                                displayValue(
+                                    it
+                                )
+                            }
+                        } else
+                            if (data.matrix != null) {
+                                data.matrix!!.map { row ->
+
+                                    row.joinToString(
+                                        prefix = "[ ",
+                                        separator = " ",
+                                        postfix = " ]",
+                                    ) {
+                                        displayValue(
+                                            it
+                                        )
+                                    }
+                                }.joinToString(
+                                    prefix = "[ ",
+                                    separator = "  \n",
+                                    postfix = " ]",
+                                )
+                            } else {
+                                ""
+                            }
+
+                    val text = if (data.desc.isNotEmpty())
+                        if (value.isNotEmpty()) {
+                            "\"${data.desc}\" $value +"
+                        } else
+                            "\"${data.desc}\""
+                    else
+                        value
+                    
                     dialogBinding.calcCode.setText(text)
                 }
             }
