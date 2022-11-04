@@ -150,6 +150,10 @@ class CalcProgFragment(stockSymbol: String = "") : CalcBaseFragment(stockSymbol)
         val elements = calcViewModel.calcData.value?.numberList?.size
         dialogBinding.buttonGetData.isEnabled = elements != null && elements > 0
 
+        dialogBinding.buttonClearData.setOnClickListener {
+            dialogBinding.calcCode.setText("")
+        }
+
         dialogBinding.buttonGetData.setOnClickListener {
             // Load top of stack element to the editor.
             dialogBinding.calcCode.setText(calcViewModel.getText())

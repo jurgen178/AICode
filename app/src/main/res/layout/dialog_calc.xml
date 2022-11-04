@@ -26,18 +26,36 @@
           app:layout_constraintEnd_toEndOf="parent"
           app:layout_constraintStart_toStartOf="parent"
           app:layout_constraintTop_toTopOf="parent"
-          app:layout_constraintBottom_toTopOf="@+id/buttonGetData"
+          app:layout_constraintBottom_toTopOf="@+id/buttonLayout"
           android:inputType="textMultiLine|textNoSuggestions"
           />
 
-      <Button
-          android:id="@+id/buttonGetData"
-          android:layout_width="wrap_content"
+      <LinearLayout
+          android:id="@+id/buttonLayout"
+          android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          android:text="@string/getdata"
           app:layout_constraintTop_toBottomOf="@+id/calc_code"
           app:layout_constraintStart_toStartOf="parent"
-          />
+          android:orientation="horizontal"
+          >
+
+        <Button
+            android:id="@+id/buttonClearData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cleardata"
+            android:layout_margin="4dp"
+            />
+
+        <Button
+            android:id="@+id/buttonGetData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/getdata"
+            android:layout_margin="4dp"
+            />
+
+      </LinearLayout>
 
       <TextView
           android:id="@+id/textViewCalcDesc"
@@ -58,7 +76,7 @@
           android:layout_margin="8dp"
           app:layout_constraintEnd_toEndOf="parent"
           app:layout_constraintStart_toEndOf="@+id/textViewCalcDesc"
-          app:layout_constraintTop_toBottomOf="@+id/buttonGetData"
+          app:layout_constraintTop_toBottomOf="@+id/buttonLayout"
           app:layout_constraintBottom_toBottomOf="parent"
           app:endIconMode="clear_text"
           >
