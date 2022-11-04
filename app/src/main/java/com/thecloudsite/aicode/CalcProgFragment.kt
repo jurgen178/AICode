@@ -151,70 +151,8 @@ class CalcProgFragment(stockSymbol: String = "") : CalcBaseFragment(stockSymbol)
         dialogBinding.buttonGetData.isEnabled = elements != null && elements > 0
 
         dialogBinding.buttonGetData.setOnClickListener {
-
-            // Get top of stack element.
-            val calcData = calcViewModel.calcData
-            val size: Int = calcData.value?.numberList?.size ?: 0
-
-            fun displayValue(value: Double): String {
-                return if (calcViewModel.sciFormat) {
-                    value.toString().replace('.', separatorChar)
-                } else {
-                    calcViewModel.numberFormat.format(value)
-                }
-            }
-
-            if (size > 0) {
-                val data = calcData.value?.numberList?.get(size - 1)
-
-                if (data != null) {
-
-                    val value = if (!data.value.isNaN()) {
-                        displayValue(data.value)
-                    } else
-                        if (data.vector != null) {
-                            data.vector!!.joinToString(
-                                prefix = "[ ",
-                                separator = " ",
-                                postfix = " ]",
-                            ) {
-                                displayValue(
-                                    it
-                                )
-                            }
-                        } else
-                            if (data.matrix != null) {
-                                data.matrix!!.map { row ->
-
-                                    row.joinToString(
-                                        prefix = "[ ",
-                                        separator = " ",
-                                        postfix = " ]",
-                                    ) {
-                                        displayValue(
-                                            it
-                                        )
-                                    }
-                                }.joinToString(
-                                    prefix = "[ ",
-                                    separator = "  \n",
-                                    postfix = " ]",
-                                )
-                            } else {
-                                ""
-                            }
-
-                    val text = if (data.desc.isNotEmpty())
-                        if (value.isNotEmpty()) {
-                            "\"${data.desc}\" $value +"
-                        } else
-                            "\"${data.desc}\""
-                    else
-                        value
-                    
-                    dialogBinding.calcCode.setText(text)
-                }
-            }
+            // Load top of stack element to the editor.
+            dialogBinding.calcCode.setText(calcViewModel.getText())
         }
 
         builder.setView(dialogBinding.root)

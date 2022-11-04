@@ -1186,18 +1186,74 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
         calcRepository.updateData(calcData)
     }
 
+    private fun displayValue(value: Double): String {
+        return if (sciFormat) {
+            value.toString().replace('.', separatorChar)
+        } else {
+            numberFormat.format(value)
+        }
+    }
+
     // clipboard import/export
     fun getText(): String {
         val calcData = submitEditline(calcData.value!!)
         calcRepository.updateData(calcData)
 
-        return if (calcData.numberList.isNotEmpty()) {
-            // calcData.numberList.last().toString() converts to E-notation
-            // calcData.numberList.last().toBigDecimal().toPlainString()
-            numberFormat.format(calcData.numberList.last().value)
-        } else {
-            ""
+        if (calcData.numberList.isNotEmpty()) {
+            // numberFormat.format(calcData.numberList.last().value)
+
+            val data = calcData.numberList.last()
+
+            val value = if (!data.value.isNaN()) {
+                displayValue(data.value)
+            } else
+            // CalcAdapter has "[" for display purpose, but bracket needs a space to separate from the number for parsing.
+                if (data.vector != null) {
+                    data.vector!!.joinToString(
+                        prefix = "[ ",
+                        separator = " ",
+                        postfix = " ]",
+                    ) {
+                        displayValue(
+                            it
+                        )
+                    }
+                } else
+                    if (data.matrix != null) {
+                        data.matrix!!.map { row ->
+
+                            row.joinToString(
+                                prefix = "[ ",
+                                separator = " ",
+                                postfix = " ]",
+                            ) {
+                                displayValue(
+                                    it
+                                )
+                            }
+                        }.joinToString(
+                            prefix = "[ ",
+                            separator = "  \n",
+                            postfix = " ]",
+                        )
+                    } else {
+                        ""
+                    }
+
+            val text = if (data.desc.isNotEmpty()) {
+                var desc = "\"${data.desc}\""
+                if (value.isNotEmpty()) {
+                    desc += " $value +"
+                }
+                desc
+            } else {
+                value
+            }
+
+            return text;
         }
+
+        return ""
     }
 
     fun setText(text: String?, desc: String) {
@@ -1967,7 +2023,11 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
         calcRepository.updateData(calcData)
     }
 
-    private fun submitEditline(calcData: CalcData, radix: Int = 0, desc: String = ""): CalcData {
+    private fun submitEditline(
+        calcData: CalcData,
+        radix: Int = 0,
+        desc: String = ""
+    ): CalcData {
         if (calcData.editMode) {
 
             try {
