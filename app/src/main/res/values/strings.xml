@@ -108,4 +108,5 @@ limitations under the License. -->
   <string name="calc_error_matrix_different_row_length">Matrix rows must be same size.</string>
   <string name="calc_error_parsing_matrix">Unexpected value \'%1$s\'</string>
   <string name="getdata">Get Data</string>
+  <string name="calc_clear">Clear</string>
 </resources>

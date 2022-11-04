@@ -106,4 +106,5 @@ limitations under the License. -->
   <string name="calc_error_matrix_different_row_length">Matrixzeilen müssen gleich groß sein.</string>
   <string name="calc_error_parsing_matrix">Unerwarteter Wert \'%1$s\'</string>
   <string name="getdata">Übernehmen</string>
+  <string name="calc_clear">Löschen</string>
 </resources>

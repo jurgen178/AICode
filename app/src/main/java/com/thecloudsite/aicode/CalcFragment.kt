@@ -111,6 +111,10 @@ class CalcFragment(stockSymbol: String = "") : CalcBaseFragment(stockSymbol) {
     binding.calcPercent.setOnTouchListener { view, event -> touchHelper(view, event); false }
     binding.calcPercent.setOnClickListener { calcViewModel.opBinary(BinaryArgument.PER) }
 
+    binding.calcClear.setOnTouchListener { view, event -> touchHelper(view, event); false }
+    binding.calcClear.setOnClickListener { calcViewModel.opZero(ZeroArgument.CLEAR) }
+    binding.calcRot.setOnTouchListener { view, event -> touchHelper(view, event); false }
+    binding.calcRot.setOnClickListener { calcViewModel.opTernary(TernaryArgument.ROT) }
     binding.calcOver.setOnTouchListener { view, event -> touchHelper(view, event); false }
     binding.calcOver.setOnClickListener { calcViewModel.opBinary(BinaryArgument.OVER) }
     binding.calcSwap.setOnTouchListener { view, event -> touchHelper(view, event); false }
