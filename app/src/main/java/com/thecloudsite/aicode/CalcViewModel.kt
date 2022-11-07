@@ -1579,11 +1579,14 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 UnaryArgument.INV -> {
                     calcData.numberList.add(
-                        if (op1.matrix != null) {
-                            matrixInvers(op1)
-                        } else {
-                            CalcLine(desc = "", value = 1 / op1.value)
-                        }
+                        if (op1.vector != null) {
+                            vectorInvers(op1)
+                        } else
+                            if (op1.matrix != null) {
+                                matrixInvers(op1)
+                            } else {
+                                CalcLine(desc = "", value = 1 / op1.value)
+                            }
                     )
                 }
                 UnaryArgument.ABS -> {

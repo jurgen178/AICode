@@ -433,6 +433,26 @@ fun solve(op1: CalcLine, op2: CalcLine): CalcLine {
     )
 }
 
+// 1/x for each element
+fun vectorInvers(op: CalcLine): CalcLine {
+
+    if (op.vector != null) {
+        val n = op.vector!!.size
+
+        if (n > 0) {
+            for (k in 0 until n) {
+                if(op.vector!![k] != 0.0) {
+                    op.vector!![k] = 1 / op.vector!![k]
+                }
+            }
+
+            return op
+        }
+    }
+
+    return CalcLine(value = Double.NaN)
+}
+
 fun matrixInvers(op: CalcLine): CalcLine {
 
     if (op.matrix != null) {
