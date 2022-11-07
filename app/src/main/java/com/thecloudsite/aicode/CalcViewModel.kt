@@ -106,7 +106,7 @@ enum class TernaryArgument {
 }
 
 enum class QuadArgument {
-    SETM, // set matrix element
+    SETM, // Set matrix element.
     IFEQ, // if equal
     IFGE, // if greater or equal than
     IFGT, // if greater than
@@ -1151,13 +1151,17 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             if (!success) {
-                calcData.errorMsg = context.getString(R.string.calc_error_msg, word)
+                if (calcData.errorMsg.isEmpty()) {
+                    calcData.errorMsg = context.getString(R.string.calc_error_msg, word)
+                }
                 calcRepository.updateData(calcData)
 
                 return
             } else
                 if (!validArgs) {
-                    calcData.errorMsg = context.getString(R.string.calc_invalid_args)
+                    if (calcData.errorMsg.isEmpty()) {
+                        calcData.errorMsg = context.getString(R.string.calc_invalid_args)
+                    }
                     calcRepository.updateData(calcData)
 
                     return
@@ -1892,7 +1896,6 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 // Get vector element.
                 BinaryArgument.GETV -> {
                     if (op1.vector != null && op2.value.isFinite() && op1.vector!!.size > op2.value.toInt()) {
-                        // Get vector element.
                         calcData.numberList.add(
                             CalcLine(
                                 desc = "",
@@ -2007,7 +2010,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                         argsValid = false
                     }
                 }
-                // set vector element
+                // Set vector element.
                 TernaryArgument.SETV -> {
                     if (op3.vector != null && op2.value.isFinite() && op1.value.isFinite() && op3.vector!!.size > op2.value.toInt()) {
                         op3.vector!![op2.value.toInt()] = op1.value
@@ -2056,7 +2059,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
             val op4 = calcData.numberList.removeLast()
 
             when (op) {
-                // set matrix element
+                // Set matrix element.
                 QuadArgument.SETM -> {
                     if (op4.matrix != null && op3.value.isFinite() && op2.value.isFinite() && op1.value.isFinite() && op4.matrix!!.size > op3.value.toInt() && op4.matrix!![0].size > op2.value.toInt()) {
                         op4.matrix!![op3.value.toInt()][op2.value.toInt()] = op1.value
