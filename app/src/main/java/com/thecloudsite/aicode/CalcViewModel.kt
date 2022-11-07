@@ -68,6 +68,7 @@ enum class UnaryArgument {
     ROUND4, // Round to four digits
     FRAC,
     FACTORIAL,
+    SIZE,
     TOSTR,  // toStr
     LN,
     EX,
@@ -86,6 +87,7 @@ enum class BinaryArgument {
     POW,
     SWAP,
     OVER,
+    GETV, // Get vector element.
     MOD,  // modulo
     PER,  // Percent
     PERC, // Percent change
@@ -98,10 +100,13 @@ enum class BinaryArgument {
 
 enum class TernaryArgument {
     ROT,
+    GETM, // Get matrix element.
+    SETV, // Set vector element.
     ZinsMonat,
 }
 
 enum class QuadArgument {
+    SETM, // set matrix element
     IFEQ, // if equal
     IFGE, // if greater or equal than
     IFGT, // if greater than
@@ -911,6 +916,9 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 "sum" -> {
                     validArgs = opVarArg(calcData, VariableArguments.SUM)
                 }
+                "size" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.SIZE)
+                }
                 "var" -> {
                     validArgs = opVarArg(calcData, VariableArguments.VAR)
                 }
@@ -976,6 +984,20 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 // Solve
                 "solve" -> {
                     validArgs = opBinary(calcData, BinaryArgument.SOLVE)
+                }
+
+                // Get/Set Element
+                "getv" -> {
+                    validArgs = opBinary(calcData, BinaryArgument.GETV)
+                }
+                "setv" -> {
+                    validArgs = opTernary(calcData, TernaryArgument.SETV)
+                }
+                "getm" -> {
+                    validArgs = opTernary(calcData, TernaryArgument.GETM)
+                }
+                "setm" -> {
+                    validArgs = opQuad(calcData, QuadArgument.SETM)
                 }
 
                 // Conditional operations
@@ -1548,7 +1570,8 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     calcData.numberList.add(CalcLine(desc = "", value = op1.value.pow(0.5)))
                 }
                 UnaryArgument.SQ -> {
-                    calcData.numberList.add(CalcLine(desc = "", value = op1.value.pow(2)))
+                    //calcData.numberList.add(CalcLine(desc = "", value = op1.value.pow(2)))
+                    calcData.numberList.add(op1 * op1)
                 }
                 UnaryArgument.INV -> {
                     calcData.numberList.add(
@@ -1655,6 +1678,39 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                         )
                     } else {
                         calcData.numberList.add(op1)
+                    }
+                }
+                UnaryArgument.SIZE -> {
+                    if (op1.vector != null) {
+                        // Add vector length.
+                        calcData.numberList.add(
+                            CalcLine(
+                                desc = "",
+                                value = op1.vector!!.size.toDouble()
+                            )
+                        )
+                    } else if (op1.matrix != null) {
+                        // Add matrix size in rows and columns.
+                        calcData.numberList.add(
+                            CalcLine(
+                                desc = "",
+                                value = op1.matrix!!.size.toDouble()
+                            )
+                        )
+                        calcData.numberList.add(
+                            CalcLine(
+                                desc = "",
+                                value = op1.matrix!![0].size.toDouble()
+                            )
+                        )
+                    } else {
+                        // Add description length.
+                        calcData.numberList.add(
+                            CalcLine(
+                                desc = "",
+                                value = op1.desc.length.toDouble()
+                            )
+                        )
                     }
                 }
                 UnaryArgument.SIN -> {
@@ -1779,7 +1835,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun opBinary(calcData: CalcData, op: BinaryArgument): Boolean {
 
-        val argsValid = calcData.numberList.size > 1
+        var argsValid = calcData.numberList.size > 1
         if (argsValid) {
             endEdit(calcData)
 
@@ -1832,6 +1888,21 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     calcData.numberList.add(op2)
                     // Clone element
                     calcData.numberList.add(clone(op1))
+                }
+                // Get vector element.
+                BinaryArgument.GETV -> {
+                    if (op1.vector != null && op2.value.isFinite() && op1.vector!!.size > op2.value.toInt()) {
+                        // Get vector element.
+                        calcData.numberList.add(
+                            CalcLine(
+                                desc = "",
+                                value = op1.vector!![op2.value.toInt()]
+                            )
+                        )
+                    } else {
+                        calcData.errorMsg = context.getString(R.string.calc_invalid_get_vector_args)
+                        argsValid = false
+                    }
                 }
                 // Percent
                 BinaryArgument.PER -> {
@@ -1904,7 +1975,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun opTernary(calcData: CalcData, op: TernaryArgument): Boolean {
-        val argsValid = calcData.numberList.size > 2
+        var argsValid = calcData.numberList.size > 2
 
         if (argsValid) {
             endEdit(calcData)
@@ -1921,6 +1992,30 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     calcData.numberList.add(op2)
                     calcData.numberList.add(op1)
                     calcData.numberList.add(op3)
+                }
+                // Get matrix element.
+                TernaryArgument.GETM -> {
+                    if (op3.matrix != null && op2.value.isFinite() && op1.value.isFinite() && op3.matrix!!.size > op2.value.toInt() && op3.matrix!![0].size > op1.value.toInt()) {
+                        calcData.numberList.add(
+                            CalcLine(
+                                desc = "",
+                                value = op3.matrix!![op2.value.toInt()][op1.value.toInt()]
+                            )
+                        )
+                    } else {
+                        calcData.errorMsg = context.getString(R.string.calc_invalid_get_matrix_args)
+                        argsValid = false
+                    }
+                }
+                // set vector element
+                TernaryArgument.SETV -> {
+                    if (op3.vector != null && op2.value.isFinite() && op1.value.isFinite() && op3.vector!!.size > op2.value.toInt()) {
+                        op3.vector!![op2.value.toInt()] = op1.value
+                        calcData.numberList.add(op3)
+                    } else {
+                        calcData.errorMsg = context.getString(R.string.calc_invalid_set_vector_args)
+                        argsValid = false
+                    }
                 }
                 TernaryArgument.ZinsMonat -> {
                     val K = op3.value // Kapital
@@ -1946,7 +2041,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun opQuad(calcData: CalcData, op: QuadArgument): Boolean {
-        val argsValid = calcData.numberList.size > 3
+        var argsValid = calcData.numberList.size > 3
 
         if (argsValid) {
             endEdit(calcData)
@@ -1961,6 +2056,16 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
             val op4 = calcData.numberList.removeLast()
 
             when (op) {
+                // set matrix element
+                QuadArgument.SETM -> {
+                    if (op4.matrix != null && op3.value.isFinite() && op2.value.isFinite() && op1.value.isFinite() && op4.matrix!!.size > op3.value.toInt() && op4.matrix!![0].size > op2.value.toInt()) {
+                        op4.matrix!![op3.value.toInt()][op2.value.toInt()] = op1.value
+                        calcData.numberList.add(op4)
+                    } else {
+                        calcData.errorMsg = context.getString(R.string.calc_invalid_set_matrix_args)
+                        argsValid = false
+                    }
+                }
                 QuadArgument.IFEQ -> {
                     val opResult = if (op2.value == op1.value) op3 else op4
                     calcData.numberList.add(opResult)
