@@ -108,8 +108,8 @@ limitations under the License. -->
   <string name="getdata">+</string>
   <string name="calc_clear">Löschen</string>
   <string name="cleardata">Löschen</string>
-  <string name="calc_invalid_get_vector_args">\'getv\' erwartet Vector und Index</string>
-  <string name="calc_invalid_get_matrix_args">\'getm\' erwartet Matrix und Zeile,Spalte</string>
-  <string name="calc_invalid_set_vector_args">\'setv\' erwartet Vector, Index und ein Wert</string>
-  <string name="calc_invalid_set_matrix_args">\'setm\' erwartet Matrix, Zeile,Spalte und ein Wert</string>
+  <string name="calc_invalid_get_vector_args">\'getv\' erwartet Vektor und Index</string>
+  <string name="calc_invalid_get_matrix_args">\'getm\' erwartet Matrix, Zeile und Spalte</string>
+  <string name="calc_invalid_set_vector_args">\'setv\' erwartet Vektor, Index und ein Wert</string>
+  <string name="calc_invalid_set_matrix_args">\'setm\' erwartet Matrix, Zeile, Spalte und ein Wert</string>
 </resources>

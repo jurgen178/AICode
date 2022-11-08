@@ -1584,9 +1584,13 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                         } else
                             if (op1.matrix != null) {
                                 matrixInvers(op1)
-                            } else {
-                                CalcLine(desc = "", value = 1 / op1.value)
-                            }
+                            } else
+                                // Reverse desc if no value is present.
+                                if (op1.desc.isNotEmpty() && op1.value.isNaN()) {
+                                    CalcLine(desc = op1.desc.reversed(), value = Double.NaN)
+                                } else {
+                                    CalcLine(desc = "", value = 1 / op1.value)
+                                }
                     )
                 }
                 UnaryArgument.ABS -> {
