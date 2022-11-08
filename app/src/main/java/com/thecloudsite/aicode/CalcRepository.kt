@@ -440,13 +440,18 @@ fun vectorInvers(op: CalcLine): CalcLine {
         val n = op.vector!!.size
 
         if (n > 0) {
+            val vector = op.vector!!.clone()
+
             for (k in 0 until n) {
-                if(op.vector!![k] != 0.0) {
-                    op.vector!![k] = 1 / op.vector!![k]
+                if (vector[k] != 0.0) {
+                    vector[k] = 1 / vector[k]
                 }
             }
 
-            return op
+            return CalcLine(
+                value = Double.NaN,
+                vector = vector
+            )
         }
     }
 

@@ -1585,7 +1585,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                             if (op1.matrix != null) {
                                 matrixInvers(op1)
                             } else
-                                // Reverse desc if no value is present.
+                            // Reverse desc if no value is present.
                                 if (op1.desc.isNotEmpty() && op1.value.isNaN()) {
                                     CalcLine(desc = op1.desc.reversed(), value = Double.NaN)
                                 } else {
@@ -2020,8 +2020,9 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 // Set vector element.
                 TernaryArgument.SETV -> {
                     if (op3.vector != null && op2.value.isFinite() && op1.value.isFinite() && op3.vector!!.size > op2.value.toInt()) {
-                        op3.vector!![op2.value.toInt()] = op1.value
-                        calcData.numberList.add(op3)
+                        val vector = op3.vector!!.clone()
+                        vector[op2.value.toInt()] = op1.value
+                        calcData.numberList.add(CalcLine(desc = "", vector = vector))
                     } else {
                         calcData.errorMsg = context.getString(R.string.calc_invalid_set_vector_args)
                         argsValid = false
@@ -2068,12 +2069,26 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
             when (op) {
                 // Set matrix element.
                 QuadArgument.SETM -> {
-                    if (op4.matrix != null && op3.value.isFinite() && op2.value.isFinite() && op1.value.isFinite() && op4.matrix!!.size > op3.value.toInt() && op4.matrix!![0].size > op2.value.toInt()) {
-                        op4.matrix!![op3.value.toInt()][op2.value.toInt()] = op1.value
-                        calcData.numberList.add(op4)
-                    } else {
-                        calcData.errorMsg = context.getString(R.string.calc_invalid_set_matrix_args)
-                        argsValid = false
+                    if (op4.matrix != null) {
+                        val n = op4.matrix!!.size
+                        val m = op4.matrix!![0].size
+
+                        if (op3.value.isFinite() && op2.value.isFinite() && op1.value.isFinite() && n > op3.value.toInt() && m > op2.value.toInt()) {
+                            // clone matrix (Array of DoubleArray)
+                            val matrix =
+                                Array(n) { r ->
+                                    DoubleArray(m) { c ->
+                                        op4.matrix!![r][c]
+                                    }
+                                }
+
+                            matrix[op3.value.toInt()][op2.value.toInt()] = op1.value
+                            calcData.numberList.add(CalcLine(desc = "", matrix = matrix))
+                        } else {
+                            calcData.errorMsg =
+                                context.getString(R.string.calc_invalid_set_matrix_args)
+                            argsValid = false
+                        }
                     }
                 }
                 QuadArgument.IFEQ -> {
