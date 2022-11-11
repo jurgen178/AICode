@@ -62,6 +62,7 @@ enum class UnaryArgument {
     ARCCOSH,
     ARCTAN,
     ARCTANH,
+    VECTOR,   // Create vector element.
     INT,    // Integer part
     ROUND,  // Round to nearest int
     ROUND2, // Round to two digits
@@ -87,6 +88,7 @@ enum class BinaryArgument {
     POW,
     SWAP,
     OVER,
+    MATRIX, // Create matrix element.
     GETV, // Get vector element.
     MOD,  // modulo
     PER,  // Percent
@@ -113,6 +115,9 @@ enum class QuadArgument {
     IFLE, // if less or equal then
     IFLT, // if less then
 }
+
+val VECTORMAX = 100
+val MATRIXMAX = 40
 
 // List of chars that cannot be used as definitions.
 val wordListRegex = "[\"':;(){}\\[\\]]".toRegex()
@@ -986,7 +991,13 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     validArgs = opBinary(calcData, BinaryArgument.SOLVE)
                 }
 
-                // Get/Set Element
+                // Create/Get/Set Element
+                "vector" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.VECTOR)
+                }
+                "matrix" -> {
+                    validArgs = opBinary(calcData, BinaryArgument.MATRIX)
+                }
                 "getv" -> {
                     validArgs = opBinary(calcData, BinaryArgument.GETV)
                 }
@@ -1276,7 +1287,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 value
             }
 
-            return text;
+            return text
         }
 
         return ""
@@ -1547,7 +1558,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun opUnary(calcData: CalcData, op: UnaryArgument): Boolean {
-        val argsValid = calcData.numberList.size > 0
+        var argsValid = calcData.numberList.size > 0
 
         if (argsValid) {
             endEdit(calcData)
@@ -1722,6 +1733,22 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                                 value = op1.desc.length.toDouble()
                             )
                         )
+                    }
+                }
+                // Create vector Element.
+                UnaryArgument.VECTOR -> {
+                    val n = op1.value.toInt()
+                    if (n > 0 && n <= VECTORMAX) {
+                        val vector =
+                            DoubleArray(n) { r ->
+                                0.0
+                            }
+
+                        calcData.numberList.add(CalcLine(desc = "", vector = vector))
+                    } else {
+                        calcData.errorMsg =
+                            context.getString(R.string.calc_invalid_new_vector_args, VECTORMAX)
+                        argsValid = false
                     }
                 }
                 UnaryArgument.SIN -> {
@@ -1900,6 +1927,31 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     // Clone element
                     calcData.numberList.add(clone(op1))
                 }
+                // Create matrix element.
+                BinaryArgument.MATRIX -> {
+                    val n = op1.value.toInt()
+                    val m = op2.value.toInt()
+                    if (n > 0 && n <= MATRIXMAX && m > 0 && m <= MATRIXMAX) {
+                        val matrix =
+                            Array(n) { r ->
+                                DoubleArray(m) { c ->
+                                    0.0
+                                }
+                            }
+
+                        // Set unity matrix if n=m.
+                        if (n == m) {
+                            for (i in 0 until n) {
+                                matrix[i][i] = 1.0
+                            }
+                        }
+                        calcData.numberList.add(CalcLine(desc = "", matrix = matrix))
+                    } else {
+                        calcData.errorMsg =
+                            context.getString(R.string.calc_invalid_new_matrix_args, MATRIXMAX)
+                        argsValid = false
+                    }
+                }
                 // Get vector element.
                 BinaryArgument.GETV -> {
                     if (op1.vector != null && op2.value.isFinite() && op1.vector!!.size > op2.value.toInt()) {
@@ -1910,7 +1962,8 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                             )
                         )
                     } else {
-                        calcData.errorMsg = context.getString(R.string.calc_invalid_get_vector_args)
+                        calcData.errorMsg =
+                            context.getString(R.string.calc_invalid_get_vector_args)
                         argsValid = false
                     }
                 }
@@ -2013,7 +2066,8 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                             )
                         )
                     } else {
-                        calcData.errorMsg = context.getString(R.string.calc_invalid_get_matrix_args)
+                        calcData.errorMsg =
+                            context.getString(R.string.calc_invalid_get_matrix_args)
                         argsValid = false
                     }
                 }
@@ -2024,7 +2078,8 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                         vector[op2.value.toInt()] = op1.value
                         calcData.numberList.add(CalcLine(desc = "", vector = vector))
                     } else {
-                        calcData.errorMsg = context.getString(R.string.calc_invalid_set_vector_args)
+                        calcData.errorMsg =
+                            context.getString(R.string.calc_invalid_set_vector_args)
                         argsValid = false
                     }
                 }

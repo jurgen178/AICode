@@ -112,4 +112,6 @@ limitations under the License. -->
   <string name="calc_invalid_get_matrix_args">\'getm\' erwartet Matrix, Zeile und Spalte</string>
   <string name="calc_invalid_set_vector_args">\'setv\' erwartet Vektor, Index und ein Wert</string>
   <string name="calc_invalid_set_matrix_args">\'setm\' erwartet Matrix, Zeile, Spalte und ein Wert</string>
+  <string name="calc_invalid_new_vector_args">1..%1$d für \'vector\' </string>
+  <string name="calc_invalid_new_matrix_args">1..%1$d für \'matrix\'</string>
 </resources>

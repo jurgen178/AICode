@@ -114,4 +114,6 @@ limitations under the License. -->
   <string name="calc_invalid_get_matrix_args">\'getm\' expects Matrix, Row and Column</string>
   <string name="calc_invalid_set_vector_args">\'setv\' expects Vector, Index and one value</string>
   <string name="calc_invalid_set_matrix_args">\'setm\' expects Matrix, Row, Column and one value</string>
+  <string name="calc_invalid_new_vector_args">1..%1$d for \'vector\' </string>
+  <string name="calc_invalid_new_matrix_args">1..%1$d for \'matrix\'</string>
 </resources>
