@@ -1293,7 +1293,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
         return ""
     }
 
-    fun setText(text: String?, desc: String) {
+    fun setText(text: String?) {
         if (text != null && text.isNotEmpty()) {
 
             // Use function(...) to interpret the content instead of parsing as a number.
