@@ -86,6 +86,7 @@ enum class BinaryArgument {
     SUB,
     MULT,
     DIV,
+    ARCTAN2,
     HYPOT,
     POW,
     MIN,
@@ -861,6 +862,9 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 "arctan" -> {
                     validArgs = opUnary(calcData, UnaryArgument.ARCTAN)
+                }
+                "arctan2" -> {
+                    validArgs = opBinary(calcData, BinaryArgument.ARCTAN2)
                 }
                 "sinh" -> {
                     validArgs = opUnary(calcData, UnaryArgument.SINH)
@@ -1919,6 +1923,14 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 BinaryArgument.DIV -> {
                     calcData.numberList.add(op1 / op2)
+                }
+                BinaryArgument.ARCTAN2 -> {
+                    calcData.numberList.add(
+                        CalcLine(
+                            desc = "",
+                            value = atan2(op1.value, op2.value) / radian
+                        )
+                    )
                 }
                 BinaryArgument.HYPOT -> {
                     calcData.numberList.add(

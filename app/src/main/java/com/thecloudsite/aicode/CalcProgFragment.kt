@@ -108,7 +108,7 @@ class CalcProgFragment(stockSymbol: String = "") : CalcBaseFragment(stockSymbol)
             ),
             // math op
             SyntaxHighlightRule(
-                "(?i)((\\s|^)(sin|cos|tan|arcsin|arccos|arctan|sinh|cosh|tanh|arcsinh|arccosh|arctanh|ln|log|sq|sqrt|hypot|pow|per|perc|binom|erf|inv|abs|mod|int|round|round2|round4|rand|frac|tostr|max|min|sum|size|var|vector|matrix|getv|setv|getm|setm|pi|π|e|and|or|xor|not|solve|factorial|[!]))+(\\s|$)",
+                "(?i)((\\s|^)(sin|cos|tan|arcsin|arccos|arctan|arctan2|sinh|cosh|tanh|arcsinh|arccosh|arctanh|ln|log|sq|sqrt|hypot|pow|per|perc|binom|erf|inv|abs|mod|int|round|round2|round4|rand|frac|tostr|max|min|sum|size|var|vector|matrix|getv|setv|getm|setm|pi|π|e|and|or|xor|not|solve|factorial|[!]))+(\\s|$)",
                 "#B50000"
             ),
             // ()
@@ -145,6 +145,8 @@ class CalcProgFragment(stockSymbol: String = "") : CalcBaseFragment(stockSymbol)
 
             calcViewModel.codeMap[name] = CodeType(code = calcCodeText, name = calcDisplayNameText)
             updateKeys()
+
+            saveData()
         }
 
         val elements = calcViewModel.calcData.value?.numberList?.size
@@ -381,9 +383,8 @@ class CalcProgFragment(stockSymbol: String = "") : CalcBaseFragment(stockSymbol)
         updateShift()
     }
 
-    override fun onPause() {
-        super.onPause()
-
+    fun saveData()
+    {
         val sharedPreferences =
             PreferenceManager.getDefaultSharedPreferences(requireContext() /* Activity context */)
 
@@ -397,6 +398,12 @@ class CalcProgFragment(stockSymbol: String = "") : CalcBaseFragment(stockSymbol)
             .edit()
             .putBoolean("calc_format_radian", radian == 1.0)
             .apply()
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        saveData()
     }
 
     override fun onResume() {
