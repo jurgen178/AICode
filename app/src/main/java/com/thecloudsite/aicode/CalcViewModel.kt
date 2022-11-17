@@ -86,7 +86,10 @@ enum class BinaryArgument {
     SUB,
     MULT,
     DIV,
+    HYPOT,
     POW,
+    MIN,
+    MAX,
     SWAP,
     OVER,
     MATRIX, // Create matrix element.
@@ -916,6 +919,12 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 "rand" -> {
                     opZero(calcData, ZeroArgument.RAND)
                 }
+                "min" -> {
+                    validArgs = opBinary(calcData, BinaryArgument.MIN)
+                }
+                "max" -> {
+                    validArgs = opBinary(calcData, BinaryArgument.MAX)
+                }
                 "factorial", "!" -> {
                     validArgs = opUnary(calcData, UnaryArgument.FACTORIAL)
                 }
@@ -1044,6 +1053,9 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 "/" -> {
                     validArgs = opBinary(calcData, BinaryArgument.DIV)
+                }
+                "hypot" -> {
+                    validArgs = opBinary(calcData, BinaryArgument.HYPOT)
                 }
                 "^", "pow" -> {
                     validArgs = opBinary(calcData, BinaryArgument.POW)
@@ -1908,6 +1920,14 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 BinaryArgument.DIV -> {
                     calcData.numberList.add(op1 / op2)
                 }
+                BinaryArgument.HYPOT -> {
+                    calcData.numberList.add(
+                        CalcLine(
+                            desc = "",
+                            value = Math.hypot(op1.value, op2.value)
+                        )
+                    )
+                }
                 BinaryArgument.POW -> {
                     calcData.numberList.add(
                         CalcLine(
@@ -1915,6 +1935,20 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                             value = op1.value.pow(op2.value)
                         )
                     )
+                }
+                BinaryArgument.MIN -> {
+                    if(op1.value < op2.value) {
+                        calcData.numberList.add(op1)
+                    }else {
+                        calcData.numberList.add(op2)
+                    }
+                }
+                BinaryArgument.MAX -> {
+                    if(op1.value > op2.value) {
+                        calcData.numberList.add(op1)
+                    }else {
+                        calcData.numberList.add(op2)
+                    }
                 }
                 BinaryArgument.SWAP -> {
                     calcData.numberList.add(op2)
