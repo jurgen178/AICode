@@ -198,10 +198,25 @@ fun getDisplayString(value: Long, radix: Int): String {
 }
 
 fun factorial(n: Int): Long {
-    return if (n <= 0) {
+    // 20! = 2432902008176640000
+    // 21! will overflow Long (64bit)
+    return if (n >= 21) {
+        0
+    } else if (n <= 0) {
         1
     } else {
         n * factorial(n - 1)
+    }
+}
+
+fun factorialDouble(n: Int): Double {
+    // Limit to 100!
+    return if (n > 100) {
+        0.0
+    } else if (n <= 0.0) {
+        1.0
+    } else {
+        n * factorialDouble(n - 1)
     }
 }
 
