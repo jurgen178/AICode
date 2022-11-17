@@ -233,6 +233,9 @@ fun binomRecursive(n: Int, k: Int): Long {
 //    (k+1) = (k) + (k+1)
 
     return when {
+        n > 100 || k > 100 -> {
+            0
+        }
         k <= 0 -> {
             1
         }
