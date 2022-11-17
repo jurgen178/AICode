@@ -40,6 +40,7 @@ enum class ZeroArgument {
     CLEAR,
     PI,
     E,
+    RAND,   // Random number between 0..1
 }
 
 enum class UnaryArgument {
@@ -912,6 +913,9 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 "frac" -> {
                     validArgs = opUnary(calcData, UnaryArgument.FRAC)
                 }
+                "rand" -> {
+                    opZero(calcData, ZeroArgument.RAND)
+                }
                 "factorial", "!" -> {
                     validArgs = opUnary(calcData, UnaryArgument.FACTORIAL)
                 }
@@ -1293,7 +1297,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
         return ""
     }
 
-    fun setText(text: String?) {
+    fun setText(text: String?, desc: String) {
         if (text != null && text.isNotEmpty()) {
 
             // Use function(...) to interpret the content instead of parsing as a number.
@@ -1546,6 +1550,9 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
             }
             ZeroArgument.E -> {
                 calcData.numberList.add(CalcLine(desc = "", value = Math.E))
+            }
+            ZeroArgument.RAND -> {
+                calcData.numberList.add(CalcLine(desc = "", value = Math.random()))
             }
         }
 

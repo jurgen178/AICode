@@ -108,7 +108,7 @@ class CalcProgFragment(stockSymbol: String = "") : CalcBaseFragment(stockSymbol)
             ),
             // math op
             SyntaxHighlightRule(
-                "(?i)((\\s|^)(sin|cos|tan|arcsin|arccos|arctan|sinh|cosh|tanh|arcsinh|arccosh|arctanh|ln|log|sq|sqrt|pow|per|perc|binom|erf|inv|abs|mod|int|round|round2|round4|frac|tostr|sum|size|var|vector|matrix|getv|setv|getm|setm|pi|π|e|and|or|xor|not|solve|factorial|[!]))+(\\s|$)",
+                "(?i)((\\s|^)(sin|cos|tan|arcsin|arccos|arctan|sinh|cosh|tanh|arcsinh|arccosh|arctanh|ln|log|sq|sqrt|pow|per|perc|binom|erf|inv|abs|mod|int|round|round2|round4|rand|frac|tostr|sum|size|var|vector|matrix|getv|setv|getm|setm|pi|π|e|and|or|xor|not|solve|factorial|[!]))+(\\s|$)",
                 "#B50000"
             ),
             // ()
