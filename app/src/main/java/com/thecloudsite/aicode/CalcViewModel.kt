@@ -130,6 +130,12 @@ val wordListRegex = "[\"':;(){}\\[\\]]".toRegex()
 // (?s) dotall
 val wordDefinitionRegex = Regex("(?s):\\s(.+?)\\s(?:.*?\\s)?;")
 
+data class LoopValues(
+    var start: CalcLine,
+    var end: CalcLine,
+    var inc: CalcLine,
+)
+
 data class CodeType
     (
     val code: String,
@@ -297,6 +303,8 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
         // (?s) = dotall = . + \n
         val labelRegex = "^(?:do)?[.](.+?)$".toRegex(IGNORE_CASE)
         val whileIfRegex = "^(while|if)[.](\\w+)[.](.+?)$".toRegex(IGNORE_CASE)
+        val loopRegex = "^loop[.](.+?)$".toRegex(IGNORE_CASE)
+        val endloopRegex = "^endloop[.](.+?)$".toRegex(IGNORE_CASE)
         val gotoRegex = "^goto[.](.+?)$".toRegex(IGNORE_CASE)
         val stoRegex = "^sto[.](.+)$".toRegex(IGNORE_CASE)
         val rclRegex = "^rcl[.](.+)$".toRegex(IGNORE_CASE)
@@ -379,6 +387,71 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     } else {
                         context.getString(R.string.calc_missing_if_label, labelStr)
                     }
+                    calcRepository.updateData(calcData)
+
+                    // label missing, end loop
+                    return
+                }
+            }
+        }
+
+        // validate and store all loop.labels
+        val loopMap: MutableMap<String, Int> = mutableMapOf()
+        val endloopMap: MutableMap<String, Int> = mutableMapOf()
+        val loopValuesMap: MutableMap<String, LoopValues> = mutableMapOf()
+
+        words.forEachIndexed { index, word ->
+            var labelStr =
+                getRegexOneGroup(word, loopRegex)
+            // is loop?
+            if (labelStr != null) {
+                val label = labelStr.lowercase(Locale.ROOT)
+
+                // check if loop-labels are unique
+                if (loopMap.containsKey(label)) {
+                    calcData.errorMsg =
+                        context.getString(R.string.calc_duplicate_loop_label, labelStr)
+                    calcRepository.updateData(calcData)
+
+                    // duplicate label, end loop
+                    return
+                } else {
+                    // Store label
+                    loopMap[label] = index
+                }
+
+                if (!loopMap.containsKey(label)) {
+                    calcData.errorMsg =
+                        context.getString(R.string.calc_missing_loop_label, labelStr)
+                    calcRepository.updateData(calcData)
+
+                    // label missing, end loop
+                    return
+                }
+            }
+
+            labelStr =
+                getRegexOneGroup(word, endloopRegex)
+            // is endloop?
+            if (labelStr != null) {
+                val label = labelStr.lowercase(Locale.ROOT)
+
+                // check if loop-labels are unique
+                if (endloopMap.containsKey(label)) {
+                    calcData.errorMsg =
+                        context.getString(R.string.calc_duplicate_loop_label, labelStr)
+                    calcRepository.updateData(calcData)
+
+                    // duplicate label, end loop
+                    return
+                } else {
+                    // Store label
+                    endloopMap[label] = index
+                }
+
+                if (!endloopMap.containsKey(label)) {
+                    calcData.errorMsg =
+                        context.getString(R.string.calc_missing_loop_label, labelStr)
                     calcRepository.updateData(calcData)
 
                     // label missing, end loop
@@ -509,7 +582,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     return
                 }
 
-                val argsValid = calcData.numberList.size > 1
+                val argsValid = calcData.numberList.size >= 2
                 if (argsValid) {
 
                     // 2: op2
@@ -579,6 +652,68 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
 
+            // loop.[label]
+            val labelStr =
+                getRegexOneGroup(word, loopRegex)
+            // is loop?
+            if (labelStr != null) {
+                loopCounter++
+
+                val label = labelStr.lowercase(Locale.ROOT)
+
+                // already checked in validation, kept as runtime test-case
+                if (!loopMap.containsKey(label)) {
+                    calcData.errorMsg =
+                        context.getString(R.string.calc_missing_loop_label, labelStr)
+                    calcRepository.updateData(calcData)
+
+                    // label missing, end loop
+                    return
+                }
+
+                // Store start,end,inc of the loop.
+                if (!loopValuesMap.containsKey(label)) {
+                    val argsValid = calcData.numberList.size >= 3
+                    if (argsValid) {
+                        loopValuesMap[label] = LoopValues(
+                            inc = calcData.numberList.removeLast(),
+                            end = calcData.numberList.removeLast(),
+                            start = calcData.numberList.removeLast(),
+                        )
+                    } else {
+                        calcData.errorMsg = context.getString(R.string.calc_invalid_loop_args)
+                        calcRepository.updateData(calcData)
+
+                        // invalid args, end instruction
+                        return
+                    }
+                }
+
+                val loopValue = loopValuesMap[label]!!
+
+                if (loopValue.inc.value > 0.0 && loopValue.start.value >= loopValue.end.value
+                    || loopValue.inc.value < 0.0 && loopValue.start.value <= loopValue.end.value
+                ) {
+                    // End of loop. Jump behind end loop label.
+                    i = endloopMap[label]!! + 1
+                    loopValuesMap.remove(label)
+                    continue
+                }
+
+                // Add loop value to be used within the loop.
+                calcData.numberList.add(
+                    CalcLine(
+                        desc = loopValue.start.desc,
+                        value = loopValue.start.value
+                    )
+                )
+
+                // Update loop value.
+                loopValue.start.value += loopValue.inc.value
+
+                continue
+            }
+
             // Goto
             // goto.[label]
             val gotoMatch =
@@ -597,6 +732,26 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
 
                 // jump to label
                 i = labelMap[label]!!
+                continue
+            }
+
+            // endloop.[label]
+            val endloopMatch =
+                getRegexOneGroup(word, endloopRegex)
+            if (endloopMatch != null) {
+                loopCounter++
+                val label = endloopMatch.lowercase(Locale.ROOT)
+
+                if (!loopMap.containsKey(label)) {
+                    calcData.errorMsg = context.getString(R.string.calc_missing_label, gotoMatch)
+                    calcRepository.updateData(calcData)
+
+                    // label missing, end instruction
+                    return
+                }
+
+                // jump to label
+                i = loopMap[label]!!
                 continue
             }
 
@@ -1949,16 +2104,16 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     )
                 }
                 BinaryArgument.MIN -> {
-                    if(op1.value < op2.value) {
+                    if (op1.value < op2.value) {
                         calcData.numberList.add(op1)
-                    }else {
+                    } else {
                         calcData.numberList.add(op2)
                     }
                 }
                 BinaryArgument.MAX -> {
-                    if(op1.value > op2.value) {
+                    if (op1.value > op2.value) {
                         calcData.numberList.add(op1)
-                    }else {
+                    } else {
                         calcData.numberList.add(op2)
                     }
                 }
