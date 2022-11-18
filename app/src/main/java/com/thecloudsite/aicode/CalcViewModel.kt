@@ -691,6 +691,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
 
                 val loopValue = loopValuesMap[label]!!
 
+                // Abbruchbedingung.
                 if (loopValue.inc.value > 0.0 && loopValue.start.value >= loopValue.end.value
                     || loopValue.inc.value < 0.0 && loopValue.start.value <= loopValue.end.value
                 ) {
