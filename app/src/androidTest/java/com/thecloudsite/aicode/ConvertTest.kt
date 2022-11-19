@@ -32,7 +32,7 @@ class ConvertTest {
     data class CalcLineJson
         (
         var desc: String = "",
-        var value: Double = 0.0,
+        var value: Double? = 0.0,
         var lambda: Int = -1,
         var definition: String = "",
         var vector: List<Double>?,
@@ -50,7 +50,7 @@ class ConvertTest {
 
             val calcLineJson = CalcLineJson(
                 desc = calcLine.desc,
-                value = calcLine.value,
+                value = if(calcLine.value.isFinite()) calcLine.value else null,
                 lambda = calcLine.lambda,
                 definition = calcLine.definition,
                 vector = null,
@@ -65,8 +65,6 @@ class ConvertTest {
 
             if (calcLine.matrix != null) {
                 val rows = calcLine.matrix!!.size
-
-                val matrix1 = mutableListOf<MutableList<Double>>()
 
                 if (rows > 0) {
                     val cols = calcLine.matrix!![0].size
@@ -102,7 +100,7 @@ class ConvertTest {
 
             val calcLine = CalcLine(
                 desc = calcLineJson.desc,
-                value = calcLineJson.value,
+                value = if(calcLineJson.value == null) Double.NaN else calcLineJson.value!!,
                 lambda = calcLineJson.lambda,
                 definition = calcLineJson.definition,
                 vector = null,
@@ -169,6 +167,32 @@ class ConvertTest {
             for (col in 0 until op1.matrix!![0].size) {
                 assertEquals(op1.matrix!![row][col], calcLine.matrix!![row][col], delta)
             }
+        }
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun calcLineConvertNaNTest() {
+
+        val op1 = CalcLine(
+            value = Double.NaN
+        )
+
+        op1.vector = DoubleArray(3) { c -> (c + 1).toDouble() }
+
+        val memStr = calcLineToStr(op1)
+
+        val calcLine = strToCalcLine(memStr)
+
+        assertEquals(op1.desc, calcLine.desc)
+        assertEquals(op1.value, calcLine.value, delta)
+        assertEquals(op1.lambda, calcLine.lambda)
+        assertEquals(op1.definition, calcLine.definition)
+
+        // compare vector
+        assertEquals(op1.vector!!.size, calcLine.vector!!.size)
+        for (i in 0 until op1.vector!!.size) {
+            assertEquals(op1.vector!![i], calcLine.vector!![i], delta)
         }
     }
 }

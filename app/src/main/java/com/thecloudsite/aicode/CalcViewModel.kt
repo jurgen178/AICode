@@ -156,6 +156,16 @@ data class CodeTypeJson
     val name: String,
 )
 
+data class CalcLineJson
+    (
+    var desc: String = "",
+    var value: Double? = 0.0,
+    var lambda: Int = -1,
+    var definition: String = "",
+    var vector: List<Double>?,
+    var matrix: List<List<Double>>?,
+)
+
 class CalcViewModel(application: Application) : AndroidViewModel(application) {
 
     private val context = application
@@ -1413,11 +1423,9 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
             val gson: Gson = GsonBuilder()
                 .create()
 
-            // Convert to class with Lists for vector and matrix.
-            // Gson does not dot serialize/deserialize Arrays.
             val calcLineJson = CalcLineJson(
                 desc = calcLine.desc,
-                value = calcLine.value,
+                value = if(calcLine.value.isFinite()) calcLine.value else null,
                 lambda = calcLine.lambda,
                 definition = calcLine.definition,
                 vector = null,
@@ -1432,8 +1440,6 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
 
             if (calcLine.matrix != null) {
                 val rows = calcLine.matrix!!.size
-
-                val matrix1 = mutableListOf<MutableList<Double>>()
 
                 if (rows > 0) {
                     val cols = calcLine.matrix!![0].size
@@ -1469,7 +1475,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
 
             val calcLine = CalcLine(
                 desc = calcLineJson.desc,
-                value = calcLineJson.value,
+                value = if(calcLineJson.value == null) Double.NaN else calcLineJson.value!!,
                 lambda = calcLineJson.lambda,
                 definition = calcLineJson.definition,
                 vector = null,

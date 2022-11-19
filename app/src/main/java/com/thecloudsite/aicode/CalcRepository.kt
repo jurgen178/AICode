@@ -20,16 +20,6 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 
-data class CalcLineJson
-    (
-    var desc: String = "",
-    var value: Double = 0.0,
-    var lambda: Int = -1,
-    var definition: String = "",
-    var vector: List<Double>?,
-    var matrix: List<List<Double>>?,
-)
-
 data class CalcLine
     (
     var desc: String = "",
