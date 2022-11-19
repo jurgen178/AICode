@@ -102,7 +102,7 @@ class CalcProgFragment(stockSymbol: String = "") : CalcBaseFragment(stockSymbol)
             SyntaxHighlightRule("(?i)((\\s|^)if[.](eq|le|lt|ge|gt)([.].+?)?)+(\\s|$)", "#FF7F7F"),
             SyntaxHighlightRule("(?i)((\\s|^):loop|:radian|:degree)+(\\s|$)", "#FF6A00"),
             // recall all variables, rcl without .
-            SyntaxHighlightRule("(?i)((\\s|^)rcl)+(\\s|$)", "#2C42C1"),
+            SyntaxHighlightRule("(?i)((\\s|^)(rcl|memrcl))+(\\s|$)", "#2C42C1"),
             // stack op
             SyntaxHighlightRule(
                 "(?i)((\\s|^)(validate|clear|depth|drop|dup|over|swap|rot|pick|roll))+(\\s|$)",

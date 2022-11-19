@@ -19,7 +19,6 @@ package com.thecloudsite.aicode
 import android.app.AlertDialog
 import android.app.Application
 import android.content.Context
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.preference.PreferenceManager
@@ -1283,7 +1282,10 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
 
                 // Variable operation
                 "rcl" -> {
-                    recallAllVariables(calcData)
+                    recallAllVariables(calcData, false)
+                }
+                "memrcl" -> {
+                    recallAllVariables(calcData, true)
                 }
                 else -> {
 
@@ -1409,7 +1411,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun setSerializedStr(
         data: String
-    ) : CalcLine{
+    ): CalcLine {
 
         try {
 
@@ -1483,14 +1485,23 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private fun recallAllVariables(calcData: CalcData) {
+    private fun recallAllVariables(calcData: CalcData, permanentStorage: Boolean) {
         endEdit(calcData)
 
-        varMap.forEach { (name, line) ->
-            calcData.numberList.add(CalcLine(desc = "Variable '$name'", value = Double.NaN))
-            calcData.numberList.add(line)
+        if (permanentStorage) {
+            val sharedPreferences =
+                PreferenceManager.getDefaultSharedPreferences(context /* Activity context */)
+
+            sharedPreferences.all.forEach { name ->
+                calcData.numberList.add(CalcLine(desc = "Variable '$name'", value = Double.NaN))
+            }
+        } else {
+            varMap.forEach { (key, value) ->
+                calcData.numberList.add(CalcLine(desc = "Variable '$key'", value = Double.NaN))
+                calcData.numberList.add(value)
+            }
+            //calcData.numberList.add(CalcLine(desc = "${varMap.size}", value = Double.NaN))
         }
-        //calcData.numberList.add(CalcLine(desc = "${varMap.size}", value = Double.NaN))
 
         calcRepository.updateData(calcData)
     }
