@@ -19,8 +19,13 @@ package com.thecloudsite.aicode
 import android.app.AlertDialog
 import android.app.Application
 import android.content.Context
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import androidx.preference.PreferenceManager
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import java.text.NumberFormat
 import java.util.*
 import kotlin.math.*
@@ -304,10 +309,12 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
         val labelRegex = "^(?:do)?[.](.+?)$".toRegex(IGNORE_CASE)
         val whileIfRegex = "^(while|if)[.](\\w+)[.](.+?)$".toRegex(IGNORE_CASE)
         val loopRegex = "^loop[.](.+?)$".toRegex(IGNORE_CASE)
-        val endloopRegex = "^endloop[.](.+?)$".toRegex(IGNORE_CASE)
+        val endloopRegex = "^end[.](.+?)$".toRegex(IGNORE_CASE)
         val gotoRegex = "^goto[.](.+?)$".toRegex(IGNORE_CASE)
         val stoRegex = "^sto[.](.+)$".toRegex(IGNORE_CASE)
         val rclRegex = "^rcl[.](.+)$".toRegex(IGNORE_CASE)
+        val memstoRegex = "^memsto[.](.+)$".toRegex(IGNORE_CASE)
+        val memrclRegex = "^memrcl[.](.+)$".toRegex(IGNORE_CASE)
         val commentRegex = "(?s)^[\"'](.+?)[\"']$".toRegex()
         val definitionRegex = "^[(](.+?)[)]$".toRegex()
 
@@ -432,7 +439,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
 
             labelStr =
                 getRegexOneGroup(word, endloopRegex)
-            // is endloop?
+            // is end of loop?
             if (labelStr != null) {
                 val label = labelStr.lowercase(Locale.ROOT)
 
@@ -695,7 +702,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 if (loopValue.inc.value > 0.0 && loopValue.start.value >= loopValue.end.value
                     || loopValue.inc.value < 0.0 && loopValue.start.value <= loopValue.end.value
                 ) {
-                    // End of loop. Jump behind end loop label.
+                    // End of loop. Jump behind end loop label to continue.
                     i = endloopMap[label]!! + 1
                     loopValuesMap.remove(label)
                     continue
@@ -736,7 +743,8 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 continue
             }
 
-            // endloop.[label]
+            // End of loop.
+            // end.[label]
             val endloopMatch =
                 getRegexOneGroup(word, endloopRegex)
             if (endloopMatch != null) {
@@ -744,7 +752,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 val label = endloopMatch.lowercase(Locale.ROOT)
 
                 if (!loopMap.containsKey(label)) {
-                    calcData.errorMsg = context.getString(R.string.calc_missing_label, gotoMatch)
+                    calcData.errorMsg = context.getString(R.string.calc_missing_label, endloopMatch)
                     calcRepository.updateData(calcData)
 
                     // label missing, end instruction
@@ -1307,30 +1315,54 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                         // sto[.name]
                         val variableName = getRegexOneGroup(word, stoRegex)
                         if (variableName != null) {
-                            validArgs = storeVariable(calcData, variableName)
+                            validArgs = storeVariable(calcData, variableName, false)
 
                         } else {
 
                             // rcl[.name]
                             val recallVariable = getRegexOneGroup(word, rclRegex)
                             if (recallVariable != null) {
-                                recallVariable(calcData, recallVariable)
+                                recallVariable(calcData, recallVariable, false)
 
                             } else {
 
-                                // Evaluate number
-                                try {
-                                    val value = numberFormat.parse(word)!!
-                                        .toDouble()
+                                // memsto[.name]
+                                val memVariableName = getRegexOneGroup(word, memstoRegex)
+                                if (memVariableName != null) {
+                                    validArgs = storeVariable(calcData, memVariableName, true)
 
-                                    calcData.numberList.add(CalcLine(desc = "", value = value))
-                                } catch (e: Exception) {
-                                    // Error
-                                    calcData.errorMsg =
-                                        context.getString(R.string.calc_error_parsing_msg, word)
-                                    success = false
+                                } else {
+
+                                    // memrcl[.name]
+                                    val memRecallVariable = getRegexOneGroup(word, memrclRegex)
+                                    if (memRecallVariable != null) {
+                                        recallVariable(calcData, memRecallVariable, true)
+
+                                    } else {
+
+                                        // Evaluate number
+                                        try {
+                                            val value = numberFormat.parse(word)!!
+                                                .toDouble()
+
+                                            calcData.numberList.add(
+                                                CalcLine(
+                                                    desc = "",
+                                                    value = value
+                                                )
+                                            )
+                                        } catch (e: Exception) {
+                                            // Error
+                                            calcData.errorMsg =
+                                                context.getString(
+                                                    R.string.calc_error_parsing_msg,
+                                                    word
+                                                )
+                                            success = false
+                                        }
+
+                                    }
                                 }
-
                             }
                         }
                     }
@@ -1358,7 +1390,46 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
         calcRepository.updateData(calcData)
     }
 
-    private fun storeVariable(calcData: CalcData, name: String): Boolean {
+    private fun getSerializedStr(calcLine: CalcLine): String {
+
+        var jsonString = ""
+
+        try {
+            // Convert to a json string.
+            val gson: Gson = GsonBuilder()
+                .create()
+
+            jsonString = gson.toJson(calcLine)
+
+        } catch (e: Exception) {
+        }
+
+        return jsonString
+    }
+
+    private fun setSerializedStr(
+        data: String
+    ) : CalcLine{
+
+        try {
+
+            val sType = object : TypeToken<CalcLine>() {}.type
+            val gson = Gson()
+            val calcLine = gson.fromJson<CalcLine>(data, sType)
+
+            return calcLine
+
+        } catch (e: Exception) {
+        }
+
+        return CalcLine()
+    }
+
+    private fun storeVariable(
+        calcData: CalcData,
+        name: String,
+        permanentStorage: Boolean
+    ): Boolean {
         val argsValid = calcData.numberList.size > 0
 
         if (argsValid) {
@@ -1366,7 +1437,20 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
 
             // 1: op1
             val op1 = calcData.numberList.removeLast()
-            varMap[name] = op1
+
+            if (permanentStorage) {
+                val sharedPreferences =
+                    PreferenceManager.getDefaultSharedPreferences(context /* Activity context */)
+
+                val memStr = getSerializedStr(op1)
+                sharedPreferences
+                    .edit()
+                    .putString(name, memStr)
+                    .apply()
+
+            } else {
+                varMap[name] = op1
+            }
 
         } else {
             calcData.errorMsg = context.getString(R.string.calc_invalid_args)
@@ -1377,13 +1461,25 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
         return argsValid
     }
 
-    private fun recallVariable(calcData: CalcData, name: String) {
+    private fun recallVariable(calcData: CalcData, name: String, permanentStorage: Boolean) {
         endEdit(calcData)
 
-        if (varMap.containsKey(name)) {
-            calcData.numberList.add(varMap[name]!!)
+        if (permanentStorage) {
+            val sharedPreferences =
+                PreferenceManager.getDefaultSharedPreferences(context /* Activity context */)
 
-            calcRepository.updateData(calcData)
+            val memStr = sharedPreferences.getString(name, "").toString()
+            if (memStr.isNotEmpty()) {
+                calcData.numberList.add(setSerializedStr(memStr))
+
+                calcRepository.updateData(calcData)
+            }
+        } else {
+            if (varMap.containsKey(name)) {
+                calcData.numberList.add(varMap[name]!!)
+
+                calcRepository.updateData(calcData)
+            }
         }
     }
 
