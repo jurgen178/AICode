@@ -125,10 +125,10 @@ enum class QuadArgument {
     IFLT, // if less then
 }
 
-val VECTORMAX = 100
-val MATRIXMAX = 40
+const val VECTORMAX = 100
+const val MATRIXMAX = 40
 
-val MEM_STORE_PREFIX = "mem_"
+const val MEM_STORE_PREFIX = "mem_"
 
 
 // List of chars that cannot be used as definitions.

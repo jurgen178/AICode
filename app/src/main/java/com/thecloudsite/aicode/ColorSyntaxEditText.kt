@@ -122,7 +122,7 @@ class ColorSyntaxEditText(context: Context, attrs: AttributeSet) :
   }
 
   private fun applySyntaxHighlight() {
-    if (!syntaxHighlightRules.isNullOrEmpty()) {
+    if (syntaxHighlightRules.isNotEmpty()) {
 
       // first remove all spans
       text?.removeAllSpans()
