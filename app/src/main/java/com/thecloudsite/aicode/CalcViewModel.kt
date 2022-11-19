@@ -128,6 +128,9 @@ enum class QuadArgument {
 val VECTORMAX = 100
 val MATRIXMAX = 40
 
+val MEM_STORE_PREFIX = "mem_"
+
+
 // List of chars that cannot be used as definitions.
 val wordListRegex = "[\"':;(){}\\[\\]]".toRegex()
 
@@ -314,6 +317,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
         val rclRegex = "^rcl[.](.+)$".toRegex(IGNORE_CASE)
         val memstoRegex = "^memsto[.](.+)$".toRegex(IGNORE_CASE)
         val memrclRegex = "^memrcl[.](.+)$".toRegex(IGNORE_CASE)
+        val memdelRegex = "^memdel[.](.+)$".toRegex(IGNORE_CASE)
         val commentRegex = "(?s)^[\"'](.+?)[\"']$".toRegex()
         val definitionRegex = "^[(](.+?)[)]$".toRegex()
 
@@ -1342,27 +1346,35 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
 
                                     } else {
 
-                                        // Evaluate number
-                                        try {
-                                            val value = numberFormat.parse(word)!!
-                                                .toDouble()
+                                        // memdel[.name]
+                                        val memDeleteVariable = getRegexOneGroup(word, memdelRegex)
+                                        if (memDeleteVariable != null) {
+                                            deleteVariable(calcData, memDeleteVariable)
 
-                                            calcData.numberList.add(
-                                                CalcLine(
-                                                    desc = "",
-                                                    value = value
+                                        } else {
+
+                                            // Evaluate number
+                                            try {
+                                                val value = numberFormat.parse(word)!!
+                                                    .toDouble()
+
+                                                calcData.numberList.add(
+                                                    CalcLine(
+                                                        desc = "",
+                                                        value = value
+                                                    )
                                                 )
-                                            )
-                                        } catch (e: Exception) {
-                                            // Error
-                                            calcData.errorMsg =
-                                                context.getString(
-                                                    R.string.calc_error_parsing_msg,
-                                                    word
-                                                )
-                                            success = false
+                                            } catch (e: Exception) {
+                                                // Error
+                                                calcData.errorMsg =
+                                                    context.getString(
+                                                        R.string.calc_error_parsing_msg,
+                                                        word
+                                                    )
+                                                success = false
+                                            }
+
                                         }
-
                                     }
                                 }
                             }
@@ -1447,7 +1459,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 val memStr = getSerializedStr(op1)
                 sharedPreferences
                     .edit()
-                    .putString(name, memStr)
+                    .putString("$MEM_STORE_PREFIX$name", memStr)
                     .apply()
 
             } else {
@@ -1470,12 +1482,10 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
             val sharedPreferences =
                 PreferenceManager.getDefaultSharedPreferences(context /* Activity context */)
 
-            val memStr = sharedPreferences.getString(name, "").toString()
-            if (memStr.isNotEmpty()) {
-                calcData.numberList.add(setSerializedStr(memStr))
+            val memStr = sharedPreferences.getString("$MEM_STORE_PREFIX$name", "").toString()
+            calcData.numberList.add(setSerializedStr(memStr))
 
-                calcRepository.updateData(calcData)
-            }
+            calcRepository.updateData(calcData)
         } else {
             if (varMap.containsKey(name)) {
                 calcData.numberList.add(varMap[name]!!)
@@ -1492,8 +1502,14 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
             val sharedPreferences =
                 PreferenceManager.getDefaultSharedPreferences(context /* Activity context */)
 
-            sharedPreferences.all.forEach { name ->
-                calcData.numberList.add(CalcLine(desc = "Variable '$name'", value = Double.NaN))
+            sharedPreferences.all.forEach { element ->
+                val memName: String = element.key
+                if (memName.startsWith(MEM_STORE_PREFIX)) {
+                    val name = memName.substring(MEM_STORE_PREFIX.length)
+                    calcData.numberList.add(CalcLine(desc = "Variable '$name'", value = Double.NaN))
+                    val memValue: String = element.value as String
+                    calcData.numberList.add(setSerializedStr(memValue))
+                }
             }
         } else {
             varMap.forEach { (key, value) ->
@@ -1504,6 +1520,18 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         calcRepository.updateData(calcData)
+    }
+
+    private fun deleteVariable(calcData: CalcData, name: String) {
+        endEdit(calcData)
+
+        val sharedPreferences =
+            PreferenceManager.getDefaultSharedPreferences(context /* Activity context */)
+
+        sharedPreferences
+            .edit()
+            .remove("$MEM_STORE_PREFIX$name")
+            .apply()
     }
 
     private fun displayValue(value: Double): String {
