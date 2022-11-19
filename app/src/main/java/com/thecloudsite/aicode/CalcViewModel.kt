@@ -1404,7 +1404,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
         calcRepository.updateData(calcData)
     }
 
-    private fun getSerializedStr(calcLine: CalcLine): String {
+    private fun calcLineToStr(calcLine: CalcLine): String {
 
         var jsonString = ""
 
@@ -1413,7 +1413,43 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
             val gson: Gson = GsonBuilder()
                 .create()
 
-            jsonString = gson.toJson(calcLine)
+            // Convert to class with Lists for vector and matrix.
+            // Gson does not dot serialize/deserialize Arrays.
+            val calcLineJson = CalcLineJson(
+                desc = calcLine.desc,
+                value = calcLine.value,
+                lambda = calcLine.lambda,
+                definition = calcLine.definition,
+                vector = null,
+                matrix = null,
+            )
+
+            if (calcLine.vector != null) {
+                val vector1 = mutableListOf<Double>()
+                calcLine.vector!!.forEachIndexed { index, d -> vector1.add(d) }
+                calcLineJson.vector = vector1.toList()
+            }
+
+            if (calcLine.matrix != null) {
+                val rows = calcLine.matrix!!.size
+
+                val matrix1 = mutableListOf<MutableList<Double>>()
+
+                if (rows > 0) {
+                    val cols = calcLine.matrix!![0].size
+                    val array: MutableList<MutableList<Double>> =
+                        MutableList(rows) { MutableList(cols) { 0.0 } }
+
+                    for (row in 0 until rows) {
+                        for (col in 0 until cols) {
+                            array[row][col] += calcLine.matrix!![row][col]
+                        }
+                    }
+                    calcLineJson.matrix = array
+                }
+            }
+
+            jsonString = gson.toJson(calcLineJson)
 
         } catch (e: Exception) {
         }
@@ -1421,15 +1457,39 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
         return jsonString
     }
 
-    private fun setSerializedStr(
+    private fun strToCalcLine(
         data: String
     ): CalcLine {
 
         try {
 
-            val sType = object : TypeToken<CalcLine>() {}.type
+            val sType = object : TypeToken<CalcLineJson>() {}.type
             val gson = Gson()
-            val calcLine = gson.fromJson<CalcLine>(data, sType)
+            val calcLineJson = gson.fromJson<CalcLineJson>(data, sType)
+
+            val calcLine = CalcLine(
+                desc = calcLineJson.desc,
+                value = calcLineJson.value,
+                lambda = calcLineJson.lambda,
+                definition = calcLineJson.definition,
+                vector = null,
+                matrix = null,
+            )
+
+            if (calcLineJson.vector != null) {
+                calcLine.vector =
+                    DoubleArray(calcLineJson.vector!!.size) { c -> calcLineJson.vector!![c] }
+            }
+
+            if (calcLineJson.matrix != null) {
+                val rows = calcLineJson.matrix!!.size
+
+                if (rows > 0) {
+                    val cols = calcLineJson.matrix!![0].size
+                    calcLine.matrix =
+                        Array(rows) { r -> DoubleArray(cols) { c -> calcLineJson.matrix!![r][c] } }
+                }
+            }
 
             return calcLine
 
@@ -1456,7 +1516,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 val sharedPreferences =
                     PreferenceManager.getDefaultSharedPreferences(context /* Activity context */)
 
-                val memStr = getSerializedStr(op1)
+                val memStr = calcLineToStr(op1)
                 sharedPreferences
                     .edit()
                     .putString("$MEM_STORE_PREFIX$name", memStr)
@@ -1483,7 +1543,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 PreferenceManager.getDefaultSharedPreferences(context /* Activity context */)
 
             val memStr = sharedPreferences.getString("$MEM_STORE_PREFIX$name", "").toString()
-            calcData.numberList.add(setSerializedStr(memStr))
+            calcData.numberList.add(strToCalcLine(memStr))
 
             calcRepository.updateData(calcData)
         } else {
@@ -1508,7 +1568,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     val name = memName.substring(MEM_STORE_PREFIX.length)
                     calcData.numberList.add(CalcLine(desc = "Variable '$name'", value = Double.NaN))
                     val memValue: String = element.value as String
-                    calcData.numberList.add(setSerializedStr(memValue))
+                    calcData.numberList.add(strToCalcLine(memValue))
                 }
             }
         } else {
@@ -2058,7 +2118,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                                 0.0
                             }
 
-                        calcData.numberList.add(CalcLine(desc = "", vector = vector))
+                        calcData.numberList.add(CalcLine(desc = "", value = Double.NaN, vector = vector))
                     } else {
                         calcData.errorMsg =
                             context.getString(R.string.calc_invalid_new_vector_args, VECTORMAX)
@@ -2289,7 +2349,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                                 matrix[i][i] = 1.0
                             }
                         }
-                        calcData.numberList.add(CalcLine(desc = "", matrix = matrix))
+                        calcData.numberList.add(CalcLine(desc = "", value = Double.NaN, matrix = matrix))
                     } else {
                         calcData.errorMsg =
                             context.getString(R.string.calc_invalid_new_matrix_args, MATRIXMAX)
@@ -2420,7 +2480,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     if (op3.vector != null && op2.value.isFinite() && op1.value.isFinite() && op3.vector!!.size > op2.value.toInt()) {
                         val vector = op3.vector!!.clone()
                         vector[op2.value.toInt()] = op1.value
-                        calcData.numberList.add(CalcLine(desc = "", vector = vector))
+                        calcData.numberList.add(CalcLine(desc = "", value = Double.NaN, vector = vector))
                     } else {
                         calcData.errorMsg =
                             context.getString(R.string.calc_invalid_set_vector_args)
@@ -2482,7 +2542,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                                 }
 
                             matrix[op3.value.toInt()][op2.value.toInt()] = op1.value
-                            calcData.numberList.add(CalcLine(desc = "", matrix = matrix))
+                            calcData.numberList.add(CalcLine(desc = "", value = Double.NaN, matrix = matrix))
                         } else {
                             calcData.errorMsg =
                                 context.getString(R.string.calc_invalid_set_matrix_args)
