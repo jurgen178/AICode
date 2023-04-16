@@ -89,8 +89,8 @@ class CalcProgFragment(stockSymbol: String = "") : CalcBaseFragment(stockSymbol)
         dialogBinding.calcCode.syntaxHighlightRules = listOf(
             // "text"
             SyntaxHighlightRule("(?s)[\"'](.+?)[\"']", "#D89E00"),
-            // 1.234,56
-            SyntaxHighlightRule("((\\s|^)[+-]?[0-9]+?[,.]?[0-9]*?)+(\\s|$)", "#028900"),
+            // 1.234,56  1e10
+            SyntaxHighlightRule("((\\s|^)[+-]?[0-9]+?[,.]?[0-9eE]*?)+(\\s|$)", "#028900"),
             // $$stock[.property]
             SyntaxHighlightRule("((\\s|^)[$]{2}\\w+?([.]\\w+)?)+(\\s|$)", "#A700D6"),
             // + - * /
