@@ -186,8 +186,8 @@ class CalcSettingsActivity : AppCompatActivity(),
     }
 
     override fun onSharedPreferenceChanged(
-        sharedPreferences: SharedPreferences,
-        key: String
+        sharedPreferences: SharedPreferences?,
+        key: String?
     ) {
         when (key) {
             "app_theme" -> {
