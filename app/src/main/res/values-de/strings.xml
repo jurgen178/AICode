@@ -80,10 +80,13 @@ limitations under the License. -->
   <string name="calc_endless_loop">Mögliche Endlosschleife. Vorgang abgebrochen.</string>
   <string name="calc_missing_label">Fehlende Marke \'.%1$s\'.</string>
   <string name="calc_missing_while_label">Fehlende while-Marke \'do.%1$s\'.</string>
+  <string name="calc_missing_loop_label">Fehlende loop-Marke \'loop.%1$s\'.</string>
   <string name="calc_missing_if_label">Fehlende if-Marke \'.%1$s\'.</string>
   <string name="calc_duplicate_label">Marke \'.%1$s\' darf nur einmal verwendet werden.</string>
   <string name="calc_duplicate_while_label">while-Marke \'.%1$s\' darf nur einmal verwendet werden.</string>
+  <string name="calc_duplicate_loop_label">loop-Marke \'.%1$s\' darf nur einmal verwendet werden.</string>
   <string name="calc_invalid_while_args">Fehlende Zahlen für \'while\'.</string>
+  <string name="calc_invalid_loop_args">Fehlende Zahlen für \'loop\'.</string>
   <string name="calc_invalid_if_args">Fehlende Zahlen für \'if\'.</string>
   <string name="calc_unknown_while_condition">Unbekannte while-Bedingung \'%1$s\'. Verwende while.[eq ge gt le lt].</string>
   <string name="calc_unknown_if_condition">Unbekannte if-Bedingung \'%1$s\'. Verwende if.[eq ge gt le lt].</string>
@@ -105,4 +108,13 @@ limitations under the License. -->
   <string name="calc_error_missing_closing_vector_bracket">Fehlende schließende \']\' für Vektor.</string>
   <string name="calc_error_matrix_different_row_length">Matrixzeilen müssen gleich groß sein.</string>
   <string name="calc_error_parsing_matrix">Unerwarteter Wert \'%1$s\'</string>
+  <string name="getdata">+</string>
+  <string name="calc_clear">Löschen</string>
+  <string name="cleardata">Löschen</string>
+  <string name="calc_invalid_get_vector_args">\'getv\' erwartet Vektor und Index</string>
+  <string name="calc_invalid_get_matrix_args">\'getm\' erwartet Matrix, Zeile und Spalte</string>
+  <string name="calc_invalid_set_vector_args">\'setv\' erwartet Vektor, Index und ein Wert</string>
+  <string name="calc_invalid_set_matrix_args">\'setm\' erwartet Matrix, Zeile, Spalte und ein Wert</string>
+  <string name="calc_invalid_new_vector_args">1..%1$d für \'vector\' </string>
+  <string name="calc_invalid_new_matrix_args">1..%1$d für \'matrix\'</string>
 </resources>

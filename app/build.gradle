@@ -18,13 +18,12 @@ android {
       v2SigningEnabled true
     }
   }
-  compileSdkVersion 32
+  compileSdk 34
   defaultConfig {
     applicationId 'com.thecloudsite.aicode'
-    minSdkVersion 31
-    targetSdkVersion 32
-    versionCode 4
-    versionName "4"
+    minSdkVersion 34
+    versionCode 6
+    versionName "6"
     testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
   }
   buildTypes {
@@ -56,6 +55,7 @@ android {
   buildFeatures {
     viewBinding true
   }
+  namespace 'com.thecloudsite.aicode'
 }
 
 repositories {
@@ -66,22 +66,22 @@ repositories {
 
 dependencies {
   implementation fileTree(dir: 'libs', include: ['*.jar'])
-  implementation 'androidx.appcompat:appcompat:1.5.0'
+  implementation 'androidx.appcompat:appcompat:1.7.0'
   implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-  implementation 'com.google.android.material:material:1.6.1'
-  implementation 'androidx.preference:preference-ktx:1.2.0'
+  implementation 'com.google.android.material:material:1.12.0'
+  implementation 'androidx.preference:preference-ktx:1.2.1'
   implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-  implementation "androidx.core:core-ktx:1.8.0"
+  implementation "androidx.core:core-ktx:1.13.1"
 
   // Add the Firebase SDK for Google Analytics.
-  implementation 'com.google.firebase:firebase-config-ktx:21.1.1'
-  implementation 'com.google.firebase:firebase-analytics-ktx:21.1.0'
+  implementation 'com.google.firebase:firebase-config-ktx:22.0.0'
+  implementation 'com.google.firebase:firebase-analytics-ktx:22.0.2'
   // Add the Firebase Crashlytics SDK.
-  implementation 'com.google.firebase:firebase-crashlytics-ktx:18.2.12'
+  implementation 'com.google.firebase:firebase-crashlytics-ktx:19.0.3'
   // Add the dependency for the Performance Monitoring library
-  implementation 'com.google.firebase:firebase-perf:20.1.0'
+  implementation 'com.google.firebase:firebase-perf:21.0.1'
   // Add the Realtime Database SDK.
-  implementation 'com.google.firebase:firebase-database-ktx:20.0.5'
+  implementation 'com.google.firebase:firebase-database-ktx:21.0.0'
   implementation 'androidx.cardview:cardview:1.0.0'
   // Add the dependencies for FirebaseUI.
   //implementation 'com.firebaseui:firebase-ui-auth:6.2.0'
@@ -114,7 +114,7 @@ dependencies {
   api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.coroutines"
 
   // JSON
-  implementation 'com.google.code.gson:gson:2.8.9'
+  implementation 'com.google.code.gson:gson:2.10.1'
 
   // Testing
   testImplementation 'junit:junit:4.13.2'
@@ -122,6 +122,6 @@ dependencies {
   androidTestImplementation('androidx.test.espresso:espresso-core:3.2.0', {
     exclude group: 'com.android.support', module: 'support-annotations'
   })
-  androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+  androidTestImplementation 'androidx.test.ext:junit:1.1.5'
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021
+ * Copyright (C)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -433,6 +433,31 @@ fun solve(op1: CalcLine, op2: CalcLine): CalcLine {
     )
 }
 
+// 1/x for each element
+fun vectorInvers(op: CalcLine): CalcLine {
+
+    if (op.vector != null) {
+        val n = op.vector!!.size
+
+        if (n > 0) {
+            val vector = op.vector!!.clone()
+
+            for (k in 0 until n) {
+                if (vector[k] != 0.0) {
+                    vector[k] = 1 / vector[k]
+                }
+            }
+
+            return CalcLine(
+                value = Double.NaN,
+                vector = vector
+            )
+        }
+    }
+
+    return CalcLine(value = Double.NaN)
+}
+
 fun matrixInvers(op: CalcLine): CalcLine {
 
     if (op.matrix != null) {
@@ -533,6 +558,7 @@ fun clone(op: CalcLine): CalcLine {
         desc = op.desc,
         value = op.value,
         lambda = op.lambda,
+        definition = op.definition,
         matrix = matrix,
         vector = vector,
     )

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021
+ * Copyright (C)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -198,10 +198,25 @@ fun getDisplayString(value: Long, radix: Int): String {
 }
 
 fun factorial(n: Int): Long {
-    return if (n <= 0) {
+    // 20! = 2432902008176640000
+    // 21! will overflow Long (64bit)
+    return if (n >= 21) {
+        0
+    } else if (n <= 0) {
         1
     } else {
         n * factorial(n - 1)
+    }
+}
+
+fun factorialDouble(n: Int): Double {
+    // Limit to 100!
+    return if (n > 100) {
+        0.0
+    } else if (n <= 0.0) {
+        1.0
+    } else {
+        n * factorialDouble(n - 1)
     }
 }
 
@@ -218,6 +233,9 @@ fun binomRecursive(n: Int, k: Int): Long {
 //    (k+1) = (k) + (k+1)
 
     return when {
+        n > 100 || k > 100 -> {
+            0
+        }
         k <= 0 -> {
             1
         }

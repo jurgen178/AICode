@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021
+ * Copyright (C)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,7 +122,7 @@ class ColorSyntaxEditText(context: Context, attrs: AttributeSet) :
   }
 
   private fun applySyntaxHighlight() {
-    if (!syntaxHighlightRules.isNullOrEmpty()) {
+    if (syntaxHighlightRules.isNotEmpty()) {
 
       // first remove all spans
       text?.removeAllSpans()

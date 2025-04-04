@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021
+ * Copyright (C)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,10 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import androidx.preference.PreferenceManager
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import java.text.NumberFormat
 import java.util.*
 import kotlin.math.*
@@ -40,6 +44,7 @@ enum class ZeroArgument {
     CLEAR,
     PI,
     E,
+    RAND,   // Random number between 0..1
 }
 
 enum class UnaryArgument {
@@ -62,12 +67,14 @@ enum class UnaryArgument {
     ARCCOSH,
     ARCTAN,
     ARCTANH,
+    VECTOR,   // Create vector element.
     INT,    // Integer part
     ROUND,  // Round to nearest int
     ROUND2, // Round to two digits
     ROUND4, // Round to four digits
     FRAC,
     FACTORIAL,
+    SIZE,
     TOSTR,  // toStr
     LN,
     EX,
@@ -83,9 +90,15 @@ enum class BinaryArgument {
     SUB,
     MULT,
     DIV,
+    ARCTAN2,
+    HYPOT,
     POW,
+    MIN,
+    MAX,
     SWAP,
     OVER,
+    MATRIX, // Create matrix element.
+    GETV, // Get vector element.
     MOD,  // modulo
     PER,  // Percent
     PERC, // Percent change
@@ -98,10 +111,13 @@ enum class BinaryArgument {
 
 enum class TernaryArgument {
     ROT,
+    GETM, // Get matrix element.
+    SETV, // Set vector element.
     ZinsMonat,
 }
 
 enum class QuadArgument {
+    SETM, // Set matrix element.
     IFEQ, // if equal
     IFGE, // if greater or equal than
     IFGT, // if greater than
@@ -109,11 +125,23 @@ enum class QuadArgument {
     IFLT, // if less then
 }
 
+const val VECTORMAX = 100
+const val MATRIXMAX = 40
+
+const val MEM_STORE_PREFIX = "mem_"
+
+
 // List of chars that cannot be used as definitions.
 val wordListRegex = "[\"':;(){}\\[\\]]".toRegex()
 
 // (?s) dotall
 val wordDefinitionRegex = Regex("(?s):\\s(.+?)\\s(?:.*?\\s)?;")
+
+data class LoopValues(
+    var start: CalcLine,
+    var end: CalcLine,
+    var inc: CalcLine,
+)
 
 data class CodeType
     (
@@ -126,6 +154,16 @@ data class CodeTypeJson
     val key: String,
     val code: String,
     val name: String,
+)
+
+data class CalcLineJson
+    (
+    var desc: String = "",
+    var value: Double? = 0.0,
+    var lambda: Int = -1,
+    var definition: String = "",
+    var vector: List<Double>?,
+    var matrix: List<List<Double>>?,
 )
 
 class CalcViewModel(application: Application) : AndroidViewModel(application) {
@@ -282,9 +320,14 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
         // (?s) = dotall = . + \n
         val labelRegex = "^(?:do)?[.](.+?)$".toRegex(IGNORE_CASE)
         val whileIfRegex = "^(while|if)[.](\\w+)[.](.+?)$".toRegex(IGNORE_CASE)
+        val loopRegex = "^loop[.](.+?)$".toRegex(IGNORE_CASE)
+        val endloopRegex = "^end[.](.+?)$".toRegex(IGNORE_CASE)
         val gotoRegex = "^goto[.](.+?)$".toRegex(IGNORE_CASE)
         val stoRegex = "^sto[.](.+)$".toRegex(IGNORE_CASE)
         val rclRegex = "^rcl[.](.+)$".toRegex(IGNORE_CASE)
+        val memstoRegex = "^memsto[.](.+)$".toRegex(IGNORE_CASE)
+        val memrclRegex = "^memrcl[.](.+)$".toRegex(IGNORE_CASE)
+        val memdelRegex = "^memdel[.](.+)$".toRegex(IGNORE_CASE)
         val commentRegex = "(?s)^[\"'](.+?)[\"']$".toRegex()
         val definitionRegex = "^[(](.+?)[)]$".toRegex()
 
@@ -364,6 +407,71 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     } else {
                         context.getString(R.string.calc_missing_if_label, labelStr)
                     }
+                    calcRepository.updateData(calcData)
+
+                    // label missing, end loop
+                    return
+                }
+            }
+        }
+
+        // validate and store all loop.labels
+        val loopMap: MutableMap<String, Int> = mutableMapOf()
+        val endloopMap: MutableMap<String, Int> = mutableMapOf()
+        val loopValuesMap: MutableMap<String, LoopValues> = mutableMapOf()
+
+        words.forEachIndexed { index, word ->
+            var labelStr =
+                getRegexOneGroup(word, loopRegex)
+            // is loop?
+            if (labelStr != null) {
+                val label = labelStr.lowercase(Locale.ROOT)
+
+                // check if loop-labels are unique
+                if (loopMap.containsKey(label)) {
+                    calcData.errorMsg =
+                        context.getString(R.string.calc_duplicate_loop_label, labelStr)
+                    calcRepository.updateData(calcData)
+
+                    // duplicate label, end loop
+                    return
+                } else {
+                    // Store label
+                    loopMap[label] = index
+                }
+
+                if (!loopMap.containsKey(label)) {
+                    calcData.errorMsg =
+                        context.getString(R.string.calc_missing_loop_label, labelStr)
+                    calcRepository.updateData(calcData)
+
+                    // label missing, end loop
+                    return
+                }
+            }
+
+            labelStr =
+                getRegexOneGroup(word, endloopRegex)
+            // is end of loop?
+            if (labelStr != null) {
+                val label = labelStr.lowercase(Locale.ROOT)
+
+                // check if loop-labels are unique
+                if (endloopMap.containsKey(label)) {
+                    calcData.errorMsg =
+                        context.getString(R.string.calc_duplicate_loop_label, labelStr)
+                    calcRepository.updateData(calcData)
+
+                    // duplicate label, end loop
+                    return
+                } else {
+                    // Store label
+                    endloopMap[label] = index
+                }
+
+                if (!endloopMap.containsKey(label)) {
+                    calcData.errorMsg =
+                        context.getString(R.string.calc_missing_loop_label, labelStr)
                     calcRepository.updateData(calcData)
 
                     // label missing, end loop
@@ -494,7 +602,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     return
                 }
 
-                val argsValid = calcData.numberList.size > 1
+                val argsValid = calcData.numberList.size >= 2
                 if (argsValid) {
 
                     // 2: op2
@@ -564,6 +672,69 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
 
+            // loop.[label]
+            val labelStr =
+                getRegexOneGroup(word, loopRegex)
+            // is loop?
+            if (labelStr != null) {
+                loopCounter++
+
+                val label = labelStr.lowercase(Locale.ROOT)
+
+                // already checked in validation, kept as runtime test-case
+                if (!loopMap.containsKey(label)) {
+                    calcData.errorMsg =
+                        context.getString(R.string.calc_missing_loop_label, labelStr)
+                    calcRepository.updateData(calcData)
+
+                    // label missing, end loop
+                    return
+                }
+
+                // Store start,end,inc of the loop.
+                if (!loopValuesMap.containsKey(label)) {
+                    val argsValid = calcData.numberList.size >= 3
+                    if (argsValid) {
+                        loopValuesMap[label] = LoopValues(
+                            inc = calcData.numberList.removeLast(),
+                            end = calcData.numberList.removeLast(),
+                            start = calcData.numberList.removeLast(),
+                        )
+                    } else {
+                        calcData.errorMsg = context.getString(R.string.calc_invalid_loop_args)
+                        calcRepository.updateData(calcData)
+
+                        // invalid args, end instruction
+                        return
+                    }
+                }
+
+                val loopValue = loopValuesMap[label]!!
+
+                // Abbruchbedingung.
+                if (loopValue.inc.value > 0.0 && loopValue.start.value >= loopValue.end.value
+                    || loopValue.inc.value < 0.0 && loopValue.start.value <= loopValue.end.value
+                ) {
+                    // End of loop. Jump behind end loop label to continue.
+                    i = endloopMap[label]!! + 1
+                    loopValuesMap.remove(label)
+                    continue
+                }
+
+                // Add loop value to be used within the loop.
+                calcData.numberList.add(
+                    CalcLine(
+                        desc = loopValue.start.desc,
+                        value = loopValue.start.value
+                    )
+                )
+
+                // Update loop value.
+                loopValue.start.value += loopValue.inc.value
+
+                continue
+            }
+
             // Goto
             // goto.[label]
             val gotoMatch =
@@ -582,6 +753,27 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
 
                 // jump to label
                 i = labelMap[label]!!
+                continue
+            }
+
+            // End of loop.
+            // end.[label]
+            val endloopMatch =
+                getRegexOneGroup(word, endloopRegex)
+            if (endloopMatch != null) {
+                loopCounter++
+                val label = endloopMatch.lowercase(Locale.ROOT)
+
+                if (!loopMap.containsKey(label)) {
+                    calcData.errorMsg = context.getString(R.string.calc_missing_label, endloopMatch)
+                    calcRepository.updateData(calcData)
+
+                    // label missing, end instruction
+                    return
+                }
+
+                // jump to label
+                i = loopMap[label]!!
                 continue
             }
 
@@ -848,6 +1040,9 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 "arctan" -> {
                     validArgs = opUnary(calcData, UnaryArgument.ARCTAN)
                 }
+                "arctan2" -> {
+                    validArgs = opBinary(calcData, BinaryArgument.ARCTAN2)
+                }
                 "sinh" -> {
                     validArgs = opUnary(calcData, UnaryArgument.SINH)
                 }
@@ -902,6 +1097,15 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 "frac" -> {
                     validArgs = opUnary(calcData, UnaryArgument.FRAC)
                 }
+                "rand" -> {
+                    opZero(calcData, ZeroArgument.RAND)
+                }
+                "min" -> {
+                    validArgs = opBinary(calcData, BinaryArgument.MIN)
+                }
+                "max" -> {
+                    validArgs = opBinary(calcData, BinaryArgument.MAX)
+                }
                 "factorial", "!" -> {
                     validArgs = opUnary(calcData, UnaryArgument.FACTORIAL)
                 }
@@ -910,6 +1114,9 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 "sum" -> {
                     validArgs = opVarArg(calcData, VariableArguments.SUM)
+                }
+                "size" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.SIZE)
                 }
                 "var" -> {
                     validArgs = opVarArg(calcData, VariableArguments.VAR)
@@ -978,6 +1185,26 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     validArgs = opBinary(calcData, BinaryArgument.SOLVE)
                 }
 
+                // Create/Get/Set Element
+                "vector" -> {
+                    validArgs = opUnary(calcData, UnaryArgument.VECTOR)
+                }
+                "matrix" -> {
+                    validArgs = opBinary(calcData, BinaryArgument.MATRIX)
+                }
+                "getv" -> {
+                    validArgs = opBinary(calcData, BinaryArgument.GETV)
+                }
+                "setv" -> {
+                    validArgs = opTernary(calcData, TernaryArgument.SETV)
+                }
+                "getm" -> {
+                    validArgs = opTernary(calcData, TernaryArgument.GETM)
+                }
+                "setm" -> {
+                    validArgs = opQuad(calcData, QuadArgument.SETM)
+                }
+
                 // Conditional operations
                 "if.eq" -> {
                     validArgs = opQuad(calcData, QuadArgument.IFEQ)
@@ -1007,6 +1234,9 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 "/" -> {
                     validArgs = opBinary(calcData, BinaryArgument.DIV)
+                }
+                "hypot" -> {
+                    validArgs = opBinary(calcData, BinaryArgument.HYPOT)
                 }
                 "^", "pow" -> {
                     validArgs = opBinary(calcData, BinaryArgument.POW)
@@ -1066,7 +1296,10 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
 
                 // Variable operation
                 "rcl" -> {
-                    recallAllVariables(calcData)
+                    recallAllVariables(calcData, false)
+                }
+                "memrcl" -> {
+                    recallAllVariables(calcData, true)
                 }
                 else -> {
 
@@ -1098,30 +1331,62 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                         // sto[.name]
                         val variableName = getRegexOneGroup(word, stoRegex)
                         if (variableName != null) {
-                            validArgs = storeVariable(calcData, variableName)
+                            validArgs = storeVariable(calcData, variableName, false)
 
                         } else {
 
                             // rcl[.name]
                             val recallVariable = getRegexOneGroup(word, rclRegex)
                             if (recallVariable != null) {
-                                recallVariable(calcData, recallVariable)
+                                recallVariable(calcData, recallVariable, false)
 
                             } else {
 
-                                // Evaluate number
-                                try {
-                                    val value = numberFormat.parse(word)!!
-                                        .toDouble()
+                                // memsto[.name]
+                                val memVariableName = getRegexOneGroup(word, memstoRegex)
+                                if (memVariableName != null) {
+                                    validArgs = storeVariable(calcData, memVariableName, true)
 
-                                    calcData.numberList.add(CalcLine(desc = "", value = value))
-                                } catch (e: Exception) {
-                                    // Error
-                                    calcData.errorMsg =
-                                        context.getString(R.string.calc_error_parsing_msg, word)
-                                    success = false
+                                } else {
+
+                                    // memrcl[.name]
+                                    val memRecallVariable = getRegexOneGroup(word, memrclRegex)
+                                    if (memRecallVariable != null) {
+                                        recallVariable(calcData, memRecallVariable, true)
+
+                                    } else {
+
+                                        // memdel[.name]
+                                        val memDeleteVariable = getRegexOneGroup(word, memdelRegex)
+                                        if (memDeleteVariable != null) {
+                                            deleteVariable(calcData, memDeleteVariable)
+
+                                        } else {
+
+                                            // Evaluate number
+                                            try {
+                                                val value = numberFormat.parse(word)!!
+                                                    .toDouble()
+
+                                                calcData.numberList.add(
+                                                    CalcLine(
+                                                        desc = "",
+                                                        value = value
+                                                    )
+                                                )
+                                            } catch (e: Exception) {
+                                                // Error
+                                                calcData.errorMsg =
+                                                    context.getString(
+                                                        R.string.calc_error_parsing_msg,
+                                                        word
+                                                    )
+                                                success = false
+                                            }
+
+                                        }
+                                    }
                                 }
-
                             }
                         }
                     }
@@ -1129,13 +1394,17 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             if (!success) {
-                calcData.errorMsg = context.getString(R.string.calc_error_msg, word)
+                if (calcData.errorMsg.isEmpty()) {
+                    calcData.errorMsg = context.getString(R.string.calc_error_msg, word)
+                }
                 calcRepository.updateData(calcData)
 
                 return
             } else
                 if (!validArgs) {
-                    calcData.errorMsg = context.getString(R.string.calc_invalid_args)
+                    if (calcData.errorMsg.isEmpty()) {
+                        calcData.errorMsg = context.getString(R.string.calc_invalid_args)
+                    }
                     calcRepository.updateData(calcData)
 
                     return
@@ -1145,7 +1414,102 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
         calcRepository.updateData(calcData)
     }
 
-    private fun storeVariable(calcData: CalcData, name: String): Boolean {
+    private fun calcLineToStr(calcLine: CalcLine): String {
+
+        var jsonString = ""
+
+        try {
+            // Convert to a json string.
+            val gson: Gson = GsonBuilder()
+                .create()
+
+            val calcLineJson = CalcLineJson(
+                desc = calcLine.desc,
+                value = if(calcLine.value.isFinite()) calcLine.value else null,
+                lambda = calcLine.lambda,
+                definition = calcLine.definition,
+                vector = null,
+                matrix = null,
+            )
+
+            if (calcLine.vector != null) {
+                val vector1 = mutableListOf<Double>()
+                calcLine.vector!!.forEachIndexed { index, d -> vector1.add(d) }
+                calcLineJson.vector = vector1.toList()
+            }
+
+            if (calcLine.matrix != null) {
+                val rows = calcLine.matrix!!.size
+
+                if (rows > 0) {
+                    val cols = calcLine.matrix!![0].size
+                    val array: MutableList<MutableList<Double>> =
+                        MutableList(rows) { MutableList(cols) { 0.0 } }
+
+                    for (row in 0 until rows) {
+                        for (col in 0 until cols) {
+                            array[row][col] += calcLine.matrix!![row][col]
+                        }
+                    }
+                    calcLineJson.matrix = array
+                }
+            }
+
+            jsonString = gson.toJson(calcLineJson)
+
+        } catch (e: Exception) {
+        }
+
+        return jsonString
+    }
+
+    private fun strToCalcLine(
+        data: String
+    ): CalcLine {
+
+        try {
+
+            val sType = object : TypeToken<CalcLineJson>() {}.type
+            val gson = Gson()
+            val calcLineJson = gson.fromJson<CalcLineJson>(data, sType)
+
+            val calcLine = CalcLine(
+                desc = calcLineJson.desc,
+                value = if(calcLineJson.value == null) Double.NaN else calcLineJson.value!!,
+                lambda = calcLineJson.lambda,
+                definition = calcLineJson.definition,
+                vector = null,
+                matrix = null,
+            )
+
+            if (calcLineJson.vector != null) {
+                calcLine.vector =
+                    DoubleArray(calcLineJson.vector!!.size) { c -> calcLineJson.vector!![c] }
+            }
+
+            if (calcLineJson.matrix != null) {
+                val rows = calcLineJson.matrix!!.size
+
+                if (rows > 0) {
+                    val cols = calcLineJson.matrix!![0].size
+                    calcLine.matrix =
+                        Array(rows) { r -> DoubleArray(cols) { c -> calcLineJson.matrix!![r][c] } }
+                }
+            }
+
+            return calcLine
+
+        } catch (e: Exception) {
+        }
+
+        return CalcLine()
+    }
+
+    private fun storeVariable(
+        calcData: CalcData,
+        name: String,
+        permanentStorage: Boolean
+    ): Boolean {
         val argsValid = calcData.numberList.size > 0
 
         if (argsValid) {
@@ -1153,7 +1517,20 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
 
             // 1: op1
             val op1 = calcData.numberList.removeLast()
-            varMap[name] = op1
+
+            if (permanentStorage) {
+                val sharedPreferences =
+                    PreferenceManager.getDefaultSharedPreferences(context /* Activity context */)
+
+                val memStr = calcLineToStr(op1)
+                sharedPreferences
+                    .edit()
+                    .putString("$MEM_STORE_PREFIX$name", memStr)
+                    .apply()
+
+            } else {
+                varMap[name] = op1
+            }
 
         } else {
             calcData.errorMsg = context.getString(R.string.calc_invalid_args)
@@ -1164,26 +1541,71 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
         return argsValid
     }
 
-    private fun recallVariable(calcData: CalcData, name: String) {
+    private fun recallVariable(calcData: CalcData, name: String, permanentStorage: Boolean) {
         endEdit(calcData)
 
-        if (varMap.containsKey(name)) {
-            calcData.numberList.add(varMap[name]!!)
+        if (permanentStorage) {
+            val sharedPreferences =
+                PreferenceManager.getDefaultSharedPreferences(context /* Activity context */)
+
+            val memStr = sharedPreferences.getString("$MEM_STORE_PREFIX$name", "").toString()
+            calcData.numberList.add(strToCalcLine(memStr))
 
             calcRepository.updateData(calcData)
+        } else {
+            if (varMap.containsKey(name)) {
+                calcData.numberList.add(varMap[name]!!)
+
+                calcRepository.updateData(calcData)
+            }
         }
     }
 
-    private fun recallAllVariables(calcData: CalcData) {
+    private fun recallAllVariables(calcData: CalcData, permanentStorage: Boolean) {
         endEdit(calcData)
 
-        varMap.forEach { (name, line) ->
-            calcData.numberList.add(CalcLine(desc = "Variable '$name'", value = Double.NaN))
-            calcData.numberList.add(line)
+        if (permanentStorage) {
+            val sharedPreferences =
+                PreferenceManager.getDefaultSharedPreferences(context /* Activity context */)
+
+            sharedPreferences.all.forEach { element ->
+                val memName: String = element.key
+                if (memName.startsWith(MEM_STORE_PREFIX)) {
+                    val name = memName.substring(MEM_STORE_PREFIX.length)
+                    calcData.numberList.add(CalcLine(desc = "Variable '$name'", value = Double.NaN))
+                    val memValue: String = element.value as String
+                    calcData.numberList.add(strToCalcLine(memValue))
+                }
+            }
+        } else {
+            varMap.forEach { (key, value) ->
+                calcData.numberList.add(CalcLine(desc = "Variable '$key'", value = Double.NaN))
+                calcData.numberList.add(value)
+            }
+            //calcData.numberList.add(CalcLine(desc = "${varMap.size}", value = Double.NaN))
         }
-        //calcData.numberList.add(CalcLine(desc = "${varMap.size}", value = Double.NaN))
 
         calcRepository.updateData(calcData)
+    }
+
+    private fun deleteVariable(calcData: CalcData, name: String) {
+        endEdit(calcData)
+
+        val sharedPreferences =
+            PreferenceManager.getDefaultSharedPreferences(context /* Activity context */)
+
+        sharedPreferences
+            .edit()
+            .remove("$MEM_STORE_PREFIX$name")
+            .apply()
+    }
+
+    private fun displayValue(value: Double): String {
+        return if (sciFormat) {
+            value.toString().replace('.', separatorChar)
+        } else {
+            numberFormat.format(value)
+        }
     }
 
     // clipboard import/export
@@ -1191,13 +1613,61 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
         val calcData = submitEditline(calcData.value!!)
         calcRepository.updateData(calcData)
 
-        return if (calcData.numberList.isNotEmpty()) {
-            // calcData.numberList.last().toString() converts to E-notation
-            // calcData.numberList.last().toBigDecimal().toPlainString()
-            numberFormat.format(calcData.numberList.last().value)
-        } else {
-            ""
+        if (calcData.numberList.isNotEmpty()) {
+            // numberFormat.format(calcData.numberList.last().value)
+
+            val data = calcData.numberList.last()
+
+            val value = if (!data.value.isNaN()) {
+                displayValue(data.value)
+            } else
+            // CalcAdapter has "[" for display purpose, but bracket needs a space to separate from the number for parsing.
+                if (data.vector != null) {
+                    data.vector!!.joinToString(
+                        prefix = "[ ",
+                        separator = " ",
+                        postfix = " ]",
+                    ) {
+                        displayValue(
+                            it
+                        )
+                    }
+                } else
+                    if (data.matrix != null) {
+                        data.matrix!!.map { row ->
+
+                            row.joinToString(
+                                prefix = "[ ",
+                                separator = " ",
+                                postfix = " ]",
+                            ) {
+                                displayValue(
+                                    it
+                                )
+                            }
+                        }.joinToString(
+                            prefix = "[ ",
+                            separator = "  \n",
+                            postfix = " ]",
+                        )
+                    } else {
+                        ""
+                    }
+
+            val text = if (data.desc.isNotEmpty()) {
+                var desc = "\"${data.desc}\""
+                if (value.isNotEmpty()) {
+                    desc += " $value +"
+                }
+                desc
+            } else {
+                value
+            }
+
+            return text
         }
+
+        return ""
     }
 
     fun setText(text: String?, desc: String) {
@@ -1454,6 +1924,9 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
             ZeroArgument.E -> {
                 calcData.numberList.add(CalcLine(desc = "", value = Math.E))
             }
+            ZeroArgument.RAND -> {
+                calcData.numberList.add(CalcLine(desc = "", value = Math.random()))
+            }
         }
 
         calcRepository.updateData(calcData)
@@ -1465,7 +1938,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun opUnary(calcData: CalcData, op: UnaryArgument): Boolean {
-        val argsValid = calcData.numberList.size > 0
+        var argsValid = calcData.numberList.size > 0
 
         if (argsValid) {
             endEdit(calcData)
@@ -1492,15 +1965,23 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     calcData.numberList.add(CalcLine(desc = "", value = op1.value.pow(0.5)))
                 }
                 UnaryArgument.SQ -> {
-                    calcData.numberList.add(CalcLine(desc = "", value = op1.value.pow(2)))
+                    //calcData.numberList.add(CalcLine(desc = "", value = op1.value.pow(2)))
+                    calcData.numberList.add(op1 * op1)
                 }
                 UnaryArgument.INV -> {
                     calcData.numberList.add(
-                        if (op1.matrix != null) {
-                            matrixInvers(op1)
-                        } else {
-                            CalcLine(desc = "", value = 1 / op1.value)
-                        }
+                        if (op1.vector != null) {
+                            vectorInvers(op1)
+                        } else
+                            if (op1.matrix != null) {
+                                matrixInvers(op1)
+                            } else
+                            // Reverse desc if no value is present.
+                                if (op1.desc.isNotEmpty() && op1.value.isNaN()) {
+                                    CalcLine(desc = op1.desc.reversed(), value = Double.NaN)
+                                } else {
+                                    CalcLine(desc = "", value = 1 / op1.value)
+                                }
                     )
                 }
                 UnaryArgument.ABS -> {
@@ -1599,6 +2080,55 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                         )
                     } else {
                         calcData.numberList.add(op1)
+                    }
+                }
+                UnaryArgument.SIZE -> {
+                    if (op1.vector != null) {
+                        // Add vector length.
+                        calcData.numberList.add(
+                            CalcLine(
+                                desc = "",
+                                value = op1.vector!!.size.toDouble()
+                            )
+                        )
+                    } else if (op1.matrix != null) {
+                        // Add matrix size in rows and columns.
+                        calcData.numberList.add(
+                            CalcLine(
+                                desc = "",
+                                value = op1.matrix!!.size.toDouble()
+                            )
+                        )
+                        calcData.numberList.add(
+                            CalcLine(
+                                desc = "",
+                                value = op1.matrix!![0].size.toDouble()
+                            )
+                        )
+                    } else {
+                        // Add description length.
+                        calcData.numberList.add(
+                            CalcLine(
+                                desc = "",
+                                value = op1.desc.length.toDouble()
+                            )
+                        )
+                    }
+                }
+                // Create vector Element.
+                UnaryArgument.VECTOR -> {
+                    val n = op1.value.toInt()
+                    if (n > 0 && n <= VECTORMAX) {
+                        val vector =
+                            DoubleArray(n) { r ->
+                                0.0
+                            }
+
+                        calcData.numberList.add(CalcLine(desc = "", value = Double.NaN, vector = vector))
+                    } else {
+                        calcData.errorMsg =
+                            context.getString(R.string.calc_invalid_new_vector_args, VECTORMAX)
+                        argsValid = false
                     }
                 }
                 UnaryArgument.SIN -> {
@@ -1723,7 +2253,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun opBinary(calcData: CalcData, op: BinaryArgument): Boolean {
 
-        val argsValid = calcData.numberList.size > 1
+        var argsValid = calcData.numberList.size > 1
         if (argsValid) {
             endEdit(calcData)
 
@@ -1751,6 +2281,22 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                 BinaryArgument.DIV -> {
                     calcData.numberList.add(op1 / op2)
                 }
+                BinaryArgument.ARCTAN2 -> {
+                    calcData.numberList.add(
+                        CalcLine(
+                            desc = "",
+                            value = atan2(op1.value, op2.value) / radian
+                        )
+                    )
+                }
+                BinaryArgument.HYPOT -> {
+                    calcData.numberList.add(
+                        CalcLine(
+                            desc = "",
+                            value = Math.hypot(op1.value, op2.value)
+                        )
+                    )
+                }
                 BinaryArgument.POW -> {
                     calcData.numberList.add(
                         CalcLine(
@@ -1758,6 +2304,20 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                             value = op1.value.pow(op2.value)
                         )
                     )
+                }
+                BinaryArgument.MIN -> {
+                    if (op1.value < op2.value) {
+                        calcData.numberList.add(op1)
+                    } else {
+                        calcData.numberList.add(op2)
+                    }
+                }
+                BinaryArgument.MAX -> {
+                    if (op1.value > op2.value) {
+                        calcData.numberList.add(op1)
+                    } else {
+                        calcData.numberList.add(op2)
+                    }
                 }
                 BinaryArgument.SWAP -> {
                     calcData.numberList.add(op2)
@@ -1776,6 +2336,46 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     calcData.numberList.add(op2)
                     // Clone element
                     calcData.numberList.add(clone(op1))
+                }
+                // Create matrix element.
+                BinaryArgument.MATRIX -> {
+                    val n = op1.value.toInt()
+                    val m = op2.value.toInt()
+                    if (n > 0 && n <= MATRIXMAX && m > 0 && m <= MATRIXMAX) {
+                        val matrix =
+                            Array(n) { r ->
+                                DoubleArray(m) { c ->
+                                    0.0
+                                }
+                            }
+
+                        // Set unity matrix if n=m.
+                        if (n == m) {
+                            for (i in 0 until n) {
+                                matrix[i][i] = 1.0
+                            }
+                        }
+                        calcData.numberList.add(CalcLine(desc = "", value = Double.NaN, matrix = matrix))
+                    } else {
+                        calcData.errorMsg =
+                            context.getString(R.string.calc_invalid_new_matrix_args, MATRIXMAX)
+                        argsValid = false
+                    }
+                }
+                // Get vector element.
+                BinaryArgument.GETV -> {
+                    if (op1.vector != null && op2.value.isFinite() && op1.vector!!.size > op2.value.toInt()) {
+                        calcData.numberList.add(
+                            CalcLine(
+                                desc = "",
+                                value = op1.vector!![op2.value.toInt()]
+                            )
+                        )
+                    } else {
+                        calcData.errorMsg =
+                            context.getString(R.string.calc_invalid_get_vector_args)
+                        argsValid = false
+                    }
                 }
                 // Percent
                 BinaryArgument.PER -> {
@@ -1848,7 +2448,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun opTernary(calcData: CalcData, op: TernaryArgument): Boolean {
-        val argsValid = calcData.numberList.size > 2
+        var argsValid = calcData.numberList.size > 2
 
         if (argsValid) {
             endEdit(calcData)
@@ -1865,6 +2465,33 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
                     calcData.numberList.add(op2)
                     calcData.numberList.add(op1)
                     calcData.numberList.add(op3)
+                }
+                // Get matrix element.
+                TernaryArgument.GETM -> {
+                    if (op3.matrix != null && op2.value.isFinite() && op1.value.isFinite() && op3.matrix!!.size > op2.value.toInt() && op3.matrix!![0].size > op1.value.toInt()) {
+                        calcData.numberList.add(
+                            CalcLine(
+                                desc = "",
+                                value = op3.matrix!![op2.value.toInt()][op1.value.toInt()]
+                            )
+                        )
+                    } else {
+                        calcData.errorMsg =
+                            context.getString(R.string.calc_invalid_get_matrix_args)
+                        argsValid = false
+                    }
+                }
+                // Set vector element.
+                TernaryArgument.SETV -> {
+                    if (op3.vector != null && op2.value.isFinite() && op1.value.isFinite() && op3.vector!!.size > op2.value.toInt()) {
+                        val vector = op3.vector!!.clone()
+                        vector[op2.value.toInt()] = op1.value
+                        calcData.numberList.add(CalcLine(desc = "", value = Double.NaN, vector = vector))
+                    } else {
+                        calcData.errorMsg =
+                            context.getString(R.string.calc_invalid_set_vector_args)
+                        argsValid = false
+                    }
                 }
                 TernaryArgument.ZinsMonat -> {
                     val K = op3.value // Kapital
@@ -1890,7 +2517,7 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun opQuad(calcData: CalcData, op: QuadArgument): Boolean {
-        val argsValid = calcData.numberList.size > 3
+        var argsValid = calcData.numberList.size > 3
 
         if (argsValid) {
             endEdit(calcData)
@@ -1905,6 +2532,30 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
             val op4 = calcData.numberList.removeLast()
 
             when (op) {
+                // Set matrix element.
+                QuadArgument.SETM -> {
+                    if (op4.matrix != null) {
+                        val n = op4.matrix!!.size
+                        val m = op4.matrix!![0].size
+
+                        if (op3.value.isFinite() && op2.value.isFinite() && op1.value.isFinite() && n > op3.value.toInt() && m > op2.value.toInt()) {
+                            // clone matrix (Array of DoubleArray)
+                            val matrix =
+                                Array(n) { r ->
+                                    DoubleArray(m) { c ->
+                                        op4.matrix!![r][c]
+                                    }
+                                }
+
+                            matrix[op3.value.toInt()][op2.value.toInt()] = op1.value
+                            calcData.numberList.add(CalcLine(desc = "", value = Double.NaN, matrix = matrix))
+                        } else {
+                            calcData.errorMsg =
+                                context.getString(R.string.calc_invalid_set_matrix_args)
+                            argsValid = false
+                        }
+                    }
+                }
                 QuadArgument.IFEQ -> {
                     val opResult = if (op2.value == op1.value) op3 else op4
                     calcData.numberList.add(opResult)
@@ -1967,7 +2618,11 @@ class CalcViewModel(application: Application) : AndroidViewModel(application) {
         calcRepository.updateData(calcData)
     }
 
-    private fun submitEditline(calcData: CalcData, radix: Int = 0, desc: String = ""): CalcData {
+    private fun submitEditline(
+        calcData: CalcData,
+        radix: Int = 0,
+        desc: String = ""
+    ): CalcData {
         if (calcData.editMode) {
 
             try {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021
+ * Copyright (C)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -186,8 +186,8 @@ class CalcSettingsActivity : AppCompatActivity(),
     }
 
     override fun onSharedPreferenceChanged(
-        sharedPreferences: SharedPreferences,
-        key: String
+        sharedPreferences: SharedPreferences?,
+        key: String?
     ) {
         when (key) {
             "app_theme" -> {
